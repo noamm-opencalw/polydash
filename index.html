@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>PolyDash — שוק הניבויים</title>
+  <meta name="description" content="PolyDash — לוח מחוונים חי לשוק הניבויים Polymarket" />
+
+  <style>
+    /* ─── RESET & BASE ─── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --purple:     #6C37F4;
+      --purple-lt:  #EDE8FF;
+      --purple-dk:  #4B20D4;
+      --green:      #00C853;
+      --green-lt:   #E8F9F0;
+      --red:        #F44336;
+      --red-lt:     #FEECEB;
+      --bg:         #F8FAFC;
+      --card:       #FFFFFF;
+      --border:     #E8ECF2;
+      --text:       #111827;
+      --text-sm:    #6B7280;
+      --shadow:     0 1px 4px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.05);
+      --shadow-hov: 0 4px 12px rgba(108,55,244,.12), 0 8px 32px rgba(0,0,0,.08);
+      --radius:     16px;
+      --radius-sm:  10px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      direction: rtl;
+    }
+
+    /* ─── HEADER ─── */
+    header {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(255,255,255,.92);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1.5px solid var(--border);
+    }
+
+    .header-inner {
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 0 16px;
+    }
+
+    .header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 0 10px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .logo-icon {
+      width: 32px; height: 32px;
+      background: var(--purple);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+    }
+
+    .logo-text {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--purple);
+      letter-spacing: -0.5px;
+    }
+
+    .logo-sub {
+      font-size: 11px;
+      color: var(--text-sm);
+      font-weight: 400;
+    }
+
+    .refresh-btn {
+      display: flex; align-items: center; gap: 5px;
+      background: var(--purple-lt);
+      color: var(--purple);
+      border: none; border-radius: 20px;
+      padding: 6px 12px;
+      font-size: 12px; font-weight: 600;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .refresh-btn:hover { background: var(--purple); color: #fff; }
+    .refresh-btn.spinning .spin-icon { animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .spin-icon { display: inline-block; font-style: normal; }
+
+    /* ─── TAB NAV ─── */
+    .tabs-scroll {
+      overflow-x: auto;
+      padding-bottom: 10px;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    .tabs-scroll::-webkit-scrollbar { display: none; }
+
+    .tabs {
+      display: flex;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    .tab-btn {
+      background: none;
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      padding: 5px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-sm);
+      cursor: pointer;
+      transition: all .2s;
+      font-family: inherit;
+    }
+    .tab-btn:hover { border-color: var(--purple); color: var(--purple); }
+    .tab-btn.active {
+      background: var(--purple);
+      border-color: var(--purple);
+      color: #fff;
+    }
+
+    /* ─── MAIN CONTENT ─── */
+    main {
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 16px 16px 80px;
+    }
+
+    /* ─── SECTION HEADERS ─── */
+    .section { margin-bottom: 28px; }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--text);
+      display: flex; align-items: center; gap: 6px;
+    }
+
+    .section-count {
+      font-size: 11px;
+      background: var(--purple-lt);
+      color: var(--purple);
+      border-radius: 10px;
+      padding: 2px 8px;
+      font-weight: 700;
+    }
+
+    /* ─── CARDS ─── */
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+      margin-bottom: 10px;
+      border: 1.5px solid var(--border);
+      transition: box-shadow .2s, transform .2s;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+    .card:hover {
+      box-shadow: var(--shadow-hov);
+      transform: translateY(-1px);
+      border-color: rgba(108,55,244,.2);
+    }
+    .card:last-child { margin-bottom: 0; }
+
+    /* ─── HOT MARKET CARD ─── */
+    .hot-card {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: start;
+    }
+
+    .card-rank {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-sm);
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+    }
+
+    .card-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.4;
+      margin-bottom: 8px;
+    }
+
+    .card-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .meta-chip {
+      font-size: 11px;
+      color: var(--text-sm);
+      background: var(--bg);
+      border-radius: 6px;
+      padding: 2px 7px;
+      font-weight: 500;
+    }
+
+    .vol-chip {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--purple);
+      background: var(--purple-lt);
+      border-radius: 6px;
+      padding: 2px 8px;
+    }
+
+    /* ─── BIG PROBABILITY DISPLAY ─── */
+    .prob-block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 72px;
+    }
+
+    .prob-big {
+      font-size: 36px;
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: -1px;
+    }
+    .prob-big.yes { color: var(--green); }
+    .prob-big.no  { color: var(--red); }
+    .prob-big.mid { color: var(--purple); }
+
+    .prob-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+    .prob-label.yes { color: var(--green); }
+    .prob-label.no  { color: var(--red); }
+    .prob-label.mid { color: var(--purple); }
+
+    /* ─── DUAL PROB BAR ─── */
+    .prob-bar {
+      display: flex;
+      height: 5px;
+      border-radius: 3px;
+      overflow: hidden;
+      margin-top: 8px;
+      gap: 2px;
+    }
+    .prob-bar-yes { background: var(--green); border-radius: 3px; }
+    .prob-bar-no  { background: var(--red);   border-radius: 3px; }
+
+    /* ─── MOVER CARD ─── */
+    .mover-card {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .mover-change {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 64px;
+    }
+
+    .mover-pct {
+      font-size: 22px;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      line-height: 1;
+    }
+    .mover-pct.up   { color: var(--green); }
+    .mover-pct.down { color: var(--red);   }
+
+    .mover-arrow {
+      font-size: 14px;
+      margin-top: 2px;
+    }
+    .mover-arrow.up   { color: var(--green); }
+    .mover-arrow.down { color: var(--red);   }
+
+    /* ─── NEW MARKET CARD ─── */
+    .new-card-body {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .new-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .new-badge {
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: .8px;
+      text-transform: uppercase;
+      background: linear-gradient(90deg, #6C37F4, #9B6EFF);
+      color: #fff;
+      border-radius: 6px;
+      padding: 3px 8px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .interesting-text {
+      font-size: 12px;
+      color: var(--text-sm);
+      line-height: 1.4;
+      padding: 7px 10px;
+      background: var(--bg);
+      border-radius: var(--radius-sm);
+      border-right: 3px solid var(--purple);
+    }
+
+    /* ─── WORTH WATCHING ─── */
+    .watch-card {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .watch-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .cat-tag {
+      font-size: 11px;
+      font-weight: 700;
+      border-radius: 6px;
+      padding: 3px 9px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .cat-politics  { background: #EEF2FF; color: #4338CA; }
+    .cat-economy   { background: #FFF7ED; color: #C2410C; }
+    .cat-sports    { background: #ECFDF5; color: #065F46; }
+    .cat-crypto    { background: #FEF9C3; color: #854D0E; }
+    .cat-tech      { background: #F0F9FF; color: #0369A1; }
+    .cat-geo       { background: #FDF4FF; color: #7E22CE; }
+    .cat-other     { background: var(--bg); color: var(--text-sm); }
+
+    .watch-probs {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .watch-yes {
+      font-size: 26px;
+      font-weight: 900;
+      color: var(--green);
+      letter-spacing: -0.5px;
+      line-height: 1;
+    }
+    .watch-divider {
+      font-size: 14px;
+      color: var(--border);
+      font-weight: 300;
+    }
+    .watch-no {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--red);
+      letter-spacing: -0.5px;
+      line-height: 1;
+    }
+
+    .watch-label-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .wl { font-size: 10px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; }
+    .wl.yes { color: var(--green); }
+    .wl.no  { color: var(--red); }
+
+    /* ─── LOADING / EMPTY ─── */
+    .loading-state {
+      text-align: center;
+      padding: 48px 16px;
+    }
+    .loading-spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--purple);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+    .loading-text { color: var(--text-sm); font-size: 14px; }
+
+    .error-state {
+      text-align: center;
+      padding: 32px 16px;
+      background: var(--red-lt);
+      border-radius: var(--radius);
+      border: 1.5px solid var(--red);
+    }
+
+    /* ─── UPDATED TIMESTAMP ─── */
+    .updated-bar {
+      text-align: center;
+      font-size: 11px;
+      color: var(--text-sm);
+      padding: 8px 0 0;
+      margin-bottom: -4px;
+    }
+    .updated-bar span { color: var(--purple); font-weight: 600; }
+
+    /* ─── FOOTER ─── */
+    footer {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: rgba(255,255,255,.95);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-top: 1.5px solid var(--border);
+      text-align: center;
+      padding: 10px 16px;
+      font-size: 11px;
+      color: var(--text-sm);
+    }
+    footer a { color: var(--purple); text-decoration: none; font-weight: 600; }
+
+    /* ─── ALL MARKETS SECTION ─── */
+    #section-all { display: none; }
+
+    /* ─── CATEGORY HIDDEN ─── */
+    .cat-hidden { display: none !important; }
+
+    /* ─── RESPONSIVE ─── */
+    @media (min-width: 540px) {
+      .header-inner, main { max-width: 520px; }
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-inner">
+    <div class="header-top">
+      <div class="logo">
+        <div class="logo-icon">📊</div>
+        <div>
+          <div class="logo-text">PolyDash</div>
+          <div class="logo-sub">שוק הניבויים בזמן אמת</div>
+        </div>
+      </div>
+      <button class="refresh-btn" id="refreshBtn" onclick="refreshData()">
+        <span class="spin-icon" id="spinIcon">↻</span>
+        <span id="refreshLabel">רענן</span>
+      </button>
+    </div>
+    <div class="tabs-scroll">
+      <div class="tabs" id="tabsBar">
+        <button class="tab-btn active" data-cat="all" onclick="filterCat(this, 'all')">הכל</button>
+        <button class="tab-btn" data-cat="politics" onclick="filterCat(this, 'politics')">🗳️ פוליטיקה</button>
+        <button class="tab-btn" data-cat="economy" onclick="filterCat(this, 'economy')">💰 כלכלה</button>
+        <button class="tab-btn" data-cat="sports" onclick="filterCat(this, 'sports')">🏆 ספורט</button>
+        <button class="tab-btn" data-cat="crypto" onclick="filterCat(this, 'crypto')">₿ קריפטו</button>
+        <button class="tab-btn" data-cat="tech" onclick="filterCat(this, 'tech')">🔬 טכנולוגיה</button>
+        <button class="tab-btn" data-cat="geo" onclick="filterCat(this, 'geo')">🌍 גאופוליטיקה</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- MAIN -->
+<main id="mainContent">
+  <div class="loading-state" id="loadingState">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">טוען נתוני שוק...</div>
+  </div>
+</main>
+
+<!-- FOOTER -->
+<footer>
+  נתונים מ <a href="https://polymarket.com" target="_blank" rel="noopener">Polymarket</a> •
+  מתעדכן אוטומטית כל שעה
+</footer>
+
+<script>
+let allData = null;
+let currentCat = 'all';
+let refreshTimer = null;
+
+// ─── HELPERS ───
+function fmt(n) {
+  if (n >= 1_000_000) return '$' + (n / 1_000_000).toFixed(1) + 'M';
+  if (n >= 1_000)     return '$' + (n / 1_000).toFixed(0) + 'K';
+  return '$' + n.toFixed(0);
+}
+
+function fmtDate(iso) {
+  if (!iso) return '';
+  try {
+    const d = new Date(iso);
+    return d.toLocaleDateString('he-IL', { day: 'numeric', month: 'short', year: '2-digit' });
+  } catch { return ''; }
+}
+
+function probClass(pct) {
+  if (pct >= 60) return 'yes';
+  if (pct <= 40) return 'no';
+  return 'mid';
+}
+
+function catLabel(cat) {
+  const labels = {
+    politics: '🗳️ פוליטיקה',
+    economy:  '💰 כלכלה',
+    sports:   '🏆 ספורט',
+    crypto:   '₿ קריפטו',
+    tech:     '🔬 טכנולוגיה',
+    geo:      '🌍 גאופוליטיקה',
+    other:    '📊 שונות',
+  };
+  return labels[cat] || '📊 שונות';
+}
+
+function daysAgo(iso) {
+  try {
+    const d = new Date(iso);
+    const diff = (Date.now() - d.getTime()) / 86400000;
+    if (diff < 1) return 'היום';
+    if (diff < 2) return 'אתמול';
+    return `לפני ${Math.floor(diff)} ימים`;
+  } catch { return ''; }
+}
+
+// ─── BUILD CARDS ───
+function hotCard(m, rank) {
+  const pc = probClass(m.yes_pct);
+  const yWidth = m.yes_pct;
+  return `
+  <a class="card" href="${m.link}" target="_blank" rel="noopener" data-cat="${m.category}">
+    <div class="hot-card">
+      <div>
+        <div class="card-rank">#${rank} • ${catLabel(m.category)}</div>
+        <div class="card-title">${m.question}</div>
+        <div class="card-meta">
+          <span class="vol-chip">🔥 ${fmt(m.volume24hr)} היום</span>
+          ${m.end_date ? `<span class="meta-chip">⏰ ${fmtDate(m.end_date)}</span>` : ''}
+          ${m.volume ? `<span class="meta-chip">📊 ${fmt(m.volume)}</span>` : ''}
+        </div>
+        <div class="prob-bar" style="margin-top:10px">
+          <div class="prob-bar-yes" style="flex:${yWidth}"></div>
+          <div class="prob-bar-no"  style="flex:${100 - yWidth}"></div>
+        </div>
+      </div>
+      <div class="prob-block">
+        <div class="prob-big ${pc}">${m.yes_pct}%</div>
+        <div class="prob-label ${pc}">YES</div>
+      </div>
+    </div>
+  </a>`;
+}
+
+function moverCard(m) {
+  const up = m.oneWeekPriceChange >= 0;
+  const pct = Math.abs(m.oneWeekPriceChange * 100).toFixed(1);
+  const dir = up ? 'up' : 'down';
+  const arrow = up ? '↑' : '↓';
+  return `
+  <a class="card" href="${m.link}" target="_blank" rel="noopener" data-cat="${m.category}">
+    <div class="mover-card">
+      <div>
+        <div class="card-rank">${catLabel(m.category)}</div>
+        <div class="card-title">${m.question}</div>
+        <div class="card-meta">
+          <span class="meta-chip">כעת: ${m.yes_pct}% YES</span>
+          ${m.volume24hr ? `<span class="vol-chip">${fmt(m.volume24hr)}/24h</span>` : ''}
+        </div>
+      </div>
+      <div class="mover-change">
+        <div class="mover-pct ${dir}">${up ? '+' : '-'}${pct}%</div>
+        <div class="mover-arrow ${dir}">${arrow} שבוע</div>
+      </div>
+    </div>
+  </a>`;
+}
+
+function newCard(m) {
+  return `
+  <a class="card" href="${m.link}" target="_blank" rel="noopener" data-cat="${m.category}">
+    <div class="new-card-body">
+      <div class="new-card-top">
+        <div class="card-title">${m.question}</div>
+        <span class="new-badge">חדש!</span>
+      </div>
+      <div class="interesting-text">${m.interesting}</div>
+      <div class="card-meta">
+        <span class="meta-chip">${daysAgo(m.start_date)}</span>
+        <span class="meta-chip">YES: ${m.yes_pct}%</span>
+        ${m.liquidity ? `<span class="vol-chip">💧 ${fmt(m.liquidity)}</span>` : ''}
+      </div>
+    </div>
+  </a>`;
+}
+
+function watchCard(m) {
+  const catCls = 'cat-' + m.category;
+  return `
+  <a class="card" href="${m.link}" target="_blank" rel="noopener" data-cat="${m.category}">
+    <div class="watch-card">
+      <div class="watch-top">
+        <div class="card-title">${m.question}</div>
+        <span class="cat-tag ${catCls}">${catLabel(m.category)}</span>
+      </div>
+      <div>
+        <div class="watch-probs">
+          <div class="watch-yes">${m.yes_pct}%</div>
+          <div class="watch-divider">|</div>
+          <div class="watch-no">${m.no_pct}%</div>
+        </div>
+        <div class="watch-label-row">
+          <span class="wl yes">YES</span>
+          <span class="wl no">NO</span>
+        </div>
+      </div>
+      <div class="interesting-text">${m.interesting}</div>
+    </div>
+  </a>`;
+}
+
+function allMarketCard(m) {
+  const pc = probClass(m.yes_pct);
+  return `
+  <a class="card" href="${m.link}" target="_blank" rel="noopener" data-cat="${m.category}">
+    <div class="hot-card">
+      <div>
+        <div class="card-rank">${catLabel(m.category)}</div>
+        <div class="card-title">${m.question}</div>
+        <div class="card-meta">
+          ${m.volume24hr ? `<span class="vol-chip">${fmt(m.volume24hr)}/24h</span>` : ''}
+          ${m.end_date ? `<span class="meta-chip">⏰ ${fmtDate(m.end_date)}</span>` : ''}
+        </div>
+      </div>
+      <div class="prob-block">
+        <div class="prob-big ${pc}">${m.yes_pct}%</div>
+        <div class="prob-label ${pc}">YES</div>
+      </div>
+    </div>
+  </a>`;
+}
+
+// ─── RENDER ───
+function render(data) {
+  const main = document.getElementById('mainContent');
+
+  const updatedTime = data.updated_at
+    ? new Date(data.updated_at).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })
+    : '';
+
+  let html = `<div class="updated-bar">עודכן לאחרונה: <span>${updatedTime}</span></div>`;
+
+  const isAll = currentCat === 'all';
+
+  // ── Section: All Markets (when category selected) ──
+  if (!isAll) {
+    const filtered = (data.all_markets || []).filter(m => m.category === currentCat);
+    html += `
+    <div class="section" id="section-cat">
+      <div class="section-header">
+        <span class="section-title">${catLabel(currentCat)}</span>
+        <span class="section-count">${filtered.length} שווקים</span>
+      </div>
+      ${filtered.length
+        ? filtered.map(m => allMarketCard(m)).join('')
+        : `<div class="loading-state"><div class="loading-text">אין שווקים בקטגוריה זו</div></div>`
+      }
+    </div>`;
+    main.innerHTML = html;
+    return;
+  }
+
+  // ── Section 1: Hot Markets ──
+  if (data.hot && data.hot.length) {
+    html += `
+    <div class="section">
+      <div class="section-header">
+        <span class="section-title">🔥 חם עכשיו</span>
+        <span class="section-count">Top ${data.hot.length}</span>
+      </div>
+      ${data.hot.map((m, i) => hotCard(m, i + 1)).join('')}
+    </div>`;
+  }
+
+  // ── Section 2: Big Movers ──
+  if (data.movers && data.movers.length) {
+    html += `
+    <div class="section">
+      <div class="section-header">
+        <span class="section-title">📈 תנועות גדולות</span>
+        <span class="section-count">שינוי שבועי</span>
+      </div>
+      ${data.movers.map(m => moverCard(m)).join('')}
+    </div>`;
+  }
+
+  // ── Section 3: New & Interesting ──
+  if (data.new_interesting && data.new_interesting.length) {
+    html += `
+    <div class="section">
+      <div class="section-header">
+        <span class="section-title">✨ חדש ומעניין</span>
+        <span class="section-count">14 ימים אחרונים</span>
+      </div>
+      ${data.new_interesting.map(m => newCard(m)).join('')}
+    </div>`;
+  }
+
+  // ── Section 4: Worth Watching ──
+  if (data.worth_watching && data.worth_watching.length) {
+    html += `
+    <div class="section">
+      <div class="section-header">
+        <span class="section-title">🎯 שווה לעקוב</span>
+        <span class="section-count">המלצות עורך</span>
+      </div>
+      ${data.worth_watching.map(m => watchCard(m)).join('')}
+    </div>`;
+  }
+
+  main.innerHTML = html;
+}
+
+// ─── FILTER ───
+function filterCat(btn, cat) {
+  currentCat = cat;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if (allData) render(allData);
+}
+
+// ─── LOAD DATA ───
+async function loadData() {
+  try {
+    const r = await fetch('data.json?t=' + Date.now());
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    allData = await r.json();
+    render(allData);
+  } catch (e) {
+    document.getElementById('mainContent').innerHTML = `
+      <div class="error-state">
+        <div style="font-size:32px;margin-bottom:8px">⚠️</div>
+        <div style="font-weight:700;margin-bottom:4px">לא ניתן לטעון נתונים</div>
+        <div style="font-size:12px;color:var(--text-sm)">${e.message}</div>
+      </div>`;
+  }
+}
+
+// ─── REFRESH ───
+async function refreshData() {
+  const btn = document.getElementById('refreshBtn');
+  const spin = document.getElementById('spinIcon');
+  const label = document.getElementById('refreshLabel');
+  btn.classList.add('spinning');
+  label.textContent = 'טוען...';
+  await loadData();
+  btn.classList.remove('spinning');
+  label.textContent = 'רענן';
+}
+
+// ─── AUTO-REFRESH every 5 minutes ───
+function startAutoRefresh() {
+  if (refreshTimer) clearInterval(refreshTimer);
+  refreshTimer = setInterval(loadData, 5 * 60 * 1000);
+}
+
+// ─── INIT ───
+loadData();
+startAutoRefresh();
+</script>
+</body>
+</html>
