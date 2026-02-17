@@ -129,6 +129,21 @@ def process_market(m: dict) -> dict | None:
 
     interesting = interesting_reason(question, category, yes_pct, volume24hr)
 
+    # Financial Truth: net return after 25% tax + 0.1% commission (on $100 bet)
+    net_return_100 = None
+    gross_return_100 = None
+    roi_pct = None
+    p = yes_pct / 100.0
+    if 0.01 < p < 0.99:
+        bet = 100.0
+        shares = bet / p
+        gross = shares * (1 - p)
+        after_fees = gross - (bet * 0.001)
+        net = after_fees * 0.75
+        net_return_100 = round(net, 1)
+        gross_return_100 = round(gross, 1)
+        roi_pct = round((net / bet) * 100, 0)
+
     return {
         "id": m.get("id", ""),
         "question": question,
@@ -148,6 +163,9 @@ def process_market(m: dict) -> dict | None:
         "oneWeekPriceChange": float(m.get("oneWeekPriceChange") or 0),
         "oneMonthPriceChange": float(m.get("oneMonthPriceChange") or 0),
         "lastTradePrice": float(m.get("lastTradePrice") or 0),
+        "net_return_100": net_return_100,
+        "gross_return_100": gross_return_100,
+        "roi_pct": roi_pct,
     }
 
 

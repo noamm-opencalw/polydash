@@ -2,818 +2,1048 @@
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>PolyDash — שוק הניבויים</title>
   <meta name="description" content="PolyDash — לוח מחוונים חי לשוק הניבויים Polymarket" />
+  <meta name="theme-color" content="#0d0818" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&display=swap" rel="stylesheet" />
 
   <style>
-    /* ─── RESET & BASE ─── */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
+    /* ═══════════════════════════════════════════════
+       DESIGN TOKENS — Single Source of Truth
+    ═══════════════════════════════════════════════ */
     :root {
-      --purple:     #6C37F4;
-      --purple-lt:  #EDE8FF;
-      --purple-dk:  #4B20D4;
-      --green:      #00C853;
-      --green-lt:   #E8F9F0;
-      --red:        #F44336;
-      --red-lt:     #FEECEB;
-      --bg:         #F8FAFC;
-      --card:       #FFFFFF;
-      --border:     #E8ECF2;
-      --text:       #111827;
-      --text-sm:    #6B7280;
-      --shadow:     0 1px 4px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.05);
-      --shadow-hov: 0 4px 12px rgba(108,55,244,.12), 0 8px 32px rgba(0,0,0,.08);
-      --radius:     16px;
-      --radius-sm:  10px;
+      /* Base */
+      --bg-base:          #0d0818;
+      --bg-elevated:      rgba(255,255,255,0.04);
+      --bg-card:          rgba(255,255,255,0.05);
+      --bg-card-hover:    rgba(255,255,255,0.09);
+
+      /* Glass */
+      --glass-border:     rgba(255,255,255,0.09);
+      --glass-blur:       blur(16px);
+
+      /* Accent */
+      --accent:           #7C3AED;
+      --accent-lt:        rgba(124,58,237,0.18);
+      --accent-glow:      rgba(124,58,237,0.35);
+
+      /* Signal — ONLY for data changes */
+      --yes:              #10b981;
+      --yes-bg:           rgba(16,185,129,0.14);
+      --no:               #f43f5e;
+      --no-bg:            rgba(244,63,94,0.14);
+      --up:               #10b981;
+      --down:             #f43f5e;
+
+      /* Neutral text (WCAG AA ✓) */
+      --text-1:           #f1f5f9;   /* slate-100 — primary */
+      --text-2:           #94a3b8;   /* slate-400 — secondary */
+      --text-3:           #475569;   /* slate-600 — meta/dim */
+
+      /* Spacing — Power User Mode (15-20% tighter) */
+      --s-xs:             4px;
+      --s-sm:             8px;
+      --s-md:             14px;
+      --s-lg:             20px;
+      --s-xl:             28px;
+
+      /* Typography */
+      --fs-xs:            11px;
+      --fs-sm:            13px;
+      --fs-base:          15px;
+      --fs-lg:            17px;
+      --fs-xl:            22px;
+      --fs-2xl:           30px;
+
+      /* Radius */
+      --r-sm:             8px;
+      --r-md:             14px;
+      --r-lg:             18px;
+      --r-pill:           100px;
+
+      /* Shadows */
+      --shadow-card:      0 2px 8px rgba(0,0,0,0.45), 0 0 0 1px var(--glass-border);
+      --shadow-hover:     0 8px 32px rgba(124,58,237,0.25), 0 0 0 1px rgba(124,58,237,0.35);
+
+      /* Transitions */
+      --t:                all 0.2s cubic-bezier(0.4,0,0.2,1);
+      --t-slow:           all 0.35s cubic-bezier(0.4,0,0.2,1);
     }
+
+    /* ═══════════════════════════════════════════════
+       RESET & BASE
+    ═══════════════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     html { scroll-behavior: smooth; }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: var(--bg);
-      color: var(--text);
+      font-family: 'Assistant', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-base);
+      color: var(--text-1);
       min-height: 100vh;
       direction: rtl;
+      -webkit-overflow-scrolling: touch;
+      /* iPhone 17 Pro safe areas */
+      padding-bottom: env(safe-area-inset-bottom);
     }
 
-    /* ─── HEADER ─── */
+    /* Background gradient overlay */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background:
+        radial-gradient(ellipse 80% 50% at 20% 10%, rgba(124,58,237,0.12) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 80% 80%, rgba(59,130,246,0.06) 0%, transparent 60%);
+      pointer-events: none; z-index: 0;
+    }
+
+    main { position: relative; z-index: 1; }
+
+    /* ═══════════════════════════════════════════════
+       HEADER
+    ═══════════════════════════════════════════════ */
     header {
       position: sticky; top: 0; z-index: 100;
-      background: rgba(255,255,255,.92);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border-bottom: 1.5px solid var(--border);
+      background: rgba(13,8,24,0.88);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--glass-border);
+      /* iPhone 17 Pro safe area */
+      padding-top: max(var(--s-md), env(safe-area-inset-top));
+      padding-right: env(safe-area-inset-right);
+      padding-left: env(safe-area-inset-left);
     }
 
     .header-inner {
       max-width: 520px;
       margin: 0 auto;
-      padding: 0 16px;
+      padding: 0 var(--s-md);
     }
 
     .header-top {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 14px 0 10px;
+      padding: 0 0 var(--s-sm);
     }
 
     .logo {
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      display: flex; align-items: center; gap: var(--s-sm);
     }
 
     .logo-icon {
-      width: 32px; height: 32px;
-      background: var(--purple);
-      border-radius: 8px;
+      width: 34px; height: 34px;
+      background: linear-gradient(135deg, var(--accent), #9f67ff);
+      border-radius: var(--r-sm);
       display: flex; align-items: center; justify-content: center;
-      font-size: 16px;
+      font-size: 17px;
+      box-shadow: 0 0 14px var(--accent-glow);
     }
 
-    .logo-text {
-      font-size: 20px;
-      font-weight: 800;
-      color: var(--purple);
-      letter-spacing: -0.5px;
-    }
+    .logo-info { display: flex; flex-direction: column; }
+    .logo-name { font-size: 19px; font-weight: 800; color: var(--text-1); letter-spacing: -0.5px; line-height: 1.1; }
+    .logo-sub  { font-size: var(--fs-xs); color: var(--text-3); font-weight: 400; }
 
-    .logo-sub {
-      font-size: 11px;
-      color: var(--text-sm);
-      font-weight: 400;
-    }
-
-    .refresh-btn {
+    /* Live indicator */
+    .live-badge {
       display: flex; align-items: center; gap: 5px;
-      background: var(--purple-lt);
-      color: var(--purple);
-      border: none; border-radius: 20px;
-      padding: 6px 12px;
-      font-size: 12px; font-weight: 600;
-      cursor: pointer;
-      transition: all .2s;
+      background: var(--yes-bg);
+      border: 1px solid rgba(16,185,129,0.25);
+      border-radius: var(--r-pill);
+      padding: 4px 10px;
+      font-size: var(--fs-xs); font-weight: 700;
+      color: var(--yes);
+      cursor: pointer; transition: var(--t);
+      min-height: 44px;
     }
-    .refresh-btn:hover { background: var(--purple); color: #fff; }
-    .refresh-btn.spinning .spin-icon { animation: spin 1s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
+    .live-badge:hover { background: rgba(16,185,129,0.2); }
+    .live-badge:active { transform: scale(0.95); }
 
-    .spin-icon { display: inline-block; font-style: normal; }
+    .live-dot {
+      width: 7px; height: 7px;
+      background: var(--yes);
+      border-radius: 50%;
+      animation: pulse-live 2s ease-in-out infinite;
+    }
+    @keyframes pulse-live {
+      0%,100% { opacity: 1; transform: scale(1); }
+      50%      { opacity: 0.5; transform: scale(1.4); }
+    }
 
-    /* ─── TAB NAV ─── */
-    .tabs-scroll {
-      overflow-x: auto;
-      padding-bottom: 10px;
+    /* ═══════════════════════════════════════════════
+       CATEGORY TABS
+    ═══════════════════════════════════════════════ */
+    .tabs-wrap {
+      overflow-x: auto; overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
       scrollbar-width: none;
-      -ms-overflow-style: none;
+      padding-bottom: var(--s-sm);
     }
-    .tabs-scroll::-webkit-scrollbar { display: none; }
+    .tabs-wrap::-webkit-scrollbar { display: none; }
 
     .tabs {
-      display: flex;
-      gap: 6px;
+      display: flex; gap: var(--s-xs);
+      width: max-content;
+    }
+
+    .tab {
+      background: transparent;
+      border: 1px solid var(--glass-border);
+      border-radius: var(--r-pill);
+      padding: 5px 13px;
+      font-size: var(--fs-sm); font-weight: 600;
+      color: var(--text-2);
+      cursor: pointer; transition: var(--t);
       white-space: nowrap;
+      min-height: 44px; display: flex; align-items: center;
+      font-family: 'Assistant', sans-serif;
+    }
+    .tab:hover { border-color: var(--accent); color: var(--text-1); }
+    .tab.active {
+      background: var(--accent-lt);
+      border-color: var(--accent);
+      color: var(--text-1);
+    }
+    .tab .badge {
+      margin-right: 4px;
+      background: var(--accent);
+      color: white;
+      border-radius: var(--r-pill);
+      padding: 1px 6px;
+      font-size: 10px; font-weight: 800;
     }
 
-    .tab-btn {
-      background: none;
-      border: 1.5px solid var(--border);
-      border-radius: 20px;
-      padding: 5px 14px;
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text-sm);
-      cursor: pointer;
-      transition: all .2s;
-      font-family: inherit;
+    /* ═══════════════════════════════════════════════
+       HERO STATS BAR
+    ═══════════════════════════════════════════════ */
+    .stats-bar-wrap {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
     }
-    .tab-btn:hover { border-color: var(--purple); color: var(--purple); }
-    .tab-btn.active {
-      background: var(--purple);
-      border-color: var(--purple);
-      color: #fff;
-    }
+    .stats-bar-wrap::-webkit-scrollbar { display: none; }
 
-    /* ─── MAIN CONTENT ─── */
-    main {
+    .stats-bar {
       max-width: 520px;
       margin: 0 auto;
-      padding: 16px 16px 80px;
+      display: flex; gap: var(--s-sm);
+      padding: var(--s-md) var(--s-md) var(--s-sm);
+      width: max-content;
     }
 
-    /* ─── SECTION HEADERS ─── */
-    .section { margin-bottom: 28px; }
+    .stat-pill {
+      background: var(--bg-card);
+      backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--r-pill);
+      padding: 6px 13px;
+      display: flex; align-items: center; gap: 5px;
+      white-space: nowrap;
+    }
+    .stat-pill .stat-icon { font-size: 14px; }
+    .stat-pill .stat-val { font-size: var(--fs-sm); font-weight: 700; color: var(--text-1); }
+    .stat-pill .stat-lbl { font-size: var(--fs-xs); color: var(--text-3); }
+
+    /* ═══════════════════════════════════════════════
+       SECTIONS
+    ═══════════════════════════════════════════════ */
+    .content {
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 0 var(--s-md) calc(var(--s-xl) + env(safe-area-inset-bottom));
+    }
+
+    .section { margin-bottom: var(--s-xl); }
 
     .section-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 14px;
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: var(--s-md);
     }
 
     .section-title {
-      font-size: 18px;
-      font-weight: 800;
-      color: var(--text);
+      font-size: var(--fs-lg); font-weight: 800;
+      color: var(--text-1);
       display: flex; align-items: center; gap: 6px;
     }
 
     .section-count {
-      font-size: 11px;
-      background: var(--purple-lt);
-      color: var(--purple);
-      border-radius: 10px;
+      font-size: var(--fs-xs); color: var(--text-3);
+      background: var(--bg-card);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--r-pill);
       padding: 2px 8px;
-      font-weight: 700;
     }
 
-    /* ─── CARDS ─── */
+    /* ═══════════════════════════════════════════════
+       MARKET CARD
+    ═══════════════════════════════════════════════ */
     .card {
-      background: var(--card);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 16px;
-      margin-bottom: 10px;
-      border: 1.5px solid var(--border);
-      transition: box-shadow .2s, transform .2s;
-      cursor: pointer;
-      text-decoration: none;
-      color: inherit;
       display: block;
+      background: var(--bg-card);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--r-lg);
+      padding: var(--s-md);
+      margin-bottom: var(--s-sm);
+      cursor: pointer; text-decoration: none; color: inherit;
+      transition: var(--t);
+      position: relative;
+      box-shadow: var(--shadow-card);
+      /* WCAG: min 44px touch target via min-height logic */
     }
-    .card:hover {
-      box-shadow: var(--shadow-hov);
+    .card:hover, .card:focus-visible {
+      background: var(--bg-card-hover);
+      box-shadow: var(--shadow-hover);
       transform: translateY(-1px);
-      border-color: rgba(108,55,244,.2);
+      border-color: rgba(124,58,237,0.35);
     }
-    .card:last-child { margin-bottom: 0; }
+    .card:active { transform: translateY(0) scale(0.99); }
+    .card:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-    /* ─── HOT MARKET CARD ─── */
-    .hot-card {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 12px;
-      align-items: start;
+    /* Card top row */
+    .card-top {
+      display: flex; align-items: flex-start; gap: var(--s-sm);
+      margin-bottom: var(--s-sm);
     }
 
-    .card-rank {
-      font-size: 11px;
-      font-weight: 700;
-      color: var(--text-sm);
-      margin-bottom: 4px;
-      text-transform: uppercase;
-      letter-spacing: .5px;
+    .card-img {
+      width: 38px; height: 38px; flex-shrink: 0;
+      border-radius: var(--r-sm);
+      object-fit: cover;
+      background: var(--bg-elevated);
     }
+    .card-img-placeholder {
+      width: 38px; height: 38px; flex-shrink: 0;
+      border-radius: var(--r-sm);
+      background: var(--accent-lt);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+    }
+
+    .card-info { flex: 1; min-width: 0; }
 
     .card-title {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--text);
-      line-height: 1.4;
-      margin-bottom: 8px;
+      font-size: var(--fs-base); font-weight: 700;
+      color: var(--text-1); line-height: 1.35;
+      display: -webkit-box;
+      -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+      overflow: hidden;
+      margin-bottom: 3px;
     }
 
     .card-meta {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      align-items: center;
+      display: flex; flex-wrap: wrap; align-items: center; gap: 5px;
     }
-
-    .meta-chip {
-      font-size: 11px;
-      color: var(--text-sm);
-      background: var(--bg);
-      border-radius: 6px;
+    .card-cat {
+      font-size: var(--fs-xs); font-weight: 600;
+      color: var(--accent);
+      background: var(--accent-lt);
+      border-radius: var(--r-pill);
       padding: 2px 7px;
-      font-weight: 500;
+    }
+    .card-date {
+      font-size: var(--fs-xs); color: var(--text-3);
     }
 
-    .vol-chip {
-      font-size: 11px;
-      font-weight: 700;
-      color: var(--purple);
-      background: var(--purple-lt);
-      border-radius: 6px;
-      padding: 2px 8px;
-    }
-
-    /* ─── BIG PROBABILITY DISPLAY ─── */
-    .prob-block {
-      display: flex;
-      flex-direction: column;
+    /* Action buttons — visible on hover */
+    .card-actions {
+      display: flex; gap: var(--s-xs);
+      opacity: 0; transition: var(--t);
       align-items: center;
-      min-width: 72px;
+    }
+    .card:hover .card-actions,
+    .card:focus-within .card-actions { opacity: 1; }
+
+    .action-btn {
+      width: 32px; height: 32px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--r-sm);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px;
+      cursor: pointer; transition: var(--t);
+      color: var(--text-2);
+      flex-shrink: 0;
+    }
+    .action-btn:hover { background: var(--accent-lt); border-color: var(--accent); color: var(--accent); }
+    .action-btn.starred { color: #fbbf24; border-color: rgba(251,191,36,0.3); background: rgba(251,191,36,0.1); }
+
+    /* Probability bars */
+    .prob-bars {
+      margin-bottom: var(--s-sm);
     }
 
-    .prob-big {
-      font-size: 36px;
-      font-weight: 900;
-      line-height: 1;
-      letter-spacing: -1px;
+    .prob-row {
+      display: flex; align-items: center; gap: var(--s-sm);
+      margin-bottom: 5px;
     }
-    .prob-big.yes { color: var(--green); }
-    .prob-big.no  { color: var(--red); }
-    .prob-big.mid { color: var(--purple); }
+    .prob-row:last-child { margin-bottom: 0; }
 
     .prob-label {
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      margin-top: 2px;
+      font-size: var(--fs-xs); font-weight: 700;
+      width: 24px; flex-shrink: 0;
     }
-    .prob-label.yes { color: var(--green); }
-    .prob-label.no  { color: var(--red); }
-    .prob-label.mid { color: var(--purple); }
+    .prob-label.yes { color: var(--yes); }
+    .prob-label.no  { color: var(--no); }
 
-    /* ─── DUAL PROB BAR ─── */
-    .prob-bar {
-      display: flex;
-      height: 5px;
-      border-radius: 3px;
-      overflow: hidden;
-      margin-top: 8px;
-      gap: 2px;
+    .prob-bar-bg {
+      flex: 1; height: 6px;
+      background: rgba(255,255,255,0.07);
+      border-radius: 3px; overflow: hidden;
     }
-    .prob-bar-yes { background: var(--green); border-radius: 3px; }
-    .prob-bar-no  { background: var(--red);   border-radius: 3px; }
-
-    /* ─── MOVER CARD ─── */
-    .mover-card {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 12px;
-      align-items: center;
+    .prob-bar-fill {
+      height: 100%; border-radius: 3px;
+      transition: width 0.6s cubic-bezier(0.4,0,0.2,1);
     }
+    .prob-bar-fill.yes { background: linear-gradient(90deg, var(--yes), #34d399); }
+    .prob-bar-fill.no  { background: linear-gradient(90deg, var(--no), #fb7185); }
 
-    .mover-change {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-width: 64px;
+    .prob-pct {
+      font-size: var(--fs-sm); font-weight: 800;
+      width: 34px; text-align: left; flex-shrink: 0;
+      transition: var(--t);
     }
+    .prob-pct.yes { color: var(--yes); }
+    .prob-pct.no  { color: var(--no); }
 
-    .mover-pct {
-      font-size: 22px;
-      font-weight: 900;
-      letter-spacing: -0.5px;
-      line-height: 1;
+    /* Price flash animation */
+    @keyframes price-flash-up {
+      0%   { background: transparent; }
+      20%  { background: rgba(16,185,129,0.22); border-radius: 4px; }
+      100% { background: transparent; }
     }
-    .mover-pct.up   { color: var(--green); }
-    .mover-pct.down { color: var(--red);   }
-
-    .mover-arrow {
-      font-size: 14px;
-      margin-top: 2px;
+    @keyframes price-flash-down {
+      0%   { background: transparent; }
+      20%  { background: rgba(244,63,94,0.22); border-radius: 4px; }
+      100% { background: transparent; }
     }
-    .mover-arrow.up   { color: var(--green); }
-    .mover-arrow.down { color: var(--red);   }
+    .flash-up   { animation: price-flash-up   1.4s ease; }
+    .flash-down { animation: price-flash-down 1.4s ease; }
 
-    /* ─── NEW MARKET CARD ─── */
-    .new-card-body {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
+    /* Card footer */
+    .card-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      border-top: 1px solid var(--glass-border);
+      padding-top: var(--s-sm);
+      gap: var(--s-sm);
     }
 
-    .new-card-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 12px;
+    /* Net return (financial truth) */
+    .net-return {
+      display: flex; align-items: baseline; gap: 4px;
+    }
+    .net-val {
+      font-size: var(--fs-sm); font-weight: 800;
+      color: var(--yes);
+    }
+    .gross-val {
+      font-size: var(--fs-xs); color: var(--text-3);
+      font-style: italic;
+    }
+    .net-label {
+      font-size: var(--fs-xs); color: var(--text-3);
     }
 
-    .new-badge {
-      font-size: 10px;
-      font-weight: 800;
-      letter-spacing: .8px;
-      text-transform: uppercase;
-      background: linear-gradient(90deg, #6C37F4, #9B6EFF);
-      color: #fff;
-      border-radius: 6px;
-      padding: 3px 8px;
-      white-space: nowrap;
-      flex-shrink: 0;
+    /* Volume + change badge */
+    .card-stats {
+      display: flex; align-items: center; gap: var(--s-sm);
     }
+    .vol-txt {
+      font-size: var(--fs-xs); color: var(--text-3);
+    }
+    .change-badge {
+      font-size: var(--fs-xs); font-weight: 700;
+      border-radius: var(--r-pill);
+      padding: 2px 7px;
+    }
+    .change-badge.up   { color: var(--up);   background: var(--yes-bg); }
+    .change-badge.down { color: var(--down); background: var(--no-bg); }
 
-    .interesting-text {
-      font-size: 12px;
-      color: var(--text-sm);
-      line-height: 1.4;
-      padding: 7px 10px;
-      background: var(--bg);
-      border-radius: var(--radius-sm);
-      border-right: 3px solid var(--purple);
-    }
-
-    /* ─── WORTH WATCHING ─── */
-    .watch-card {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .watch-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 12px;
-    }
-
-    .cat-tag {
-      font-size: 11px;
-      font-weight: 700;
-      border-radius: 6px;
-      padding: 3px 9px;
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-    .cat-politics  { background: #EEF2FF; color: #4338CA; }
-    .cat-economy   { background: #FFF7ED; color: #C2410C; }
-    .cat-sports    { background: #ECFDF5; color: #065F46; }
-    .cat-crypto    { background: #FEF9C3; color: #854D0E; }
-    .cat-tech      { background: #F0F9FF; color: #0369A1; }
-    .cat-geo       { background: #FDF4FF; color: #7E22CE; }
-    .cat-other     { background: var(--bg); color: var(--text-sm); }
-
-    .watch-probs {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
-
-    .watch-yes {
-      font-size: 26px;
-      font-weight: 900;
-      color: var(--green);
-      letter-spacing: -0.5px;
-      line-height: 1;
-    }
-    .watch-divider {
-      font-size: 14px;
-      color: var(--border);
-      font-weight: 300;
-    }
-    .watch-no {
-      font-size: 20px;
-      font-weight: 700;
-      color: var(--red);
-      letter-spacing: -0.5px;
-      line-height: 1;
-    }
-
-    .watch-label-row {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
-    .wl { font-size: 10px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; }
-    .wl.yes { color: var(--green); }
-    .wl.no  { color: var(--red); }
-
-    /* ─── LOADING / EMPTY ─── */
-    .loading-state {
+    /* ═══════════════════════════════════════════════
+       WATCHLIST EMPTY STATE
+    ═══════════════════════════════════════════════ */
+    .empty-watch {
       text-align: center;
-      padding: 48px 16px;
+      padding: var(--s-xl) var(--s-lg);
+      color: var(--text-3);
     }
-    .loading-spinner {
-      width: 40px; height: 40px;
-      border: 3px solid var(--border);
-      border-top-color: var(--purple);
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-      margin: 0 auto 16px;
-    }
-    .loading-text { color: var(--text-sm); font-size: 14px; }
+    .empty-watch .empty-icon { font-size: 36px; margin-bottom: var(--s-sm); display: block; }
+    .empty-watch p { font-size: var(--fs-sm); line-height: 1.5; }
 
-    .error-state {
+    /* ═══════════════════════════════════════════════
+       QUICK VIEW MODAL
+    ═══════════════════════════════════════════════ */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 200;
+      background: rgba(13,8,24,0.72);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: flex; align-items: flex-end; justify-content: center;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+
+    .modal-sheet {
+      background: #170e2a;
+      border: 1px solid var(--glass-border);
+      border-radius: var(--r-lg) var(--r-lg) 0 0;
+      width: 100%; max-width: 520px;
+      padding: var(--s-lg);
+      padding-bottom: calc(var(--s-lg) + env(safe-area-inset-bottom));
+      transform: translateY(100%);
+      transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+      max-height: 85vh;
+      overflow-y: auto;
+    }
+    .modal-overlay.open .modal-sheet { transform: translateY(0); }
+
+    .modal-handle {
+      width: 40px; height: 4px;
+      background: var(--text-3);
+      border-radius: 2px;
+      margin: 0 auto var(--s-md);
+    }
+
+    .modal-header { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--s-sm); margin-bottom: var(--s-md); }
+    .modal-title  { font-size: var(--fs-lg); font-weight: 800; color: var(--text-1); line-height: 1.3; flex: 1; }
+    .modal-close  {
+      width: 32px; height: 32px; flex-shrink: 0;
+      background: var(--bg-elevated); border: 1px solid var(--glass-border);
+      border-radius: var(--r-sm); cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; color: var(--text-2); transition: var(--t);
+    }
+    .modal-close:hover { background: var(--no-bg); color: var(--no); }
+
+    .modal-img {
+      width: 100%; height: 130px;
+      object-fit: cover; border-radius: var(--r-md);
+      margin-bottom: var(--s-md);
+      background: var(--bg-elevated);
+    }
+
+    .modal-prob-section { margin-bottom: var(--s-md); }
+    .modal-prob-title { font-size: var(--fs-sm); color: var(--text-3); margin-bottom: var(--s-sm); font-weight: 600; }
+
+    .modal-big-prob {
+      display: flex; gap: var(--s-md);
+      margin-bottom: var(--s-md);
+    }
+    .big-prob-item {
+      flex: 1;
+      background: var(--bg-card);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--r-md);
+      padding: var(--s-md);
       text-align: center;
-      padding: 32px 16px;
-      background: var(--red-lt);
-      border-radius: var(--radius);
-      border: 1.5px solid var(--red);
+    }
+    .big-prob-item.yes-item { border-color: rgba(16,185,129,0.25); background: var(--yes-bg); }
+    .big-prob-item.no-item  { border-color: rgba(244,63,94,0.2);  background: var(--no-bg); }
+    .big-prob-lbl { font-size: var(--fs-xs); font-weight: 600; margin-bottom: 2px; }
+    .big-prob-lbl.yes { color: var(--yes); }
+    .big-prob-lbl.no  { color: var(--no); }
+    .big-prob-val { font-size: var(--fs-2xl); font-weight: 800; }
+    .big-prob-val.yes { color: var(--yes); }
+    .big-prob-val.no  { color: var(--no); }
+
+    .modal-desc {
+      font-size: var(--fs-sm); color: var(--text-2); line-height: 1.6;
+      margin-bottom: var(--s-md);
     }
 
-    /* ─── UPDATED TIMESTAMP ─── */
-    .updated-bar {
-      text-align: center;
-      font-size: 11px;
-      color: var(--text-sm);
-      padding: 8px 0 0;
-      margin-bottom: -4px;
+    .modal-meta-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: var(--s-sm); margin-bottom: var(--s-lg);
     }
-    .updated-bar span { color: var(--purple); font-weight: 600; }
+    .meta-item { }
+    .meta-lbl  { font-size: var(--fs-xs); color: var(--text-3); margin-bottom: 2px; }
+    .meta-val  { font-size: var(--fs-sm); font-weight: 700; color: var(--text-1); }
 
-    /* ─── FOOTER ─── */
-    footer {
-      position: fixed; bottom: 0; left: 0; right: 0;
-      background: rgba(255,255,255,.95);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border-top: 1.5px solid var(--border);
-      text-align: center;
-      padding: 10px 16px;
-      font-size: 11px;
-      color: var(--text-sm);
+    .modal-net-box {
+      background: var(--yes-bg);
+      border: 1px solid rgba(16,185,129,0.25);
+      border-radius: var(--r-md);
+      padding: var(--s-md);
+      margin-bottom: var(--s-md);
     }
-    footer a { color: var(--purple); text-decoration: none; font-weight: 600; }
+    .modal-net-title { font-size: var(--fs-xs); color: var(--yes); font-weight: 600; margin-bottom: 4px; }
+    .modal-net-val   { font-size: var(--fs-xl); font-weight: 800; color: var(--yes); }
+    .modal-net-sub   { font-size: var(--fs-xs); color: var(--text-3); margin-top: 2px; }
 
-    /* ─── ALL MARKETS SECTION ─── */
-    #section-all { display: none; }
+    .modal-cta {
+      display: block; width: 100%;
+      background: var(--accent);
+      color: white; font-weight: 800; font-size: var(--fs-base);
+      border: none; border-radius: var(--r-md);
+      padding: 14px;
+      text-align: center; text-decoration: none;
+      transition: var(--t); cursor: pointer;
+      font-family: 'Assistant', sans-serif;
+      min-height: 44px;
+    }
+    .modal-cta:hover { background: #6d28d9; transform: translateY(-1px); }
+    .modal-cta:active { transform: scale(0.98); }
 
-    /* ─── CATEGORY HIDDEN ─── */
-    .cat-hidden { display: none !important; }
+    /* ═══════════════════════════════════════════════
+       LOADER / SKELETON
+    ═══════════════════════════════════════════════ */
+    .skeleton {
+      background: linear-gradient(90deg, var(--bg-card) 25%, rgba(255,255,255,0.08) 50%, var(--bg-card) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: var(--r-md);
+    }
+    @keyframes shimmer {
+      0%   { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+    .skel-card { height: 120px; margin-bottom: var(--s-sm); }
 
-    /* ─── RESPONSIVE ─── */
-    @media (min-width: 540px) {
-      .header-inner, main { max-width: 520px; }
+    /* ═══════════════════════════════════════════════
+       RESPONSIVE / ACCESSIBILITY
+    ═══════════════════════════════════════════════ */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    }
+    @media (hover: none) {
+      .card-actions { opacity: 1; }
     }
   </style>
 </head>
-
 <body>
 
-<!-- HEADER -->
+<!-- ───────────────────── HEADER ───────────────────── -->
 <header>
   <div class="header-inner">
     <div class="header-top">
       <div class="logo">
-        <div class="logo-icon">📊</div>
-        <div>
-          <div class="logo-text">PolyDash</div>
-          <div class="logo-sub">שוק הניבויים בזמן אמת</div>
+        <div class="logo-icon">🔮</div>
+        <div class="logo-info">
+          <span class="logo-name">PolyDash</span>
+          <span class="logo-sub">שוק הניבויים החי</span>
         </div>
       </div>
-      <button class="refresh-btn" id="refreshBtn" onclick="refreshData()">
-        <span class="spin-icon" id="spinIcon">↻</span>
-        <span id="refreshLabel">רענן</span>
+      <button class="live-badge" id="refreshBtn" aria-label="רענן נתונים" title="לחץ לרענון">
+        <span class="live-dot"></span>
+        <span id="liveLabel">LIVE</span>
       </button>
     </div>
-    <div class="tabs-scroll">
-      <div class="tabs" id="tabsBar">
-        <button class="tab-btn active" data-cat="all" onclick="filterCat(this, 'all')">הכל</button>
-        <button class="tab-btn" data-cat="politics" onclick="filterCat(this, 'politics')">🗳️ פוליטיקה</button>
-        <button class="tab-btn" data-cat="economy" onclick="filterCat(this, 'economy')">💰 כלכלה</button>
-        <button class="tab-btn" data-cat="sports" onclick="filterCat(this, 'sports')">🏆 ספורט</button>
-        <button class="tab-btn" data-cat="crypto" onclick="filterCat(this, 'crypto')">₿ קריפטו</button>
-        <button class="tab-btn" data-cat="tech" onclick="filterCat(this, 'tech')">🔬 טכנולוגיה</button>
-        <button class="tab-btn" data-cat="geo" onclick="filterCat(this, 'geo')">🌍 גאופוליטיקה</button>
+
+    <div class="tabs-wrap" role="tablist" aria-label="סינון לפי קטגוריה">
+      <div class="tabs" id="tabs">
+        <button class="tab active" data-cat="all"      role="tab" aria-selected="true">הכל</button>
+        <button class="tab"        data-cat="politics" role="tab">🗳️ פוליטיקה</button>
+        <button class="tab"        data-cat="economy"  role="tab">💰 כלכלה</button>
+        <button class="tab"        data-cat="geo"      role="tab">🌍 גאופוליטיקה</button>
+        <button class="tab"        data-cat="sports"   role="tab">🏆 ספורט</button>
+        <button class="tab"        data-cat="crypto"   role="tab">₿ קריפטו</button>
+        <button class="tab"        data-cat="tech"     role="tab">🔬 טכנולוגיה</button>
+        <button class="tab"        data-cat="watch"    role="tab" id="watchTab">⭐ מעקב <span class="badge" id="watchBadge" style="display:none">0</span></button>
       </div>
     </div>
   </div>
 </header>
 
-<!-- MAIN -->
-<main id="mainContent">
-  <div class="loading-state" id="loadingState">
-    <div class="loading-spinner"></div>
-    <div class="loading-text">טוען נתוני שוק...</div>
+<!-- ───────────────────── STATS BAR ───────────────────── -->
+<div class="stats-bar-wrap" role="region" aria-label="סטטיסטיקות">
+  <div class="stats-bar" id="statsBar">
+    <div class="stat-pill skeleton" style="width:110px;height:34px;border-radius:100px"></div>
+    <div class="stat-pill skeleton" style="width:130px;height:34px;border-radius:100px"></div>
+    <div class="stat-pill skeleton" style="width:100px;height:34px;border-radius:100px"></div>
+    <div class="stat-pill skeleton" style="width:110px;height:34px;border-radius:100px"></div>
+  </div>
+</div>
+
+<!-- ───────────────────── MAIN CONTENT ───────────────────── -->
+<main>
+  <div class="content" id="mainContent">
+    <!-- Skeleton loading state -->
+    <div id="skeleton-view">
+      <div class="section-title" style="margin-bottom:12px;opacity:0.4">🔥 חם עכשיו</div>
+      <div class="skel-card skeleton"></div>
+      <div class="skel-card skeleton"></div>
+      <div class="skel-card skeleton"></div>
+    </div>
+
+    <!-- Real content injected by JS -->
+    <div id="real-content" style="display:none"></div>
   </div>
 </main>
 
-<!-- FOOTER -->
-<footer>
-  נתונים מ <a href="https://polymarket.com" target="_blank" rel="noopener">Polymarket</a> •
-  מתעדכן אוטומטית כל שעה
-</footer>
+<!-- ───────────────────── QUICK VIEW MODAL ───────────────────── -->
+<div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal-sheet" id="modalSheet">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <h2 class="modal-title" id="modalTitle">—</h2>
+      <button class="modal-close" id="modalClose" aria-label="סגור">✕</button>
+    </div>
+    <div id="modalBody"></div>
+  </div>
+</div>
 
+<!-- ───────────────────── JAVASCRIPT ───────────────────── -->
 <script>
-let allData = null;
-let currentCat = 'all';
-let refreshTimer = null;
+'use strict';
 
-// ─── HELPERS ───
-function fmt(n) {
-  if (n >= 1_000_000) return '$' + (n / 1_000_000).toFixed(1) + 'M';
-  if (n >= 1_000)     return '$' + (n / 1_000).toFixed(0) + 'K';
-  return '$' + n.toFixed(0);
+/* ────────────────────────────────
+   CONSTANTS & STATE
+──────────────────────────────── */
+const DATA_URL     = './data.json';
+const REFRESH_MS   = 5 * 60 * 1000;  // 5 min
+const WATCH_KEY    = 'polydash_watchlist';
+const CAT_LABELS   = { all:'הכל', politics:'🗳️ פוליטיקה', economy:'💰 כלכלה', geo:'🌍 גאופוליטיקה', sports:'🏆 ספורט', crypto:'₿ קריפטו', tech:'🔬 טכנולוגיה', other:'עוד' };
+
+let appData     = null;
+let prevData    = null;
+let activeTab   = 'all';
+let modalMarket = null;
+
+/* ────────────────────────────────
+   FINANCIAL TRUTH — NET RETURNS
+──────────────────────────────── */
+function calcNet(yesPct, bet = 100) {
+  const p = yesPct / 100;
+  if (p <= 0.01 || p >= 0.99) return null;
+  const shares    = bet / p;
+  const gross     = shares * (1 - p);
+  const afterFees = gross - (bet * 0.001);
+  const net       = afterFees * 0.75;          // 25% tax
+  const roi       = ((net / bet) * 100).toFixed(0);
+  return { net: net.toFixed(1), gross: gross.toFixed(1), roi };
 }
 
-function fmtDate(iso) {
-  if (!iso) return '';
-  try {
-    const d = new Date(iso);
-    return d.toLocaleDateString('he-IL', { day: 'numeric', month: 'short', year: '2-digit' });
-  } catch { return ''; }
+/* ────────────────────────────────
+   WATCHLIST (localStorage)
+──────────────────────────────── */
+function getWatchlist() {
+  try { return JSON.parse(localStorage.getItem(WATCH_KEY) || '[]'); } catch { return []; }
+}
+function saveWatchlist(ids) {
+  localStorage.setItem(WATCH_KEY, JSON.stringify(ids));
+  updateWatchBadge();
+}
+function isWatched(id) { return getWatchlist().includes(String(id)); }
+function toggleWatch(id, el) {
+  const ids = getWatchlist();
+  const sid = String(id);
+  const idx = ids.indexOf(sid);
+  if (idx === -1) { ids.push(sid); el.classList.add('starred'); el.title = 'הסר ממעקב'; }
+  else            { ids.splice(idx, 1); el.classList.remove('starred'); el.title = 'הוסף למעקב'; }
+  saveWatchlist(ids);
+  if (activeTab === 'watch') renderView();
+}
+function updateWatchBadge() {
+  const n = getWatchlist().length;
+  const badge = document.getElementById('watchBadge');
+  if (badge) { badge.textContent = n; badge.style.display = n > 0 ? 'inline' : 'none'; }
 }
 
-function probClass(pct) {
-  if (pct >= 60) return 'yes';
-  if (pct <= 40) return 'no';
-  return 'mid';
+/* ────────────────────────────────
+   HELPERS
+──────────────────────────────── */
+function fmt$( n ) { if (!n) return '$0'; const v = parseFloat(n); if (v >= 1e9) return '$'+(v/1e9).toFixed(1)+'B'; if (v >= 1e6) return '$'+(v/1e6).toFixed(1)+'M'; if (v >= 1e3) return '$'+(v/1e3).toFixed(0)+'K'; return '$'+v.toFixed(0); }
+function fmtDate(s) { if (!s) return '—'; const d = new Date(s); const now = new Date(); const diff = Math.round((d-now)/(1000*60*60*24)); if (diff < 0) return 'הסתיים'; if (diff === 0) return 'היום'; if (diff === 1) return 'מחר'; if (diff < 7) return `${diff} ימים`; if (diff < 30) return `${Math.round(diff/7)} שבועות`; if (diff < 365) return `${Math.round(diff/30)} חודשים`; return `${Math.round(diff/365)} שנים`; }
+function fmtAgo(s) { if (!s) return ''; const d = new Date(s); const diff = Math.round((Date.now()-d)/60000); if (diff < 1) return 'עכשיו'; if (diff < 60) return `לפני ${diff} דק׳`; return `לפני ${Math.round(diff/60)} שע׳`; }
+function catEmoji(c) { const m = {politics:'🗳️',economy:'💰',geo:'🌍',sports:'🏆',crypto:'₿',tech:'🔬',other:'💡'}; return (m[c]||'💡')+' '+(CAT_LABELS[c]||c); }
+function imgOrPlaceholder(m) {
+  const emoji = {politics:'🗳️',economy:'💰',geo:'🌍',sports:'🏆',crypto:'₿',tech:'🔬',other:'💡'};
+  if (m.image) return `<img class="card-img" src="${esc(m.image)}" alt="" loading="lazy" onerror="this.style.display='none'" />`;
+  return `<div class="card-img-placeholder">${emoji[m.category]||'🔮'}</div>`;
 }
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-function catLabel(cat) {
-  const labels = {
-    politics: '🗳️ פוליטיקה',
-    economy:  '💰 כלכלה',
-    sports:   '🏆 ספורט',
-    crypto:   '₿ קריפטו',
-    tech:     '🔬 טכנולוגיה',
-    geo:      '🌍 גאופוליטיקה',
-    other:    '📊 שונות',
-  };
-  return labels[cat] || '📊 שונות';
-}
+/* ────────────────────────────────
+   RENDER CARD
+──────────────────────────────── */
+function buildCard(m, showChange) {
+  const watched   = isWatched(m.id);
+  const nr        = calcNet(m.yes_pct);
+  const netHtml   = nr ? `<div class="net-return"><span class="net-label">נטו:</span><span class="net-val">+$${nr.net}</span><span class="gross-val">(ברוטו +$${nr.gross})</span></div>` : '';
+  const volHtml   = `<span class="vol-txt">📊 ${fmt$(m.volume24hr)}/24h</span>`;
+  let changeBadge = '';
+  if (showChange && m.oneWeekPriceChange !== undefined && m.oneWeekPriceChange !== 0) {
+    const pct = (m.oneWeekPriceChange * 100).toFixed(1);
+    const cls = pct > 0 ? 'up' : 'down';
+    const arrow = pct > 0 ? '▲' : '▼';
+    changeBadge = `<span class="change-badge ${cls}">${arrow} ${Math.abs(pct)}%</span>`;
+  }
 
-function daysAgo(iso) {
-  try {
-    const d = new Date(iso);
-    const diff = (Date.now() - d.getTime()) / 86400000;
-    if (diff < 1) return 'היום';
-    if (diff < 2) return 'אתמול';
-    return `לפני ${Math.floor(diff)} ימים`;
-  } catch { return ''; }
-}
-
-// ─── BUILD CARDS ───
-function hotCard(m, rank) {
-  const pc = probClass(m.yes_pct);
-  const yWidth = m.yes_pct;
   return `
-  <a class="card" href="${m.link}" target="_blank" rel="noopener" data-cat="${m.category}">
-    <div class="hot-card">
-      <div>
-        <div class="card-rank">#${rank} • ${catLabel(m.category)}</div>
-        <div class="card-title">${m.question}</div>
+  <div class="card" data-id="${esc(m.id)}" data-cat="${esc(m.category)}"
+       role="article" tabindex="0" aria-label="${esc(m.question)}">
+    <div class="card-top">
+      ${imgOrPlaceholder(m)}
+      <div class="card-info">
+        <div class="card-title">${esc(m.question)}</div>
         <div class="card-meta">
-          <span class="vol-chip">🔥 ${fmt(m.volume24hr)} היום</span>
-          ${m.end_date ? `<span class="meta-chip">⏰ ${fmtDate(m.end_date)}</span>` : ''}
-          ${m.volume ? `<span class="meta-chip">📊 ${fmt(m.volume)}</span>` : ''}
-        </div>
-        <div class="prob-bar" style="margin-top:10px">
-          <div class="prob-bar-yes" style="flex:${yWidth}"></div>
-          <div class="prob-bar-no"  style="flex:${100 - yWidth}"></div>
+          <span class="card-cat">${catEmoji(m.category)}</span>
+          <span class="card-date">⏳ ${fmtDate(m.end_date)}</span>
         </div>
       </div>
-      <div class="prob-block">
-        <div class="prob-big ${pc}">${m.yes_pct}%</div>
-        <div class="prob-label ${pc}">YES</div>
+      <div class="card-actions">
+        <button class="action-btn ${watched?'starred':''}" data-star="${esc(m.id)}"
+                title="${watched?'הסר ממעקב':'הוסף למעקב'}" aria-label="שמור למעקב">⭐</button>
+        <button class="action-btn" data-view="${esc(m.id)}"
+                title="תצוגה מהירה" aria-label="פתח תצוגה מהירה">👁</button>
       </div>
     </div>
-  </a>`;
+
+    <div class="prob-bars" id="probs-${esc(m.id)}">
+      <div class="prob-row">
+        <span class="prob-label yes">YES</span>
+        <div class="prob-bar-bg"><div class="prob-bar-fill yes" style="width:${m.yes_pct||0}%"></div></div>
+        <span class="prob-pct yes" id="yes-${esc(m.id)}">${m.yes_pct||0}%</span>
+      </div>
+      <div class="prob-row">
+        <span class="prob-label no">NO</span>
+        <div class="prob-bar-bg"><div class="prob-bar-fill no" style="width:${m.no_pct||0}%"></div></div>
+        <span class="prob-pct no">${m.no_pct||0}%</span>
+      </div>
+    </div>
+
+    <div class="card-footer">
+      ${netHtml}
+      <div class="card-stats">${volHtml}${changeBadge}</div>
+    </div>
+  </div>`;
 }
 
-function moverCard(m) {
-  const up = m.oneWeekPriceChange >= 0;
-  const pct = Math.abs(m.oneWeekPriceChange * 100).toFixed(1);
-  const dir = up ? 'up' : 'down';
-  const arrow = up ? '↑' : '↓';
+/* ────────────────────────────────
+   RENDER SECTIONS
+──────────────────────────────── */
+function renderSection(title, markets, showChange = false) {
+  if (!markets || !markets.length) return '';
+  const filtered = activeTab === 'all' || activeTab === 'watch' ? markets
+    : markets.filter(m => m.category === activeTab);
+  if (!filtered.length) return '';
   return `
-  <a class="card" href="${m.link}" target="_blank" rel="noopener" data-cat="${m.category}">
-    <div class="mover-card">
-      <div>
-        <div class="card-rank">${catLabel(m.category)}</div>
-        <div class="card-title">${m.question}</div>
-        <div class="card-meta">
-          <span class="meta-chip">כעת: ${m.yes_pct}% YES</span>
-          ${m.volume24hr ? `<span class="vol-chip">${fmt(m.volume24hr)}/24h</span>` : ''}
-        </div>
-      </div>
-      <div class="mover-change">
-        <div class="mover-pct ${dir}">${up ? '+' : '-'}${pct}%</div>
-        <div class="mover-arrow ${dir}">${arrow} שבוע</div>
-      </div>
+  <div class="section">
+    <div class="section-header">
+      <h2 class="section-title">${title}</h2>
+      <span class="section-count">${filtered.length}</span>
     </div>
-  </a>`;
+    ${filtered.map(m => buildCard(m, showChange)).join('')}
+  </div>`;
 }
 
-function newCard(m) {
-  return `
-  <a class="card" href="${m.link}" target="_blank" rel="noopener" data-cat="${m.category}">
-    <div class="new-card-body">
-      <div class="new-card-top">
-        <div class="card-title">${m.question}</div>
-        <span class="new-badge">חדש!</span>
-      </div>
-      <div class="interesting-text">${m.interesting}</div>
-      <div class="card-meta">
-        <span class="meta-chip">${daysAgo(m.start_date)}</span>
-        <span class="meta-chip">YES: ${m.yes_pct}%</span>
-        ${m.liquidity ? `<span class="vol-chip">💧 ${fmt(m.liquidity)}</span>` : ''}
-      </div>
-    </div>
-  </a>`;
-}
+function renderView() {
+  const rc = document.getElementById('real-content');
+  if (!appData) return;
 
-function watchCard(m) {
-  const catCls = 'cat-' + m.category;
-  return `
-  <a class="card" href="${m.link}" target="_blank" rel="noopener" data-cat="${m.category}">
-    <div class="watch-card">
-      <div class="watch-top">
-        <div class="card-title">${m.question}</div>
-        <span class="cat-tag ${catCls}">${catLabel(m.category)}</span>
-      </div>
-      <div>
-        <div class="watch-probs">
-          <div class="watch-yes">${m.yes_pct}%</div>
-          <div class="watch-divider">|</div>
-          <div class="watch-no">${m.no_pct}%</div>
-        </div>
-        <div class="watch-label-row">
-          <span class="wl yes">YES</span>
-          <span class="wl no">NO</span>
-        </div>
-      </div>
-      <div class="interesting-text">${m.interesting}</div>
-    </div>
-  </a>`;
-}
-
-function allMarketCard(m) {
-  const pc = probClass(m.yes_pct);
-  return `
-  <a class="card" href="${m.link}" target="_blank" rel="noopener" data-cat="${m.category}">
-    <div class="hot-card">
-      <div>
-        <div class="card-rank">${catLabel(m.category)}</div>
-        <div class="card-title">${m.question}</div>
-        <div class="card-meta">
-          ${m.volume24hr ? `<span class="vol-chip">${fmt(m.volume24hr)}/24h</span>` : ''}
-          ${m.end_date ? `<span class="meta-chip">⏰ ${fmtDate(m.end_date)}</span>` : ''}
-        </div>
-      </div>
-      <div class="prob-block">
-        <div class="prob-big ${pc}">${m.yes_pct}%</div>
-        <div class="prob-label ${pc}">YES</div>
-      </div>
-    </div>
-  </a>`;
-}
-
-// ─── RENDER ───
-function render(data) {
-  const main = document.getElementById('mainContent');
-
-  const updatedTime = data.updated_at
-    ? new Date(data.updated_at).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })
-    : '';
-
-  let html = `<div class="updated-bar">עודכן לאחרונה: <span>${updatedTime}</span></div>`;
-
-  const isAll = currentCat === 'all';
-
-  // ── Section: All Markets (when category selected) ──
-  if (!isAll) {
-    const filtered = (data.all_markets || []).filter(m => m.category === currentCat);
-    html += `
-    <div class="section" id="section-cat">
-      <div class="section-header">
-        <span class="section-title">${catLabel(currentCat)}</span>
-        <span class="section-count">${filtered.length} שווקים</span>
-      </div>
-      ${filtered.length
-        ? filtered.map(m => allMarketCard(m)).join('')
-        : `<div class="loading-state"><div class="loading-text">אין שווקים בקטגוריה זו</div></div>`
-      }
-    </div>`;
-    main.innerHTML = html;
+  if (activeTab === 'watch') {
+    const ids = getWatchlist();
+    if (!ids.length) {
+      rc.innerHTML = `<div class="empty-watch"><span class="empty-icon">⭐</span><p>אין שווקים במעקב עדיין.<br>לחץ על ⭐ בכל שוק כדי להוסיף.</p></div>`;
+      return;
+    }
+    const all = [...(appData.hot||[]), ...(appData.movers||[]), ...(appData.new_interesting||[]), ...(appData.worth_watching||appData.watching||[])];
+    const seen = new Set();
+    const watched = ids.map(id => all.find(m => String(m.id) === id)).filter(Boolean).filter(m => { if (seen.has(m.id)) return false; seen.add(m.id); return true; });
+    rc.innerHTML = renderSection('⭐ שווקים במעקב', watched);
     return;
   }
 
-  // ── Section 1: Hot Markets ──
-  if (data.hot && data.hot.length) {
-    html += `
-    <div class="section">
-      <div class="section-header">
-        <span class="section-title">🔥 חם עכשיו</span>
-        <span class="section-count">Top ${data.hot.length}</span>
-      </div>
-      ${data.hot.map((m, i) => hotCard(m, i + 1)).join('')}
-    </div>`;
-  }
-
-  // ── Section 2: Big Movers ──
-  if (data.movers && data.movers.length) {
-    html += `
-    <div class="section">
-      <div class="section-header">
-        <span class="section-title">📈 תנועות גדולות</span>
-        <span class="section-count">שינוי שבועי</span>
-      </div>
-      ${data.movers.map(m => moverCard(m)).join('')}
-    </div>`;
-  }
-
-  // ── Section 3: New & Interesting ──
-  if (data.new_interesting && data.new_interesting.length) {
-    html += `
-    <div class="section">
-      <div class="section-header">
-        <span class="section-title">✨ חדש ומעניין</span>
-        <span class="section-count">14 ימים אחרונים</span>
-      </div>
-      ${data.new_interesting.map(m => newCard(m)).join('')}
-    </div>`;
-  }
-
-  // ── Section 4: Worth Watching ──
-  if (data.worth_watching && data.worth_watching.length) {
-    html += `
-    <div class="section">
-      <div class="section-header">
-        <span class="section-title">🎯 שווה לעקוב</span>
-        <span class="section-count">המלצות עורך</span>
-      </div>
-      ${data.worth_watching.map(m => watchCard(m)).join('')}
-    </div>`;
-  }
-
-  main.innerHTML = html;
+  let html = '';
+  html += renderSection('🔥 חם עכשיו',        appData.hot              || [], false);
+  html += renderSection('📈 תנועות גדולות',    appData.movers           || [], true);
+  html += renderSection('✨ חדש ומעניין',      appData.new_interesting  || [], false);
+  html += renderSection('🎯 שווה לעקוב',       appData.worth_watching   || appData.watching || [], false);
+  rc.innerHTML = html || `<div class="empty-watch"><span class="empty-icon">🔍</span><p>אין שווקים בקטגוריה זו כרגע.</p></div>`;
 }
 
-// ─── FILTER ───
-function filterCat(btn, cat) {
-  currentCat = cat;
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  if (allData) render(allData);
+/* ────────────────────────────────
+   STATS BAR
+──────────────────────────────── */
+function renderStats(d) {
+  const totalVol = [...(d.hot||[]), ...(d.movers||[])].reduce((s, m) => s + (m.volume24hr||0), 0);
+  const total    = (d.total_markets || (d.all_markets && d.all_markets.length) || 0);
+  const updated  = fmtAgo(d.updated_at);
+  document.getElementById('statsBar').innerHTML = `
+    <div class="stat-pill"><span class="stat-icon">📊</span><span class="stat-val">${total}</span><span class="stat-lbl"> שווקים</span></div>
+    <div class="stat-pill"><span class="stat-icon">💰</span><span class="stat-val">${fmt$(totalVol)}</span><span class="stat-lbl"> נפח 24h</span></div>
+    <div class="stat-pill"><span class="stat-icon">🔥</span><span class="stat-val">${(d.hot||[]).length}</span><span class="stat-lbl"> חם עכשיו</span></div>
+    <div class="stat-pill"><span class="stat-icon">⏰</span><span class="stat-val">${updated}</span><span class="stat-lbl"></span></div>
+  `;
 }
 
-// ─── LOAD DATA ───
-async function loadData() {
+/* ────────────────────────────────
+   PRICE FLASH (micro-interaction)
+──────────────────────────────── */
+function flashUpdated(newData, oldData) {
+  if (!oldData) return;
+  const allNew = [...(newData.hot||[]), ...(newData.movers||[])];
+  const allOld = [...(oldData.hot||[]), ...(oldData.movers||[])];
+  const oldMap  = Object.fromEntries(allOld.map(m => [m.id, m.yes_pct]));
+  allNew.forEach(m => {
+    const oldPct = oldMap[m.id];
+    const el     = document.getElementById(`yes-${m.id}`);
+    if (el && oldPct !== undefined && oldPct !== m.yes_pct) {
+      el.classList.remove('flash-up','flash-down');
+      void el.offsetWidth; // force reflow
+      el.classList.add(m.yes_pct > oldPct ? 'flash-up' : 'flash-down');
+    }
+  });
+}
+
+/* ────────────────────────────────
+   DATA LOADING
+──────────────────────────────── */
+async function loadData(isRefresh = false) {
+  if (isRefresh) {
+    const btn = document.getElementById('liveLabel');
+    if (btn) btn.textContent = '...';
+  }
   try {
-    const r = await fetch('data.json?t=' + Date.now());
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    allData = await r.json();
-    render(allData);
-  } catch (e) {
-    document.getElementById('mainContent').innerHTML = `
-      <div class="error-state">
-        <div style="font-size:32px;margin-bottom:8px">⚠️</div>
-        <div style="font-weight:700;margin-bottom:4px">לא ניתן לטעון נתונים</div>
-        <div style="font-size:12px;color:var(--text-sm)">${e.message}</div>
-      </div>`;
+    const r = await fetch(`${DATA_URL}?v=${Date.now()}`);
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const d = await r.json();
+    prevData = appData;
+    appData  = d;
+
+    // First load
+    document.getElementById('skeleton-view').style.display = 'none';
+    document.getElementById('real-content').style.display  = 'block';
+
+    renderStats(d);
+    renderView();
+    if (isRefresh) flashUpdated(d, prevData);
+    updateWatchBadge();
+
+    const lbl = document.getElementById('liveLabel');
+    if (lbl) lbl.textContent = 'LIVE';
+  } catch(e) {
+    console.error('PolyDash load error:', e);
+    const lbl = document.getElementById('liveLabel');
+    if (lbl) lbl.textContent = '⚠️';
   }
 }
 
-// ─── REFRESH ───
-async function refreshData() {
-  const btn = document.getElementById('refreshBtn');
-  const spin = document.getElementById('spinIcon');
-  const label = document.getElementById('refreshLabel');
-  btn.classList.add('spinning');
-  label.textContent = 'טוען...';
-  await loadData();
-  btn.classList.remove('spinning');
-  label.textContent = 'רענן';
+/* ────────────────────────────────
+   QUICK VIEW MODAL
+──────────────────────────────── */
+function openModal(m) {
+  modalMarket = m;
+  const nr    = calcNet(m.yes_pct);
+  const overlay = document.getElementById('modalOverlay');
+  document.getElementById('modalTitle').textContent = m.question;
+
+  let imgHtml = '';
+  if (m.image) imgHtml = `<img class="modal-img" src="${esc(m.image)}" alt="" loading="lazy" onerror="this.style.display='none'" />`;
+
+  let netBoxHtml = '';
+  if (nr) {
+    netBoxHtml = `
+    <div class="modal-net-box">
+      <div class="modal-net-title">💰 נטו אחרי מס ועמלה (על $100 הימור)</div>
+      <div class="modal-net-val">+$${nr.net} <small style="font-size:16px;opacity:0.7">(ROI ${nr.roi}%)</small></div>
+      <div class="modal-net-sub">ברוטו: +$${nr.gross} • מס 25%: -$${(parseFloat(nr.gross)*0.25).toFixed(1)} • עמלה: -$0.1</div>
+    </div>`;
+  }
+
+  document.getElementById('modalBody').innerHTML = `
+    ${imgHtml}
+    <div class="modal-big-prob">
+      <div class="big-prob-item yes-item">
+        <div class="big-prob-lbl yes">YES</div>
+        <div class="big-prob-val yes">${m.yes_pct||0}%</div>
+      </div>
+      <div class="big-prob-item no-item">
+        <div class="big-prob-lbl no">NO</div>
+        <div class="big-prob-val no">${m.no_pct||0}%</div>
+      </div>
+    </div>
+    ${netBoxHtml}
+    <div class="modal-meta-grid">
+      <div class="meta-item"><div class="meta-lbl">קטגוריה</div><div class="meta-val">${catEmoji(m.category)}</div></div>
+      <div class="meta-item"><div class="meta-lbl">נפח 24h</div><div class="meta-val">${fmt$(m.volume24hr)}</div></div>
+      <div class="meta-item"><div class="meta-lbl">נפח כולל</div><div class="meta-val">${fmt$(m.volume)}</div></div>
+      <div class="meta-item"><div class="meta-lbl">תאריך סגירה</div><div class="meta-val">${fmtDate(m.end_date)}</div></div>
+    </div>
+    ${m.interesting ? `<div class="modal-desc">💡 ${esc(m.interesting)}</div>` : ''}
+    <a class="modal-cta" href="${esc(m.link||'https://polymarket.com')}" target="_blank" rel="noopener">פתח ב-Polymarket ↗</a>
+  `;
+
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
 }
 
-// ─── AUTO-REFRESH every 5 minutes ───
-function startAutoRefresh() {
-  if (refreshTimer) clearInterval(refreshTimer);
-  refreshTimer = setInterval(loadData, 5 * 60 * 1000);
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+  modalMarket = null;
 }
 
-// ─── INIT ───
+/* ────────────────────────────────
+   EVENT DELEGATION
+──────────────────────────────── */
+document.getElementById('mainContent').addEventListener('click', e => {
+  // Star button
+  const starBtn = e.target.closest('[data-star]');
+  if (starBtn) { e.preventDefault(); e.stopPropagation(); toggleWatch(starBtn.dataset.star, starBtn); return; }
+
+  // View button
+  const viewBtn = e.target.closest('[data-view]');
+  if (viewBtn) {
+    e.preventDefault(); e.stopPropagation();
+    const id  = viewBtn.dataset.view;
+    const all = [...(appData?.hot||[]), ...(appData?.movers||[]), ...(appData?.new_interesting||[]), ...(appData?.worth_watching||appData?.watching||[])];
+    const m   = all.find(x => String(x.id) === String(id));
+    if (m) openModal(m);
+    return;
+  }
+
+  // Card click → open modal
+  const card = e.target.closest('.card');
+  if (card && appData) {
+    const id  = card.dataset.id;
+    const all = [...(appData.hot||[]), ...(appData.movers||[]), ...(appData.new_interesting||[]), ...(appData.worth_watching||appData.watching||[])];
+    const m   = all.find(x => String(x.id) === String(id));
+    if (m) openModal(m);
+  }
+});
+
+// Keyboard accessibility for cards
+document.getElementById('mainContent').addEventListener('keydown', e => {
+  if (e.key === 'Enter' || e.key === ' ') {
+    const card = e.target.closest('.card');
+    if (card) { e.preventDefault(); card.click(); }
+  }
+});
+
+// Modal close
+document.getElementById('modalClose').addEventListener('click', closeModal);
+document.getElementById('modalOverlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('modalOverlay')) closeModal();
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+// Tabs
+document.getElementById('tabs').addEventListener('click', e => {
+  const tab = e.target.closest('.tab');
+  if (!tab) return;
+  document.querySelectorAll('.tab').forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected','false'); });
+  tab.classList.add('active');
+  tab.setAttribute('aria-selected','true');
+  activeTab = tab.dataset.cat;
+  renderView();
+});
+
+// Refresh button
+document.getElementById('refreshBtn').addEventListener('click', () => loadData(true));
+
+/* ────────────────────────────────
+   INIT & AUTO-REFRESH
+──────────────────────────────── */
 loadData();
-startAutoRefresh();
+setInterval(() => loadData(true), REFRESH_MS);
+updateWatchBadge();
 </script>
 </body>
 </html>
