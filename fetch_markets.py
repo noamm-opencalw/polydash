@@ -5,8 +5,34 @@ Fetches Polymarket data and generates data.json for the dashboard.
 """
 
 import json
+import os
 import requests
 from datetime import datetime, timezone, timedelta
+
+SIGNALS_FILE = os.path.expanduser(
+    "~/.openclaw/workspace-main/polymarket/data/signals.jsonl"
+)
+
+
+def load_signals() -> list:
+    """טוען signals מ-signals.jsonl — מחזיר ייחודיים לפי slug, ממוינים לפי ציון"""
+    if not os.path.exists(SIGNALS_FILE):
+        return []
+    by_slug = {}
+    with open(SIGNALS_FILE, encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                s = json.loads(line)
+                slug = s.get("slug", "")
+                ts   = s.get("timestamp", "")
+                if slug not in by_slug or ts > by_slug[slug].get("timestamp", ""):
+                    by_slug[slug] = s
+            except Exception:
+                pass
+    return sorted(by_slug.values(), key=lambda x: x.get("score", 0), reverse=True)
 
 BASE_URL = "https://gamma-api.polymarket.com"
 
@@ -259,6 +285,8 @@ def main():
     # --- All markets (for category filtering) ---
     all_for_tabs = sorted(all_markets, key=lambda x: x["volume24hr"], reverse=True)
 
+    signals = load_signals()
+
     data = {
         "updated_at": now.isoformat(),
         "hot": hot,
@@ -266,6 +294,8 @@ def main():
         "new_interesting": new_interesting,
         "worth_watching": worth_watching,
         "all_markets": all_for_tabs,
+        "signals": signals,
+        "signals_count": len(signals),
     }
 
     with open("data.json", "w", encoding="utf-8") as f:

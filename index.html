@@ -645,6 +645,7 @@
         <button class="tab"        data-cat="crypto"   role="tab">₿ קריפטו</button>
         <button class="tab"        data-cat="tech"     role="tab">🔬 טכנולוגיה</button>
         <button class="tab"        data-cat="watch"    role="tab" id="watchTab">⭐ מעקב <span class="badge" id="watchBadge" style="display:none">0</span></button>
+        <button class="tab"        data-cat="signals"  role="tab" id="signalsTab">📡 Signals <span class="badge" id="signalsBadge" style="display:none">0</span></button>
       </div>
     </div>
   </div>
@@ -833,9 +834,88 @@ function renderSection(title, markets, showChange = false) {
   </div>`;
 }
 
+/* ────────────────────────────────
+   SIGNALS VIEW
+──────────────────────────────── */
+function timeAgo(ts) {
+  if (!ts) return '';
+  const diff = Math.round((Date.now() - new Date(ts)) / 60000);
+  if (diff < 1)  return 'עכשיו';
+  if (diff < 60) return `לפני ${diff} דק׳`;
+  const h = Math.round(diff / 60);
+  if (h < 24)    return `לפני ${h} שע׳`;
+  return `לפני ${Math.round(h/24)} ימים`;
+}
+
+function renderSignals() {
+  const signals = (appData && appData.signals) || [];
+  if (!signals.length) {
+    return `<div class="empty-watch"><span class="empty-icon">📡</span><p>אין signals עדיין — המנוע ממתין לנתונים...</p></div>`;
+  }
+
+  const strengthConfig = {
+    'STRONG':     { emoji: '🔴', color: 'var(--no)',    label: 'STRONG' },
+    'WHALE_FADE': { emoji: '🐋', color: '#a855f7',      label: 'WHALE FADE' },
+    'MEDIUM':     { emoji: '🟡', color: '#f59e0b',      label: 'MEDIUM' },
+  };
+
+  const cards = signals.map(s => {
+    const cfg      = strengthConfig[s.strength] || { emoji: '⚫', color: 'var(--text-2)', label: s.strength };
+    const betSide  = s.bet_side || 'Yes';
+    const sideClr  = betSide === 'Yes' ? 'var(--yes)' : 'var(--no)';
+    const yesPrice = (s.yes_price * 100).toFixed(1);
+    const noPrice  = (s.no_price  * 100).toFixed(1);
+    const action   = s.action === 'EXECUTE' ? '🟢 EXECUTE' : '⚪ DRY_RUN';
+    const whaleRow = s.whale_names && s.whale_names.length
+      ? `<div style="margin-top:6px;font-size:12px;color:var(--text-2)">🐋 ${s.whale_names.join(', ')}</div>`
+      : '';
+    const reasons  = (s.reasons || []).slice(0, 3).map(r =>
+      `<span style="background:rgba(255,255,255,0.07);border-radius:4px;padding:2px 6px;font-size:11px;color:var(--text-2)">${r}</span>`
+    ).join(' ');
+
+    return `
+    <div class="card" style="border-right: 3px solid ${cfg.color}; margin-bottom: var(--s-sm)">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
+        <span style="background:${cfg.color}22;color:${cfg.color};border:1px solid ${cfg.color}44;border-radius:6px;padding:3px 8px;font-size:12px;font-weight:700">${cfg.emoji} ${cfg.label}</span>
+        <span style="background:rgba(255,255,255,0.08);border-radius:6px;padding:3px 8px;font-size:12px;color:var(--text-2)">${s.score}/100</span>
+        <span style="background:${sideClr}22;color:${sideClr};border-radius:6px;padding:3px 8px;font-size:12px;font-weight:600">הימור: ${betSide}</span>
+        <span style="margin-right:auto;font-size:11px;color:var(--text-3)">${timeAgo(s.timestamp)}</span>
+      </div>
+      <div style="font-size:15px;font-weight:700;color:var(--text-1);margin-bottom:8px;line-height:1.4">${s.question}</div>
+      <div style="display:flex;gap:16px;margin-bottom:6px;font-size:13px;flex-wrap:wrap">
+        <span>כן <strong style="color:var(--yes)">${yesPrice}%</strong></span>
+        <span>לא <strong style="color:var(--no)">${noPrice}%</strong></span>
+        <span>⏱ ${s.days_left}d</span>
+        <span>Kelly ${s.kelly_pct}%</span>
+        <span>💰 $${s.size_usd}</span>
+        <span style="color:var(--text-3)">${action}</span>
+      </div>
+      ${whaleRow}
+      <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px">${reasons}</div>
+    </div>`;
+  }).join('');
+
+  return `
+  <div class="section">
+    <div class="section-header">
+      <h2 class="section-title">📡 Signals — מנוע ההזדמנויות</h2>
+      <span class="section-count">${signals.length}</span>
+    </div>
+    <div style="font-size:13px;color:var(--text-3);margin-bottom:var(--s-md)">
+      מצב: ⚪ DRY_RUN (ניטור בלבד) · ${signals.filter(s=>s.strength==='STRONG').length} STRONG · ${signals.filter(s=>s.strength==='MEDIUM').length} MEDIUM · ${signals.filter(s=>s.strength==='WHALE_FADE').length} WHALE_FADE
+    </div>
+    ${cards}
+  </div>`;
+}
+
 function renderView() {
   const rc = document.getElementById('real-content');
   if (!appData) return;
+
+  if (activeTab === 'signals') {
+    rc.innerHTML = renderSignals();
+    return;
+  }
 
   if (activeTab === 'watch') {
     const ids = getWatchlist();
@@ -915,6 +995,12 @@ async function loadData(isRefresh = false) {
     renderView();
     if (isRefresh) flashUpdated(d, prevData);
     updateWatchBadge();
+    // Signals badge
+    const sigBadge = document.getElementById('signalsBadge');
+    if (sigBadge && d.signals_count > 0) {
+      sigBadge.textContent = d.signals_count;
+      sigBadge.style.display = 'inline';
+    }
 
     const lbl = document.getElementById('liveLabel');
     if (lbl) lbl.textContent = 'LIVE';
