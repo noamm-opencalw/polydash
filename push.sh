@@ -3,6 +3,9 @@
 set -e
 cd "$(dirname "$0")"
 
+# ודא SSH remote
+git remote set-url origin git@github.com:noamm-opencalw/polydash.git 2>/dev/null || true
+
 echo "📡 Fetching markets + signals..."
 python3 fetch_markets.py
 
