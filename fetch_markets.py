@@ -285,7 +285,115 @@ def main():
     # --- All markets (for category filtering) ---
     all_for_tabs = sorted(all_markets, key=lambda x: x["volume24hr"], reverse=True)
 
+    # --- Section 5: Good Chances (55–92% probability, any liquidity) ---
+    # Polymarket tends to be polarized; capture anything in the "likely" zone
+    good_chances = []
+    seen_gc = set()
+    for m in sorted(all_markets, key=lambda x: (x["liquidity"] + x["volume24hr"]), reverse=True):
+        if m["id"] in seen_gc:
+            continue
+        p = m["yes_pct"]
+        if 55 <= p <= 92 and m["liquidity"] >= 500:
+            good_chances.append(m)
+            seen_gc.add(m["id"])
+        if len(good_chances) >= 10:
+            break
+
+    # --- Section 6: Beat the Market (best ROI/Kelly edge) ---
+    def edge_score(m):
+        """Score based on ROI potential × probability sweet-spot × liquidity"""
+        roi = m.get("roi_pct") or 0
+        vol = min(m["volume24hr"] / 500_000, 1.0)
+        liq = min(m["liquidity"] / 100_000, 1.0)
+        p   = m["yes_pct"] / 100.0
+        # Sweet spot: 30-70% prob — meaningful edge without pure lottery
+        if p < 0.08 or p > 0.92:
+            sweetness = 0.1   # near-certain or near-impossible — not interesting
+        else:
+            sweetness = 1.0 - abs(p - 0.5) * 1.5
+        return (roi * 0.4) + (sweetness * 35) + (vol * 10) + (liq * 15)
+
+    beat_market = sorted(
+        [m for m in all_markets if (m.get("roi_pct") or 0) > 5 and 8 <= m["yes_pct"] <= 92 and m["liquidity"] >= 1_000],
+        key=edge_score,
+        reverse=True
+    )[:10]
+
+    # --- Recommendation: top pick with reasoning ---
     signals = load_signals()
+
+    def generate_recommendation(signals, good_chances, beat_market, hot):  # noqa: C901
+        """Pick the best opportunity and explain why."""
+        # Priority 1: Strong signal with high score and meaningful probability
+        strong = [
+            s for s in signals
+            if s.get("strength") == "STRONG"
+            and 0.10 <= s.get("yes_price", 0) <= 0.90  # not near-certain
+            and s.get("days_left", 0) > 0               # not expired
+        ]
+        if strong:
+            s = strong[0]
+            yes_pct = round(s.get("yes_price", 0.5) * 100, 1)
+            return {
+                "source": "signal",
+                "title": s.get("question", ""),
+                "bet_side": s.get("bet_side", "Yes"),
+                "yes_pct": yes_pct,
+                "score": s.get("score", 0),
+                "size_usd": s.get("size_usd", 0),
+                "reasoning": [
+                    f"Signal חזק עם ציון {s.get('score', 0)}/100",
+                    f"הימור על {s.get('bet_side', 'Yes')} — מחיר {yes_pct}%",
+                    *[r for r in s.get("reasons", [])[:3]],
+                ],
+                "action": s.get("action", "DRY_RUN"),
+                "link": f"https://polymarket.com/event/{s.get('slug', '')}",
+            }
+        # Priority 2: Best edge from beat_market (prefer 30-70% probability range)
+        mid_range = [m for m in beat_market if 25 <= m["yes_pct"] <= 70]
+        bm_pick = mid_range[0] if mid_range else (beat_market[0] if beat_market else None)
+        if bm_pick:
+            m = bm_pick
+            roi   = m.get("roi_pct", 0)
+            vol   = m.get("volume24hr", 0)
+            price = m["yes_pct"]
+            return {
+                "source": "edge",
+                "title": m["question"],
+                "bet_side": "Yes",
+                "yes_pct": price,
+                "score": round(edge_score(m), 1),
+                "size_usd": None,
+                "reasoning": [
+                    f"ROI נטו צפוי: {roi:.0f}% על $100 הימור",
+                    f"מחיר YES: {price}% — נזילות: ${m['liquidity']:,.0f}",
+                    f"נפח 24h: ${vol:,.0f}" if vol > 1000 else None,
+                    m.get("interesting", ""),
+                ],
+                "action": "DRY_RUN",
+                "link": m.get("link", ""),
+            }
+        # Priority 3: Best good_chance
+        if good_chances:
+            m = good_chances[0]
+            return {
+                "source": "good_chance",
+                "title": m["question"],
+                "bet_side": "Yes",
+                "yes_pct": m["yes_pct"],
+                "score": None,
+                "size_usd": None,
+                "reasoning": [
+                    f"סיכוי YES גבוה: {m['yes_pct']}%",
+                    f"נזילות גבוהה: ${m['liquidity']:,.0f}",
+                    m.get("interesting", ""),
+                ],
+                "action": "DRY_RUN",
+                "link": m.get("link", ""),
+            }
+        return None
+
+    recommendation = generate_recommendation(signals, good_chances, beat_market, hot)
 
     data = {
         "updated_at": now.isoformat(),
@@ -293,6 +401,9 @@ def main():
         "movers": movers,
         "new_interesting": new_interesting,
         "worth_watching": worth_watching,
+        "good_chances": good_chances,
+        "beat_market": beat_market,
+        "recommendation": recommendation,
         "all_markets": all_for_tabs,
         "signals": signals,
         "signals_count": len(signals),
@@ -301,7 +412,7 @@ def main():
     with open("data.json", "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
-    print(f"✅ data.json written — hot: {len(hot)}, movers: {len(movers)}, new: {len(new_interesting)}, watching: {len(worth_watching)}")
+    print(f"✅ data.json written — hot: {len(hot)}, movers: {len(movers)}, new: {len(new_interesting)}, watching: {len(worth_watching)}, good_chances: {len(good_chances)}, beat_market: {len(beat_market)}")
 
 
 if __name__ == "__main__":
