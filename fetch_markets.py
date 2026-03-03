@@ -34,6 +34,111 @@ def load_signals() -> list:
                 pass
     return sorted(by_slug.values(), key=lambda x: x.get("score", 0), reverse=True)
 
+
+def load_active_bets() -> list:
+    """טוען הימורים פעילים — signals עם days_left > 0, מועשר במחיר נוכחי"""
+    if not os.path.exists(SIGNALS_FILE):
+        return []
+    by_slug: dict = {}
+    with open(SIGNALS_FILE, encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                s = json.loads(line)
+                slug = s.get("slug", "")
+                ts   = s.get("timestamp", "")
+                if slug not in by_slug or ts > by_slug[slug].get("timestamp", ""):
+                    by_slug[slug] = s
+            except Exception:
+                pass
+
+    active = [s for s in by_slug.values() if (s.get("days_left") or 0) > 0]
+
+    # Normalise field names (two schema versions exist)
+    for s in active:
+        if "bet_side" not in s:
+            s["bet_side"] = "No"   # old signals bet the No side (LATE_SURGE whale)
+        if "yes_price" not in s:
+            s["yes_price"] = None
+        if "no_price" not in s:
+            s["no_price"] = s.get("no_price") or (1 - s["yes_price"] if s.get("yes_price") else None)
+        s["score"]      = s.get("score")   # may be None for old signals
+        s["kelly_pct"]  = s.get("kelly_pct", 0)
+        s["persistence"] = s.get("persistence", 0)
+        s["reasons"]    = s.get("reasons", [s.get("reason", "")])
+        s["whale_names"] = s.get("whale_names") or [
+            w["name"] for w in s.get("whales", [])[:2]
+        ]
+
+    # Fetch current prices from gamma API — one request per slug (small set)
+    for s in active:
+        s["current_yes"] = None
+        s["current_no"]  = None
+        try:
+            resp = requests.get(
+                f"{BASE_URL}/markets",
+                params={"slug": s["slug"], "limit": "1"},
+                timeout=10,
+            )
+            if resp.ok:
+                markets = resp.json()
+                if isinstance(markets, list) and markets:
+                    m = markets[0]
+                elif isinstance(markets, dict):
+                    m = markets
+                else:
+                    continue
+                try:
+                    prices = json.loads(m.get("outcomePrices", "[]"))
+                    s["current_yes"] = round(float(prices[0]) * 100, 1) if prices else None
+                    s["current_no"]  = round(float(prices[1]) * 100, 1) if len(prices) > 1 else None
+                except Exception:
+                    pass
+                s["market_title"] = m.get("question", s.get("question", ""))
+                s["end_date"]     = m.get("endDate", "")
+                s["volume24hr"]   = float(m.get("volume24hr") or 0)
+                s["image"]        = m.get("image", "")
+                slug_val          = m.get("slug", s["slug"])
+                s["link"]         = f"https://polymarket.com/event/{slug_val}" if slug_val else ""
+        except Exception as e:
+            print(f"Warning: price fetch failed for {s['slug']}: {e}")
+
+    # Compute simulated P&L
+    for s in active:
+        size      = float(s.get("size_usd") or 0)
+        entry_pct = None
+        current   = None
+        side      = s["bet_side"]
+
+        if side == "Yes":
+            yp        = s.get("yes_price")
+            entry_pct = float(yp) * 100 if yp is not None else None
+            current   = s.get("current_yes")
+        else:
+            np_val    = s.get("no_price")
+            entry_pct = float(np_val) * 100 if np_val is not None else None
+            current   = s.get("current_no")
+
+        if entry_pct and current and entry_pct > 0 and size > 0:
+            shares      = size / (entry_pct / 100)
+            entry_value = size
+            current_value = shares * (current / 100)
+            pnl_usd     = current_value - entry_value
+            pnl_pct     = (pnl_usd / entry_value) * 100
+            s["pnl_usd"]     = round(pnl_usd, 2)
+            s["pnl_pct"]     = round(pnl_pct, 1)
+            s["entry_pct"]   = round(entry_pct, 1)
+            s["current_pct"] = round(current, 1)
+        else:
+            s["pnl_usd"]     = None
+            s["pnl_pct"]     = None
+            s["entry_pct"]   = round(entry_pct, 1) if entry_pct else None
+            s["current_pct"] = current
+
+    return sorted(active, key=lambda x: x.get("timestamp", ""), reverse=True)
+
 BASE_URL = "https://gamma-api.polymarket.com"
 
 CATEGORY_KEYWORDS = {
@@ -320,7 +425,8 @@ def main():
     )[:10]
 
     # --- Recommendation: top pick with reasoning ---
-    signals = load_signals()
+    signals     = load_signals()
+    active_bets = load_active_bets()
 
     def generate_recommendation(signals, good_chances, beat_market, hot):  # noqa: C901
         """Pick the best opportunity and explain why."""
@@ -395,6 +501,12 @@ def main():
 
     recommendation = generate_recommendation(signals, good_chances, beat_market, hot)
 
+    # Portfolio summary for active bets
+    total_invested = sum(float(b.get("size_usd") or 0) for b in active_bets)
+    total_pnl      = sum(b.get("pnl_usd") or 0 for b in active_bets)
+    wins           = sum(1 for b in active_bets if (b.get("pnl_usd") or 0) > 0)
+    losses         = sum(1 for b in active_bets if (b.get("pnl_usd") or 0) < 0)
+
     data = {
         "updated_at": now.isoformat(),
         "hot": hot,
@@ -407,12 +519,20 @@ def main():
         "all_markets": all_for_tabs,
         "signals": signals,
         "signals_count": len(signals),
+        "active_bets": active_bets,
+        "active_bets_count": len(active_bets),
+        "portfolio": {
+            "total_invested": round(total_invested, 2),
+            "total_pnl": round(total_pnl, 2),
+            "wins": wins,
+            "losses": losses,
+        },
     }
 
     with open("data.json", "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
-    print(f"✅ data.json written — hot: {len(hot)}, movers: {len(movers)}, new: {len(new_interesting)}, watching: {len(worth_watching)}, good_chances: {len(good_chances)}, beat_market: {len(beat_market)}")
+    print(f"✅ data.json written — hot: {len(hot)}, movers: {len(movers)}, new: {len(new_interesting)}, watching: {len(worth_watching)}, good_chances: {len(good_chances)}, beat_market: {len(beat_market)}, active_bets: {len(active_bets)}")
 
 
 if __name__ == "__main__":

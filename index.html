@@ -736,6 +736,7 @@
         <button class="tab"        data-cat="crypto"   role="tab">₿ קריפטו</button>
         <button class="tab"        data-cat="tech"     role="tab">🔬 טכנולוגיה</button>
         <button class="tab"        data-cat="watch"    role="tab" id="watchTab">⭐ מעקב <span class="badge" id="watchBadge" style="display:none">0</span></button>
+        <button class="tab"        data-cat="bets"     role="tab" id="betsTab">💼 הימורים <span class="badge" id="betsBadge" style="display:none">0</span></button>
         <button class="tab"        data-cat="signals"  role="tab" id="signalsTab">📡 Signals <span class="badge" id="signalsBadge" style="display:none">0</span></button>
         <button class="tab"        data-cat="analysis" role="tab" id="analysisTab">📊 ניתוח</button>
       </div>
@@ -1087,6 +1088,134 @@ function renderAnalysis() {
 }
 
 /* ────────────────────────────────
+   ACTIVE BETS VIEW
+──────────────────────────────── */
+function renderBets() {
+  const bets      = (appData && appData.active_bets) || [];
+  const portfolio = (appData && appData.portfolio)   || {};
+
+  if (!bets.length) {
+    return `
+    <div class="empty-watch">
+      <span class="empty-icon">💼</span>
+      <p>אין הימורים פעילים כרגע.<br>
+      המנוע עובד ב-DRY_RUN — הימורים יופיעו כאן כשהמצב יעבור ל-EXECUTE.</p>
+    </div>`;
+  }
+
+  const pnlTotalClr = portfolio.total_pnl >= 0 ? 'var(--yes)' : 'var(--no)';
+  const pnlSign     = portfolio.total_pnl >= 0 ? '+' : '';
+
+  const summaryHtml = `
+  <div style="
+    background: var(--bg-card);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--r-lg);
+    padding: var(--s-md);
+    margin-bottom: var(--s-md);
+    display: flex; flex-wrap: wrap; gap: var(--s-md); align-items: center;
+  ">
+    <div style="display:flex; flex-direction:column; gap:2px; flex:1; min-width:100px">
+      <span style="font-size:var(--fs-xs); color:var(--text-3)">מושקע (מדומה)</span>
+      <span style="font-size:var(--fs-xl); font-weight:800; color:var(--text-1)">$${portfolio.total_invested || 0}</span>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:2px; flex:1; min-width:100px">
+      <span style="font-size:var(--fs-xs); color:var(--text-3)">P&L מדומה</span>
+      <span style="font-size:var(--fs-xl); font-weight:800; color:${pnlTotalClr}">${pnlSign}$${portfolio.total_pnl || 0}</span>
+    </div>
+    <div style="display:flex; gap:var(--s-sm)">
+      <div style="background:var(--yes-bg); border:1px solid rgba(16,185,129,0.25); border-radius:var(--r-pill); padding:4px 10px; font-size:var(--fs-xs); font-weight:700; color:var(--yes)">↑ ${portfolio.wins || 0}</div>
+      <div style="background:var(--no-bg); border:1px solid rgba(244,63,94,0.2); border-radius:var(--r-pill); padding:4px 10px; font-size:var(--fs-xs); font-weight:700; color:var(--no)">↓ ${portfolio.losses || 0}</div>
+      <div style="background:var(--bg-elevated); border:1px solid var(--glass-border); border-radius:var(--r-pill); padding:4px 10px; font-size:var(--fs-xs); color:var(--text-3)">${bets.length} פעילים</div>
+    </div>
+  </div>`;
+
+  const strengthCfg = {
+    'STRONG':     { emoji: '🔴', color: '#f43f5e',  label: 'STRONG' },
+    'WHALE_FADE': { emoji: '🐋', color: '#a855f7',  label: 'WHALE FADE' },
+    'MEDIUM':     { emoji: '🟡', color: '#f59e0b',  label: 'MEDIUM' },
+  };
+
+  const cards = bets.map(b => {
+    const cfg      = strengthCfg[b.strength] || { emoji: '⚫', color: 'var(--text-2)', label: b.strength || '—' };
+    const side     = b.bet_side || 'Yes';
+    const sideClr  = side === 'Yes' ? 'var(--yes)' : 'var(--no)';
+    const action   = b.action === 'EXECUTE' ? '🟢 EXECUTE' : '⚪ DRY_RUN';
+    const actionBg = b.action === 'EXECUTE'
+      ? 'background:rgba(16,185,129,0.12);color:var(--yes);border-color:rgba(16,185,129,0.3)'
+      : 'background:rgba(255,255,255,0.06);color:var(--text-3);border-color:var(--glass-border)';
+
+    // Price movement
+    const ep = b.entry_pct;
+    const cp = b.current_pct;
+    let priceHtml = '';
+    if (ep !== null && ep !== undefined) {
+      const arrow    = cp !== null && cp !== undefined ? (cp > ep ? '▲' : cp < ep ? '▼' : '—') : '—';
+      const arrowClr = cp !== null && cp !== undefined ? (cp > ep ? 'var(--yes)' : cp < ep ? 'var(--no)' : 'var(--text-3)') : 'var(--text-3)';
+      priceHtml = `
+      <div style="display:flex; gap:var(--s-md); align-items:center; margin-bottom:8px; flex-wrap:wrap; font-size:13px">
+        <span>כניסה: <strong style="color:${sideClr}">${ep}%</strong></span>
+        <span style="color:var(--text-3)">→</span>
+        <span>עכשיו: <strong style="color:${arrowClr}">${cp !== null && cp !== undefined ? cp+'%' : '—'}</strong> <span style="color:${arrowClr}">${arrow}</span></span>
+      </div>`;
+    }
+
+    // P&L badge
+    let pnlHtml = '';
+    if (b.pnl_usd !== null && b.pnl_usd !== undefined) {
+      const pnlClr = b.pnl_usd >= 0 ? 'var(--yes)' : 'var(--no)';
+      const pnlBg  = b.pnl_usd >= 0 ? 'var(--yes-bg)' : 'var(--no-bg)';
+      const pnlBdr = b.pnl_usd >= 0 ? 'rgba(16,185,129,0.25)' : 'rgba(244,63,94,0.2)';
+      const sign   = b.pnl_usd >= 0 ? '+' : '';
+      pnlHtml = `<span style="background:${pnlBg};border:1px solid ${pnlBdr};border-radius:var(--r-pill);padding:3px 9px;font-size:12px;font-weight:800;color:${pnlClr}">${sign}$${b.pnl_usd} (${sign}${b.pnl_pct}%)</span>`;
+    }
+
+    const whaleHtml = b.whale_names && b.whale_names.length
+      ? `<div style="font-size:12px;color:var(--text-2);margin-top:5px">🐋 ${b.whale_names.join(', ')}</div>`
+      : '';
+
+    const reasons = (b.reasons || []).slice(0, 3).map(r =>
+      `<span style="background:rgba(255,255,255,0.06);border-radius:4px;padding:2px 6px;font-size:11px;color:var(--text-2)">${r}</span>`
+    ).join(' ');
+
+    const link = b.link ? `<a href="${esc(b.link)}" target="_blank" rel="noopener" style="font-size:12px;color:var(--accent);text-decoration:none" onclick="event.stopPropagation()">פתח ↗</a>` : '';
+
+    return `
+    <div class="card" style="border-right: 3px solid ${cfg.color}; margin-bottom: var(--s-sm)">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
+        <span style="background:${cfg.color}22;color:${cfg.color};border:1px solid ${cfg.color}44;border-radius:6px;padding:3px 8px;font-size:12px;font-weight:700">${cfg.emoji} ${cfg.label}</span>
+        <span style="background:${sideClr}22;color:${sideClr};border-radius:6px;padding:3px 8px;font-size:12px;font-weight:600">הימור: ${side}</span>
+        <span style="border:1px solid;border-radius:6px;padding:3px 8px;font-size:11px;${actionBg}">${action}</span>
+        <span style="margin-right:auto;font-size:11px;color:var(--text-3)">${b.days_left}d נותרו</span>
+      </div>
+
+      <div style="font-size:15px;font-weight:700;color:var(--text-1);margin-bottom:8px;line-height:1.4">${esc(b.question || b.market_title || b.slug)}</div>
+
+      ${priceHtml}
+
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap">
+        <span style="font-size:13px;color:var(--text-2)">💰 $${b.size_usd || 0}</span>
+        ${pnlHtml}
+        ${link}
+      </div>
+
+      ${whaleHtml}
+      <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px">${reasons}</div>
+    </div>`;
+  }).join('');
+
+  return `
+  <div class="section">
+    <div class="section-header">
+      <h2 class="section-title">💼 הימורים פעילים</h2>
+      <span class="section-count">${bets.length}</span>
+    </div>
+    ${summaryHtml}
+    ${cards}
+  </div>`;
+}
+
+/* ────────────────────────────────
    SIGNALS VIEW
 ──────────────────────────────── */
 function timeAgo(ts) {
@@ -1163,6 +1292,11 @@ function renderSignals() {
 function renderView() {
   const rc = document.getElementById('real-content');
   if (!appData) return;
+
+  if (activeTab === 'bets') {
+    rc.innerHTML = renderBets();
+    return;
+  }
 
   if (activeTab === 'signals') {
     rc.innerHTML = renderSignals();
@@ -1256,6 +1390,12 @@ async function loadData(isRefresh = false) {
     renderView();
     if (isRefresh) flashUpdated(d, prevData);
     updateWatchBadge();
+    // Bets badge
+    const betsBadge = document.getElementById('betsBadge');
+    if (betsBadge && d.active_bets_count > 0) {
+      betsBadge.textContent = d.active_bets_count;
+      betsBadge.style.display = 'inline';
+    }
     // Signals badge
     const sigBadge = document.getElementById('signalsBadge');
     if (sigBadge && d.signals_count > 0) {
