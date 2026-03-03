@@ -1091,20 +1091,13 @@ function renderAnalysis() {
    ACTIVE BETS VIEW
 ──────────────────────────────── */
 function renderBets() {
-  const bets      = (appData && appData.active_bets) || [];
-  const portfolio = (appData && appData.portfolio)   || {};
+  const bets      = (appData && appData.active_bets)   || [];
+  const resolved  = (appData && appData.resolved_bets) || [];
+  const portfolio = (appData && appData.portfolio)      || {};
+  const allBets   = bets.length + resolved.length;
 
-  if (!bets.length) {
-    return `
-    <div class="empty-watch">
-      <span class="empty-icon">💼</span>
-      <p>אין הימורים פעילים כרגע.<br>
-      המנוע עובד ב-DRY_RUN — הימורים יופיעו כאן כשהמצב יעבור ל-EXECUTE.</p>
-    </div>`;
-  }
-
-  const pnlTotalClr = portfolio.total_pnl >= 0 ? 'var(--yes)' : 'var(--no)';
-  const pnlSign     = portfolio.total_pnl >= 0 ? '+' : '';
+  const pnlTotalClr = (portfolio.total_pnl || 0) >= 0 ? 'var(--yes)' : 'var(--no)';
+  const pnlSign     = (portfolio.total_pnl || 0) >= 0 ? '+' : '';
 
   const summaryHtml = `
   <div style="
@@ -1115,18 +1108,18 @@ function renderBets() {
     margin-bottom: var(--s-md);
     display: flex; flex-wrap: wrap; gap: var(--s-md); align-items: center;
   ">
-    <div style="display:flex; flex-direction:column; gap:2px; flex:1; min-width:100px">
+    <div style="display:flex; flex-direction:column; gap:2px; flex:1; min-width:90px">
       <span style="font-size:var(--fs-xs); color:var(--text-3)">מושקע (מדומה)</span>
       <span style="font-size:var(--fs-xl); font-weight:800; color:var(--text-1)">$${portfolio.total_invested || 0}</span>
     </div>
-    <div style="display:flex; flex-direction:column; gap:2px; flex:1; min-width:100px">
+    <div style="display:flex; flex-direction:column; gap:2px; flex:1; min-width:90px">
       <span style="font-size:var(--fs-xs); color:var(--text-3)">P&L מדומה</span>
       <span style="font-size:var(--fs-xl); font-weight:800; color:${pnlTotalClr}">${pnlSign}$${portfolio.total_pnl || 0}</span>
     </div>
-    <div style="display:flex; gap:var(--s-sm)">
-      <div style="background:var(--yes-bg); border:1px solid rgba(16,185,129,0.25); border-radius:var(--r-pill); padding:4px 10px; font-size:var(--fs-xs); font-weight:700; color:var(--yes)">↑ ${portfolio.wins || 0}</div>
-      <div style="background:var(--no-bg); border:1px solid rgba(244,63,94,0.2); border-radius:var(--r-pill); padding:4px 10px; font-size:var(--fs-xs); font-weight:700; color:var(--no)">↓ ${portfolio.losses || 0}</div>
-      <div style="background:var(--bg-elevated); border:1px solid var(--glass-border); border-radius:var(--r-pill); padding:4px 10px; font-size:var(--fs-xs); color:var(--text-3)">${bets.length} פעילים</div>
+    <div style="display:flex; gap:var(--s-xs); flex-wrap:wrap">
+      <div style="background:var(--yes-bg); border:1px solid rgba(16,185,129,0.25); border-radius:var(--r-pill); padding:4px 10px; font-size:var(--fs-xs); font-weight:700; color:var(--yes)">✅ ${portfolio.wins || 0}</div>
+      <div style="background:var(--no-bg); border:1px solid rgba(244,63,94,0.2); border-radius:var(--r-pill); padding:4px 10px; font-size:var(--fs-xs); font-weight:700; color:var(--no)">❌ ${portfolio.losses || 0}</div>
+      <div style="background:rgba(124,58,237,0.15); border:1px solid rgba(124,58,237,0.3); border-radius:var(--r-pill); padding:4px 10px; font-size:var(--fs-xs); font-weight:700; color:var(--accent)">⏳ ${portfolio.active || 0}</div>
     </div>
   </div>`;
 
@@ -1136,7 +1129,8 @@ function renderBets() {
     'MEDIUM':     { emoji: '🟡', color: '#f59e0b',  label: 'MEDIUM' },
   };
 
-  const cards = bets.map(b => {
+  // ── bet card builder ──
+  const buildBetCard = (b, isResolved = false) => {
     const cfg      = strengthCfg[b.strength] || { emoji: '⚫', color: 'var(--text-2)', label: b.strength || '—' };
     const side     = b.bet_side || 'Yes';
     const sideClr  = side === 'Yes' ? 'var(--yes)' : 'var(--no)';
@@ -1144,6 +1138,17 @@ function renderBets() {
     const actionBg = b.action === 'EXECUTE'
       ? 'background:rgba(16,185,129,0.12);color:var(--yes);border-color:rgba(16,185,129,0.3)'
       : 'background:rgba(255,255,255,0.06);color:var(--text-3);border-color:var(--glass-border)';
+
+    // Resolved outcome badge
+    let resolvedBadge = '';
+    if (isResolved) {
+      const win = b.resolved_win;
+      resolvedBadge = win === true
+        ? `<span style="background:var(--yes-bg);color:var(--yes);border:1px solid rgba(16,185,129,0.3);border-radius:6px;padding:3px 8px;font-size:12px;font-weight:700">✅ ניצחנו</span>`
+        : win === false
+        ? `<span style="background:var(--no-bg);color:var(--no);border:1px solid rgba(244,63,94,0.2);border-radius:6px;padding:3px 8px;font-size:12px;font-weight:700">❌ הפסדנו</span>`
+        : `<span style="background:rgba(255,255,255,0.07);color:var(--text-3);border:1px solid var(--glass-border);border-radius:6px;padding:3px 8px;font-size:12px">🔒 נסגר</span>`;
+    }
 
     // Price movement
     const ep = b.entry_pct;
@@ -1186,7 +1191,8 @@ function renderBets() {
         <span style="background:${cfg.color}22;color:${cfg.color};border:1px solid ${cfg.color}44;border-radius:6px;padding:3px 8px;font-size:12px;font-weight:700">${cfg.emoji} ${cfg.label}</span>
         <span style="background:${sideClr}22;color:${sideClr};border-radius:6px;padding:3px 8px;font-size:12px;font-weight:600">הימור: ${side}</span>
         <span style="border:1px solid;border-radius:6px;padding:3px 8px;font-size:11px;${actionBg}">${action}</span>
-        <span style="margin-right:auto;font-size:11px;color:var(--text-3)">${b.days_left}d נותרו</span>
+        ${resolvedBadge}
+        <span style="margin-right:auto;font-size:11px;color:var(--text-3)">${isResolved ? '🔒 נסגר' : b.days_left+'d נותרו'}</span>
       </div>
 
       <div style="font-size:15px;font-weight:700;color:var(--text-1);margin-bottom:8px;line-height:1.4">${esc(b.question || b.market_title || b.slug)}</div>
@@ -1202,16 +1208,46 @@ function renderBets() {
       ${whaleHtml}
       <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px">${reasons}</div>
     </div>`;
-  }).join('');
+  };
+
+  const activeCards   = bets.map(b => buildBetCard(b, false)).join('');
+  const resolvedCards = resolved.map(b => buildBetCard(b, true)).join('');
+
+  const activeSection = bets.length
+    ? `<div class="section">
+        <div class="section-header">
+          <h2 class="section-title">⏳ פעילים</h2>
+          <span class="section-count">${bets.length}</span>
+        </div>
+        ${activeCards}
+      </div>`
+    : `<div style="text-align:center;padding:var(--s-lg) var(--s-md);color:var(--text-3);font-size:var(--fs-sm)">
+        ⏳ אין הימורים פעילים כרגע — המנוע יזהה הזדמנות חדשה בסריקה הבאה
+      </div>`;
+
+  const resolvedSection = resolved.length
+    ? `<div class="section">
+        <div class="section-header">
+          <h2 class="section-title">📋 היסטוריה</h2>
+          <span class="section-count">${resolved.length}</span>
+        </div>
+        ${resolvedCards}
+      </div>`
+    : '';
+
+  if (!allBets) {
+    return `
+    <div class="empty-watch">
+      <span class="empty-icon">💼</span>
+      <p>אין הימורים עדיין.<br>המנוע ב-DRY_RUN — הסריקה הבאה ב-09:00 / 18:00</p>
+    </div>`;
+  }
 
   return `
-  <div class="section">
-    <div class="section-header">
-      <h2 class="section-title">💼 הימורים פעילים</h2>
-      <span class="section-count">${bets.length}</span>
-    </div>
+  <div>
     ${summaryHtml}
-    ${cards}
+    ${activeSection}
+    ${resolvedSection}
   </div>`;
 }
 

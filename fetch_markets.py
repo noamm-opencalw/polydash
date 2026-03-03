@@ -36,9 +36,10 @@ def load_signals() -> list:
 
 
 def load_active_bets() -> list:
-    """טוען הימורים פעילים — signals עם days_left > 0, מועשר במחיר נוכחי"""
+    """טוען הימורים פעילים — signals שטרם פג תוקפם, מועשרים במחיר נוכחי"""
     if not os.path.exists(SIGNALS_FILE):
         return []
+    now = datetime.now(timezone.utc)
     by_slug: dict = {}
     with open(SIGNALS_FILE, encoding="utf-8") as f:
         for line in f:
@@ -54,7 +55,11 @@ def load_active_bets() -> list:
             except Exception:
                 pass
 
-    active = [s for s in by_slug.values() if (s.get("days_left") or 0) > 0]
+    # תחילה: כולל גם markets שעדיין לא פג תוקפם (days_left > 0 מהזמן שנשמר)
+    # אחרי fetch של end_date, נסנן שוב לפי התאריך האמיתי
+    all_sigs = list(by_slug.values())
+
+    active = all_sigs  # will filter by real end_date after fetching
 
     # Normalise field names (two schema versions exist)
     for s in active:
@@ -97,13 +102,35 @@ def load_active_bets() -> list:
                 except Exception:
                     pass
                 s["market_title"] = m.get("question", s.get("question", ""))
-                s["end_date"]     = m.get("endDate", "")
+                end_date_raw      = m.get("endDate", "")
+                s["end_date"]     = end_date_raw
                 s["volume24hr"]   = float(m.get("volume24hr") or 0)
                 s["image"]        = m.get("image", "")
                 slug_val          = m.get("slug", s["slug"])
                 s["link"]         = f"https://polymarket.com/event/{slug_val}" if slug_val else ""
+                # Recalculate days_left from actual end_date
+                try:
+                    ed = datetime.fromisoformat(end_date_raw.replace("Z", "+00:00"))
+                    s["days_left"] = max(0, (ed - now).days)
+                except Exception:
+                    pass  # keep stored days_left
+                s["market_closed"] = m.get("closed", False) or m.get("active", True) is False
         except Exception as e:
             print(f"Warning: price fetch failed for {s['slug']}: {e}")
+
+    # חלק לפעילים וסגורים
+    resolved = [s for s in active if s.get("market_closed", False) or (s.get("days_left") or 0) == 0]
+    active   = [s for s in active if not s.get("market_closed", False) and (s.get("days_left") or 0) > 0]
+
+    # חישוב win/loss על הסגורים
+    for s in resolved:
+        side = s["bet_side"]
+        yes_now = s.get("current_yes", 0) or 0
+        no_now  = s.get("current_no",  0) or 0
+        if side == "Yes":
+            s["resolved_win"] = yes_now >= 99
+        else:
+            s["resolved_win"] = no_now >= 99
 
     # Compute simulated P&L
     for s in active:
@@ -137,7 +164,10 @@ def load_active_bets() -> list:
             s["entry_pct"]   = round(entry_pct, 1) if entry_pct else None
             s["current_pct"] = current
 
-    return sorted(active, key=lambda x: x.get("timestamp", ""), reverse=True)
+    return {
+        "active":   sorted(active,   key=lambda x: x.get("timestamp", ""), reverse=True),
+        "resolved": sorted(resolved, key=lambda x: x.get("timestamp", ""), reverse=True),
+    }
 
 BASE_URL = "https://gamma-api.polymarket.com"
 
@@ -425,8 +455,10 @@ def main():
     )[:10]
 
     # --- Recommendation: top pick with reasoning ---
-    signals     = load_signals()
-    active_bets = load_active_bets()
+    signals          = load_signals()
+    bets_result      = load_active_bets()
+    active_bets      = bets_result["active"]
+    resolved_bets    = bets_result["resolved"]
 
     def generate_recommendation(signals, good_chances, beat_market, hot):  # noqa: C901
         """Pick the best opportunity and explain why."""
@@ -501,11 +533,13 @@ def main():
 
     recommendation = generate_recommendation(signals, good_chances, beat_market, hot)
 
-    # Portfolio summary for active bets
-    total_invested = sum(float(b.get("size_usd") or 0) for b in active_bets)
-    total_pnl      = sum(b.get("pnl_usd") or 0 for b in active_bets)
-    wins           = sum(1 for b in active_bets if (b.get("pnl_usd") or 0) > 0)
-    losses         = sum(1 for b in active_bets if (b.get("pnl_usd") or 0) < 0)
+    # Portfolio summary (active + resolved)
+    all_bets       = active_bets + resolved_bets
+    total_invested = sum(float(b.get("size_usd") or 0) for b in all_bets)
+    wins           = sum(1 for b in resolved_bets if b.get("resolved_win"))
+    losses         = sum(1 for b in resolved_bets if not b.get("resolved_win", True))
+    # P&L on resolved: win = get back size_usd/entry_pct per share; rough calc
+    total_pnl      = sum(b.get("pnl_usd") or 0 for b in all_bets)
 
     data = {
         "updated_at": now.isoformat(),
@@ -520,12 +554,15 @@ def main():
         "signals": signals,
         "signals_count": len(signals),
         "active_bets": active_bets,
+        "resolved_bets": resolved_bets,
         "active_bets_count": len(active_bets),
+        "resolved_bets_count": len(resolved_bets),
         "portfolio": {
             "total_invested": round(total_invested, 2),
             "total_pnl": round(total_pnl, 2),
             "wins": wins,
             "losses": losses,
+            "active": len(active_bets),
         },
     }
 
