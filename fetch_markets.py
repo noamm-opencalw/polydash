@@ -285,9 +285,51 @@ def fetch_real_positions() -> dict:
     except Exception:
         pass
 
+    # שולף activity (עסקאות היסטוריות)
+    activity = []
+    try:
+        r = requests.get(
+            "https://data-api.polymarket.com/activity",
+            params={"user": PROXY_WALLET, "limit": 100},
+            timeout=10,
+        )
+        raw_activity = r.json() or []
+        for t in raw_activity:
+            cid   = t.get("conditionId", "")
+            side  = t.get("side", "BUY")
+            size  = float(t.get("size", 0))
+            usdc  = float(t.get("usdcSize", 0))
+            price = float(t.get("price", 0))
+            ts    = t.get("timestamp", 0)
+            title = t.get("title", "")
+            slug  = t.get("slug", "")
+            ev    = t.get("eventSlug", "")
+            icon  = t.get("icon", "")
+            outcome = t.get("outcome", "Yes")
+            tx    = t.get("transactionHash", "")
+            activity.append({
+                "conditionId": cid,
+                "title":   title,
+                "outcome": outcome,
+                "slug":    slug,
+                "eventSlug": ev,
+                "icon":    icon,
+                "side":    side,
+                "size":    round(size, 4),
+                "usdcSize": round(usdc, 2),
+                "price":   round(price, 4),
+                "timestamp": ts,
+                "tx":      tx,
+                "link":    f"https://polymarket.com/event/{ev or slug}",
+            })
+        activity.sort(key=lambda x: x["timestamp"], reverse=True)
+    except Exception as e:
+        print(f"Warning: activity fetch failed: {e}")
+
     return {
         "active":   active,
         "resolved": resolved,
+        "activity": activity,
         "portfolio": {
             "total_invested":  round(total_invested, 2),
             "total_current":   round(total_current, 2),
