@@ -225,6 +225,8 @@ def fetch_real_positions() -> dict:
         days_left = None
         try:
             ed = datetime.fromisoformat(end_date_str.replace("Z", "+00:00"))
+            if ed.tzinfo is None:
+                ed = ed.replace(tzinfo=timezone.utc)
             days_left = max(0, (ed - now).days)
         except Exception:
             pass
