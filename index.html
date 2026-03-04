@@ -88,8 +88,8 @@
       min-height: 100vh;
       direction: rtl;
       -webkit-overflow-scrolling: touch;
-      /* iPhone 17 Pro safe areas */
-      padding-bottom: env(safe-area-inset-bottom);
+      /* bottom nav height + safe area */
+      padding-bottom: calc(64px + env(safe-area-inset-bottom));
     }
 
     /* Background gradient overlay */
@@ -219,6 +219,56 @@
     }
 
     /* ═══════════════════════════════════════════════
+       BOTTOM NAVIGATION BAR
+    ═══════════════════════════════════════════════ */
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      z-index: 200;
+      background: rgba(13,8,24,0.95);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid var(--glass-border);
+      display: flex; align-items: stretch;
+      padding-bottom: env(safe-area-inset-bottom);
+      height: calc(64px + env(safe-area-inset-bottom));
+    }
+    .nav-item {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 3px; cursor: pointer;
+      border: none; background: transparent;
+      color: var(--text-3); font-family: 'Assistant', sans-serif;
+      font-size: 10px; font-weight: 600;
+      padding: 8px 4px; position: relative;
+      transition: color 0.2s ease;
+      min-height: 44px;
+    }
+    .nav-item:hover { color: var(--text-2); }
+    .nav-item.active { color: var(--accent); }
+    .nav-item.active::before {
+      content: '';
+      position: absolute; top: 0; left: 20%; right: 20%;
+      height: 2px;
+      background: var(--accent);
+      border-radius: 0 0 2px 2px;
+    }
+    .nav-icon { font-size: 20px; line-height: 1; }
+    .nav-badge {
+      position: absolute; top: 6px;
+      background: var(--accent);
+      color: white; border-radius: 10px;
+      padding: 1px 5px; font-size: 9px; font-weight: 800;
+      min-width: 16px; text-align: center;
+      display: none;
+    }
+    /* RTL: badge on left side of icon */
+    .nav-item:nth-child(1) .nav-badge { right: calc(50% - 22px); }
+    .nav-item:nth-child(2) .nav-badge { right: calc(50% - 22px); }
+    .nav-item:nth-child(3) .nav-badge { right: calc(50% - 22px); }
+    .nav-item:nth-child(4) .nav-badge { right: calc(50% - 22px); }
+    .nav-item:nth-child(5) .nav-badge { right: calc(50% - 22px); }
+
+    /* ═══════════════════════════════════════════════
        HERO STATS BAR
     ═══════════════════════════════════════════════ */
     .stats-bar-wrap {
@@ -255,8 +305,32 @@
     .content {
       max-width: 520px;
       margin: 0 auto;
-      padding: 0 var(--s-md) calc(var(--s-xl) + env(safe-area-inset-bottom));
+      padding: 0 var(--s-md) var(--s-xl);
     }
+
+    /* ─── Skeleton loader ─── */
+    @keyframes shimmer {
+      0%   { background-position: -400px 0; }
+      100% { background-position:  400px 0; }
+    }
+    .skeleton {
+      background: linear-gradient(90deg,
+        rgba(255,255,255,0.04) 25%,
+        rgba(255,255,255,0.09) 50%,
+        rgba(255,255,255,0.04) 75%
+      );
+      background-size: 800px 100%;
+      animation: shimmer 1.6s infinite linear;
+      border-radius: var(--r-md);
+    }
+    .skel-line  { height: 14px; border-radius: 7px; margin-bottom: 8px; }
+    .skel-card  { height: 88px; margin-bottom: 10px; }
+    #skeleton-view { padding-top: var(--s-md); }
+
+    /* ─── Position card accent ─── */
+    .pos-card-win  { border-right: 3px solid var(--yes) !important; }
+    .pos-card-loss { border-right: 3px solid var(--no)  !important; }
+    .pos-card-flat { border-right: 3px solid var(--text-3) !important; }
 
     .section { margin-bottom: var(--s-xl); }
 
@@ -758,11 +832,16 @@
 <main>
   <div class="content" id="mainContent">
     <!-- Skeleton loading state -->
-    <div id="skeleton-view">
-      <div class="section-title" style="margin-bottom:12px;opacity:0.4">🔥 חם עכשיו</div>
-      <div class="skel-card skeleton"></div>
-      <div class="skel-card skeleton"></div>
-      <div class="skel-card skeleton"></div>
+    <div id="skeleton-view" style="padding-top:var(--s-md)">
+      <!-- Skeleton portfolio bar -->
+      <div class="skeleton" style="height:80px;border-radius:var(--r-lg);margin-bottom:var(--s-md)"></div>
+      <!-- Skeleton section title -->
+      <div class="skel-line skeleton" style="width:120px;margin-bottom:var(--s-md)"></div>
+      <!-- Skeleton cards -->
+      <div class="skel-card skeleton" style="height:110px"></div>
+      <div class="skel-card skeleton" style="height:90px;opacity:0.7"></div>
+      <div class="skel-card skeleton" style="height:90px;opacity:0.5"></div>
+      <div class="skel-card skeleton" style="height:90px;opacity:0.3"></div>
     </div>
 
     <!-- Real content injected by JS -->
@@ -1390,11 +1469,11 @@ function renderRealPositions(rp) {
     const curPct   = Math.round((pos.curPrice  || 0) * 100 * 10) / 10;
 
     return `
-    <div style="
+    <div class="\${pnl > 0.05 ? 'pos-card-win' : pnl < -0.05 ? 'pos-card-loss' : 'pos-card-flat'}" style="
       background:var(--bg-card); border:1px solid var(--glass-border);
       border-radius:var(--r-md); padding:var(--s-md); margin-bottom:var(--s-sm);
       transition:var(--t); position:relative; overflow:hidden;
-    " onmouseover="this.style.borderColor='rgba(124,58,237,0.4)'" onmouseout="this.style.borderColor='var(--glass-border)'">
+    ">
 
       <!-- Header row -->
       <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px">
@@ -1646,6 +1725,7 @@ async function loadData(isRefresh = false) {
     renderView();
     if (isRefresh) flashUpdated(d, prevData);
     updateWatchBadge();
+    updateBottomNavBadges(d);
     // Bets badge
     const betsBadge = document.getElementById('betsBadge');
     if (betsBadge && d.active_bets_count > 0) {
@@ -1767,7 +1847,7 @@ document.getElementById('modalOverlay').addEventListener('click', e => {
 });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
-// Tabs
+// Tabs (category filters — top scrollable)
 document.getElementById('tabs').addEventListener('click', e => {
   const tab = e.target.closest('.tab');
   if (!tab) return;
@@ -1778,8 +1858,47 @@ document.getElementById('tabs').addEventListener('click', e => {
   renderView();
 });
 
+// Bottom nav
+document.getElementById('bottomNav').addEventListener('click', e => {
+  const item = e.target.closest('.nav-item');
+  if (!item) return;
+  const view = item.dataset.view;
+  // update bottom nav active state
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  item.classList.add('active');
+  // map to tab system
+  const viewToTab = { home:'all', positions:'bets', signals:'signals', analysis:'analysis', watch:'watch' };
+  const target = viewToTab[view] || 'all';
+  // sync top tabs
+  document.querySelectorAll('.tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.cat === target);
+    t.setAttribute('aria-selected', t.dataset.cat === target ? 'true' : 'false');
+  });
+  activeTab = target;
+  renderView();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
 // Refresh button
-document.getElementById('refreshBtn').addEventListener('click', () => loadData(true));
+document.getElementById('refreshBtn').addEventListener('click', () => {
+  document.getElementById('refreshBtn').querySelector('span:last-child').textContent = 'טוען...';
+  loadData(true).finally(() => {
+    setTimeout(() => { document.getElementById('refreshBtn').querySelector('span:last-child').textContent = 'LIVE'; }, 500);
+  });
+});
+
+// Update bottom nav badges
+function updateBottomNavBadges(d) {
+  const posCount  = (d.real_positions?.active?.length || 0) + (d.active_bets_count || 0);
+  const sigCount  = d.signals_count || 0;
+  const watchCount = getWatchlist().length;
+  const posEl  = document.getElementById('navBadgePos');
+  const sigEl  = document.getElementById('navBadgeSig');
+  const watEl  = document.getElementById('navBadgeWatch');
+  if (posEl)  { posEl.textContent = posCount;   posEl.style.display  = posCount  > 0 ? 'block' : 'none'; }
+  if (sigEl)  { sigEl.textContent = sigCount;   sigEl.style.display  = sigCount  > 0 ? 'block' : 'none'; }
+  if (watEl)  { watEl.textContent = watchCount; watEl.style.display  = watchCount > 0 ? 'block' : 'none'; }
+}
 
 /* ────────────────────────────────
    INIT & AUTO-REFRESH
@@ -1788,5 +1907,32 @@ loadData();
 setInterval(() => loadData(true), REFRESH_MS);
 updateWatchBadge();
 </script>
+
+<!-- ───────────────────── BOTTOM NAV ───────────────────── -->
+<nav class="bottom-nav" id="bottomNav" role="navigation" aria-label="ניווט ראשי">
+  <button class="nav-item active" data-view="home" aria-label="ראשי">
+    <span class="nav-icon">🏠</span>
+    <span>ראשי</span>
+  </button>
+  <button class="nav-item" data-view="positions" aria-label="פוזיציות">
+    <span class="nav-badge" id="navBadgePos"></span>
+    <span class="nav-icon">💼</span>
+    <span>פוזיציות</span>
+  </button>
+  <button class="nav-item" data-view="signals" aria-label="סיגנלים">
+    <span class="nav-badge" id="navBadgeSig"></span>
+    <span class="nav-icon">📡</span>
+    <span>סיגנלים</span>
+  </button>
+  <button class="nav-item" data-view="analysis" aria-label="ניתוח">
+    <span class="nav-icon">📊</span>
+    <span>ניתוח</span>
+  </button>
+  <button class="nav-item" data-view="watch" aria-label="מעקב">
+    <span class="nav-badge" id="navBadgeWatch"></span>
+    <span class="nav-icon">⭐</span>
+    <span>מעקב</span>
+  </button>
+</nav>
 </body>
 </html>
