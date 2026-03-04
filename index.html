@@ -316,8 +316,8 @@
       <div class="pnl-hero-top">
         <div>
           <div class="pnl-label">רווח / הפסד כולל</div>
-          <div class="pnl-amount" id="heroPnl">$0.00</div>
-          <div class="pnl-pct"   id="heroPct">—</div>
+          <div class="pnl-amount" id="heroPnl" dir="ltr">$0.00</div>
+          <div class="pnl-pct"   id="heroPct" dir="ltr">—</div>
         </div>
         <div id="donutChart"></div>
       </div>
@@ -450,7 +450,7 @@ function updateHero(port, realized, activity, active) {
   const pnlEl = document.getElementById('heroPnl');
   const pctEl = document.getElementById('heroPct');
   if (pnlEl) { pnlEl.textContent = (totalPnl<0?'-$':'$')+Math.abs(totalPnl).toFixed(2); pnlEl.className='pnl-amount '+(totalPnl>=0?'up':'down'); }
-  if (pctEl) { pctEl.textContent = sign(pctPnl)+pctPnl.toFixed(1)+'%'; pctEl.className='pnl-pct '+(pctPnl>=0?'up':'down'); }
+  if (pctEl) { pctEl.textContent = (pctPnl<0?'−':'+')+(Math.abs(pctPnl).toFixed(1))+'%'; pctEl.className='pnl-pct '+(pctPnl>=0?'up':'down'); }
 
   const bal = document.getElementById('statBalance');
   const opn = document.getElementById('statOpen');
@@ -488,7 +488,7 @@ function renderDonut(active, realized, openPnl, realizedSum) {
     legend: { show:false },
     dataLabels: { enabled:false },
     tooltip: { enabled:false },
-    plotOptions: { pie: { donut: { size:'65%', labels: { show:true, total: { show:true, label:'סה״כ', color:'#8fa3c0', fontSize:'9px', formatter: () => { const t=openPnl+realizedSum; return (t<0?'-$':'$')+Math.abs(t).toFixed(0); } } } } } },
+    plotOptions: { pie: { donut: { size:'65%', labels: { show:true, total: { show:true, label:'סה״כ', color:'#8fa3c0', fontSize:'9px', formatter: () => { const t=openPnl+realizedSum; return (t<0?'−$':'$')+Math.abs(t).toFixed(0); } } } } } },
     stroke: { width:2, colors:['#111827'] },
     theme: { mode:'dark' },
   };
