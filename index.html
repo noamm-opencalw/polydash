@@ -3,1936 +3,1290 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>PolyDash — שוק הניבויים</title>
-  <meta name="description" content="PolyDash — לוח מחוונים חי לשוק הניבויים Polymarket" />
-  <meta name="theme-color" content="#0d0818" />
+  <title>PolyDash — לוח מסחר</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&display=swap" rel="stylesheet" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
 
   <style>
-    /* ═══════════════════════════════════════════════
-       DESIGN TOKENS — Single Source of Truth
-    ═══════════════════════════════════════════════ */
     :root {
-      /* Base */
-      --bg-base:          #0d0818;
-      --bg-elevated:      rgba(255,255,255,0.04);
-      --bg-card:          rgba(255,255,255,0.05);
-      --bg-card-hover:    rgba(255,255,255,0.09);
+      /* Trading platform palette */
+      --bg-base:        #0a0e17;
+      --bg-panel:       #0f1520;
+      --bg-card:        #131b28;
+      --bg-row:         #111827;
+      --bg-row-hover:   #1a2535;
+      --border:         rgba(255,255,255,0.07);
+      --border-strong:  rgba(255,255,255,0.14);
 
-      /* Glass */
-      --glass-border:     rgba(255,255,255,0.09);
-      --glass-blur:       blur(16px);
+      /* Accent — teal like trading platforms */
+      --accent:         #00c4b4;
+      --accent-dim:     rgba(0,196,180,0.12);
+      --accent-border:  rgba(0,196,180,0.35);
 
-      /* Accent */
-      --accent:           #7C3AED;
-      --accent-lt:        rgba(124,58,237,0.18);
-      --accent-glow:      rgba(124,58,237,0.35);
+      /* P&L colors */
+      --up:             #00c087;
+      --up-bg:          rgba(0,192,135,0.10);
+      --up-border:      rgba(0,192,135,0.30);
+      --down:           #ef4444;
+      --down-bg:        rgba(239,68,68,0.10);
+      --down-border:    rgba(239,68,68,0.28);
+      --neutral:        #6b7a99;
 
-      /* Signal — ONLY for data changes */
-      --yes:              #10b981;
-      --yes-bg:           rgba(16,185,129,0.14);
-      --no:               #f43f5e;
-      --no-bg:            rgba(244,63,94,0.14);
-      --up:               #10b981;
-      --down:             #f43f5e;
+      /* Text hierarchy */
+      --t1:  #e8edf5;
+      --t2:  #8fa3c0;
+      --t3:  #4d607d;
+      --t4:  #2d3a50;
 
-      /* Neutral text (WCAG AA ✓) */
-      --text-1:           #f1f5f9;   /* slate-100 — primary */
-      --text-2:           #94a3b8;   /* slate-400 — secondary */
-      --text-3:           #475569;   /* slate-600 — meta/dim */
+      /* Numbers — monospace */
+      --mono: 'IBM Plex Mono', monospace;
 
-      /* Spacing — Power User Mode (15-20% tighter) */
-      --s-xs:             4px;
-      --s-sm:             8px;
-      --s-md:             14px;
-      --s-lg:             20px;
-      --s-xl:             28px;
+      /* Spacing */
+      --gap-xs:  4px;
+      --gap-sm:  8px;
+      --gap-md:  14px;
+      --gap-lg:  20px;
+      --gap-xl:  28px;
 
-      /* Typography */
-      --fs-xs:            11px;
-      --fs-sm:            13px;
-      --fs-base:          15px;
-      --fs-lg:            17px;
-      --fs-xl:            22px;
-      --fs-2xl:           30px;
-
-      /* Radius */
-      --r-sm:             8px;
-      --r-md:             14px;
-      --r-lg:             18px;
-      --r-pill:           100px;
-
-      /* Shadows */
-      --shadow-card:      0 2px 8px rgba(0,0,0,0.45), 0 0 0 1px var(--glass-border);
-      --shadow-hover:     0 8px 32px rgba(124,58,237,0.25), 0 0 0 1px rgba(124,58,237,0.35);
-
-      /* Transitions */
-      --t:                all 0.2s cubic-bezier(0.4,0,0.2,1);
-      --t-slow:           all 0.35s cubic-bezier(0.4,0,0.2,1);
+      /* Border radius */
+      --r-xs:  4px;
+      --r-sm:  6px;
+      --r-md:  10px;
+      --r-lg:  14px;
+      --r-pill: 100px;
     }
 
-    /* ═══════════════════════════════════════════════
-       RESET & BASE
-    ═══════════════════════════════════════════════ */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     html { scroll-behavior: smooth; }
 
     body {
-      font-family: 'Assistant', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-family: 'Assistant', -apple-system, sans-serif;
       background: var(--bg-base);
-      color: var(--text-1);
+      color: var(--t1);
       min-height: 100vh;
       direction: rtl;
       -webkit-overflow-scrolling: touch;
-      /* bottom nav height + safe area */
-      padding-bottom: calc(64px + env(safe-area-inset-bottom));
+      padding-bottom: calc(62px + env(safe-area-inset-bottom));
+      overflow-x: hidden;
     }
 
-    /* Background gradient overlay */
+    /* Grid background texture */
     body::before {
       content: '';
-      position: fixed; inset: 0;
-      background:
-        radial-gradient(ellipse 80% 50% at 20% 10%, rgba(124,58,237,0.12) 0%, transparent 60%),
-        radial-gradient(ellipse 60% 40% at 80% 80%, rgba(59,130,246,0.06) 0%, transparent 60%);
-      pointer-events: none; z-index: 0;
+      position: fixed; inset: 0; pointer-events: none; z-index: 0;
+      background-image:
+        linear-gradient(rgba(0,196,180,0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,196,180,0.02) 1px, transparent 1px);
+      background-size: 32px 32px;
     }
 
-    main { position: relative; z-index: 1; }
+    main, header, nav { position: relative; z-index: 1; }
+
+    /* ═══════════════════════════════════════════════
+       TICKER BAR — top scrolling prices
+    ═══════════════════════════════════════════════ */
+    .ticker-bar {
+      background: var(--bg-panel);
+      border-bottom: 1px solid var(--border);
+      height: 32px;
+      overflow: hidden;
+      display: flex; align-items: center;
+      padding-top: env(safe-area-inset-top);
+    }
+    .ticker-track {
+      display: flex; gap: 0; white-space: nowrap;
+      animation: ticker-scroll 35s linear infinite;
+    }
+    .ticker-track:hover { animation-play-state: paused; }
+    @keyframes ticker-scroll {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    .ticker-item {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 0 var(--gap-lg);
+      font-size: 11.5px; font-family: var(--mono);
+      border-right: 1px solid var(--border);
+    }
+    .ticker-name  { color: var(--t2); }
+    .ticker-price { color: var(--t1); font-weight: 600; }
+    .ticker-change { font-size: 11px; }
+    .ticker-up    { color: var(--up); }
+    .ticker-down  { color: var(--down); }
 
     /* ═══════════════════════════════════════════════
        HEADER
     ═══════════════════════════════════════════════ */
     header {
       position: sticky; top: 0; z-index: 100;
-      background: rgba(13,8,24,0.88);
+      background: rgba(10,14,23,0.96);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
-      border-bottom: 1px solid var(--glass-border);
-      /* iPhone 17 Pro safe area */
-      padding-top: max(var(--s-md), env(safe-area-inset-top));
-      padding-right: env(safe-area-inset-right);
-      padding-left: env(safe-area-inset-left);
+      border-bottom: 1px solid var(--border-strong);
     }
 
     .header-inner {
-      max-width: 520px;
-      margin: 0 auto;
-      padding: 0 var(--s-md);
-    }
-
-    .header-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 0 var(--s-sm);
+      max-width: 600px; margin: 0 auto;
+      padding: var(--gap-sm) var(--gap-md);
+      display: flex; align-items: center; gap: var(--gap-md);
     }
 
     .logo {
-      display: flex; align-items: center; gap: var(--s-sm);
+      display: flex; align-items: center; gap: var(--gap-sm);
+      flex-shrink: 0;
     }
-
-    .logo-icon {
-      width: 34px; height: 34px;
-      background: linear-gradient(135deg, var(--accent), #9f67ff);
+    .logo-mark {
+      width: 32px; height: 32px;
+      background: linear-gradient(135deg, var(--accent), #0e9f92);
       border-radius: var(--r-sm);
       display: flex; align-items: center; justify-content: center;
-      font-size: 17px;
-      box-shadow: 0 0 14px var(--accent-glow);
+      font-size: 15px;
+      box-shadow: 0 0 12px rgba(0,196,180,0.3);
     }
+    .logo-text { line-height: 1.15; }
+    .logo-name { font-size: 16px; font-weight: 800; color: var(--t1); letter-spacing: -0.3px; }
+    .logo-sub  { font-size: 10px; color: var(--t3); font-weight: 500; }
 
-    .logo-info { display: flex; flex-direction: column; }
-    .logo-name { font-size: 19px; font-weight: 800; color: var(--text-1); letter-spacing: -0.5px; line-height: 1.1; }
-    .logo-sub  { font-size: var(--fs-xs); color: var(--text-3); font-weight: 400; }
-
-    /* Live indicator */
-    .live-badge {
-      display: flex; align-items: center; gap: 5px;
-      background: var(--yes-bg);
-      border: 1px solid rgba(16,185,129,0.25);
-      border-radius: var(--r-pill);
-      padding: 4px 10px;
-      font-size: var(--fs-xs); font-weight: 700;
-      color: var(--yes);
-      cursor: pointer; transition: var(--t);
-      min-height: 44px;
+    /* Portfolio mini summary in header */
+    .header-portfolio {
+      flex: 1;
+      display: flex; gap: var(--gap-md); align-items: center;
+      justify-content: center;
+      border-right: 1px solid var(--border);
+      border-left:  1px solid var(--border);
+      padding: 0 var(--gap-md);
     }
-    .live-badge:hover { background: rgba(16,185,129,0.2); }
-    .live-badge:active { transform: scale(0.95); }
+    .hport-item { text-align: center; }
+    .hport-val  { font-family: var(--mono); font-size: 14px; font-weight: 600; color: var(--t1); }
+    .hport-lbl  { font-size: 9px; color: var(--t3); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 1px; }
 
-    .live-dot {
-      width: 7px; height: 7px;
-      background: var(--yes);
-      border-radius: 50%;
-      animation: pulse-live 2s ease-in-out infinite;
+    .header-actions {
+      display: flex; align-items: center; gap: var(--gap-sm);
+      flex-shrink: 0;
     }
-    @keyframes pulse-live {
-      0%,100% { opacity: 1; transform: scale(1); }
-      50%      { opacity: 0.5; transform: scale(1.4); }
-    }
-
-    /* ═══════════════════════════════════════════════
-       CATEGORY TABS
-    ═══════════════════════════════════════════════ */
-    .tabs-wrap {
-      overflow-x: auto; overflow-y: hidden;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
-      padding-bottom: var(--s-sm);
-    }
-    .tabs-wrap::-webkit-scrollbar { display: none; }
-
-    .tabs {
-      display: flex; gap: var(--s-xs);
-      width: max-content;
-    }
-
-    .tab {
+    .btn-refresh {
+      display: flex; align-items: center; gap: 4px;
       background: transparent;
-      border: 1px solid var(--glass-border);
-      border-radius: var(--r-pill);
-      padding: 5px 13px;
-      font-size: var(--fs-sm); font-weight: 600;
-      color: var(--text-2);
-      cursor: pointer; transition: var(--t);
-      white-space: nowrap;
-      min-height: 44px; display: flex; align-items: center;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--r-sm);
+      padding: 5px 10px;
+      font-size: 11px; font-weight: 600;
+      color: var(--t2); cursor: pointer;
+      transition: all 0.15s;
       font-family: 'Assistant', sans-serif;
     }
-    .tab:hover { border-color: var(--accent); color: var(--text-1); }
-    .tab.active {
-      background: var(--accent-lt);
-      border-color: var(--accent);
-      color: var(--text-1);
+    .btn-refresh:hover { border-color: var(--accent); color: var(--accent); }
+    .live-dot {
+      width: 6px; height: 6px;
+      background: var(--up); border-radius: 50%;
+      animation: pulse 2s infinite;
     }
-    .tab .badge {
-      margin-right: 4px;
-      background: var(--accent);
-      color: white;
-      border-radius: var(--r-pill);
-      padding: 1px 6px;
-      font-size: 10px; font-weight: 800;
+    @keyframes pulse {
+      0%,100% { opacity:1; transform:scale(1); }
+      50%      { opacity:0.5; transform:scale(1.3); }
     }
 
     /* ═══════════════════════════════════════════════
-       BOTTOM NAVIGATION BAR
+       BOTTOM NAVIGATION
     ═══════════════════════════════════════════════ */
     .bottom-nav {
       position: fixed; bottom: 0; left: 0; right: 0;
       z-index: 200;
-      background: rgba(13,8,24,0.95);
+      background: rgba(10,14,23,0.97);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
-      border-top: 1px solid var(--glass-border);
+      border-top: 1px solid var(--border-strong);
       display: flex; align-items: stretch;
       padding-bottom: env(safe-area-inset-bottom);
-      height: calc(64px + env(safe-area-inset-bottom));
+      height: calc(62px + env(safe-area-inset-bottom));
     }
     .nav-item {
       flex: 1; display: flex; flex-direction: column;
       align-items: center; justify-content: center;
-      gap: 3px; cursor: pointer;
-      border: none; background: transparent;
-      color: var(--text-3); font-family: 'Assistant', sans-serif;
+      gap: 3px; border: none; background: transparent;
+      color: var(--t3); cursor: pointer;
       font-size: 10px; font-weight: 600;
+      font-family: 'Assistant', sans-serif;
       padding: 8px 4px; position: relative;
-      transition: color 0.2s ease;
-      min-height: 44px;
+      transition: color 0.15s;
     }
-    .nav-item:hover { color: var(--text-2); }
+    .nav-item:hover  { color: var(--t2); }
     .nav-item.active { color: var(--accent); }
-    .nav-item.active::before {
+    .nav-item.active::after {
       content: '';
-      position: absolute; top: 0; left: 20%; right: 20%;
-      height: 2px;
-      background: var(--accent);
+      position: absolute; top: 0; left: 25%; right: 25%;
+      height: 2px; background: var(--accent);
       border-radius: 0 0 2px 2px;
     }
-    .nav-icon { font-size: 20px; line-height: 1; }
+    .nav-icon { font-size: 18px; line-height: 1; }
     .nav-badge {
-      position: absolute; top: 6px;
-      background: var(--accent);
-      color: white; border-radius: 10px;
-      padding: 1px 5px; font-size: 9px; font-weight: 800;
-      min-width: 16px; text-align: center;
-      display: none;
-    }
-    /* RTL: badge on left side of icon */
-    .nav-item:nth-child(1) .nav-badge { right: calc(50% - 22px); }
-    .nav-item:nth-child(2) .nav-badge { right: calc(50% - 22px); }
-    .nav-item:nth-child(3) .nav-badge { right: calc(50% - 22px); }
-    .nav-item:nth-child(4) .nav-badge { right: calc(50% - 22px); }
-    .nav-item:nth-child(5) .nav-badge { right: calc(50% - 22px); }
-
-    /* ═══════════════════════════════════════════════
-       HERO STATS BAR
-    ═══════════════════════════════════════════════ */
-    .stats-bar-wrap {
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
-    }
-    .stats-bar-wrap::-webkit-scrollbar { display: none; }
-
-    .stats-bar {
-      max-width: 520px;
-      margin: 0 auto;
-      display: flex; gap: var(--s-sm);
-      padding: var(--s-md) var(--s-md) var(--s-sm);
-      width: max-content;
-    }
-
-    .stat-pill {
-      background: var(--bg-card);
-      backdrop-filter: var(--glass-blur);
-      border: 1px solid var(--glass-border);
+      position: absolute; top: 5px; right: calc(50% - 20px);
+      background: var(--down); color: white;
       border-radius: var(--r-pill);
-      padding: 6px 13px;
-      display: flex; align-items: center; gap: 5px;
-      white-space: nowrap;
+      padding: 1px 5px; font-size: 9px; font-weight: 800;
+      min-width: 15px; text-align: center; display: none;
     }
-    .stat-pill .stat-icon { font-size: 14px; }
-    .stat-pill .stat-val { font-size: var(--fs-sm); font-weight: 700; color: var(--text-1); }
-    .stat-pill .stat-lbl { font-size: var(--fs-xs); color: var(--text-3); }
+    .nav-badge.green { background: var(--accent); }
 
     /* ═══════════════════════════════════════════════
-       SECTIONS
+       LAYOUT
     ═══════════════════════════════════════════════ */
     .content {
-      max-width: 520px;
-      margin: 0 auto;
-      padding: 0 var(--s-md) var(--s-xl);
+      max-width: 600px; margin: 0 auto;
+      padding: var(--gap-md) var(--gap-md) var(--gap-xl);
     }
 
-    /* ─── Skeleton loader ─── */
-    @keyframes shimmer {
-      0%   { background-position: -400px 0; }
-      100% { background-position:  400px 0; }
-    }
-    .skeleton {
-      background: linear-gradient(90deg,
-        rgba(255,255,255,0.04) 25%,
-        rgba(255,255,255,0.09) 50%,
-        rgba(255,255,255,0.04) 75%
-      );
-      background-size: 800px 100%;
-      animation: shimmer 1.6s infinite linear;
-      border-radius: var(--r-md);
-    }
-    .skel-line  { height: 14px; border-radius: 7px; margin-bottom: 8px; }
-    .skel-card  { height: 88px; margin-bottom: 10px; }
-    #skeleton-view { padding-top: var(--s-md); }
-
-    /* ─── Position card accent ─── */
-    .pos-card-win  { border-right: 3px solid var(--yes) !important; }
-    .pos-card-loss { border-right: 3px solid var(--no)  !important; }
-    .pos-card-flat { border-right: 3px solid var(--text-3) !important; }
-
-    .section { margin-bottom: var(--s-xl); }
-
-    .section-header {
+    /* ─── Section ─── */
+    .section { margin-bottom: var(--gap-xl); }
+    .section-head {
       display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: var(--s-md);
+      margin-bottom: var(--gap-sm);
+      padding-bottom: var(--gap-sm);
+      border-bottom: 1px solid var(--border);
     }
-
     .section-title {
-      font-size: var(--fs-lg); font-weight: 800;
-      color: var(--text-1);
-      display: flex; align-items: center; gap: 6px;
+      font-size: 12px; font-weight: 700;
+      color: var(--t3); text-transform: uppercase; letter-spacing: 0.8px;
     }
-
     .section-count {
-      font-size: var(--fs-xs); color: var(--text-3);
+      font-size: 11px; color: var(--t3);
       background: var(--bg-card);
-      border: 1px solid var(--glass-border);
+      border: 1px solid var(--border);
       border-radius: var(--r-pill);
-      padding: 2px 8px;
+      padding: 1px 7px; font-family: var(--mono);
     }
 
     /* ═══════════════════════════════════════════════
-       MARKET CARD
+       PORTFOLIO PANEL — top of page
     ═══════════════════════════════════════════════ */
-    .card {
-      display: block;
-      background: var(--bg-card);
-      backdrop-filter: var(--glass-blur);
-      -webkit-backdrop-filter: var(--glass-blur);
-      border: 1px solid var(--glass-border);
+    .portfolio-panel {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-strong);
       border-radius: var(--r-lg);
-      padding: var(--s-md);
-      margin-bottom: var(--s-sm);
-      cursor: pointer; text-decoration: none; color: inherit;
-      transition: var(--t);
-      position: relative;
-      box-shadow: var(--shadow-card);
-      /* WCAG: min 44px touch target via min-height logic */
+      padding: var(--gap-md);
+      margin-bottom: var(--gap-md);
     }
-    .card:hover, .card:focus-visible {
-      background: var(--bg-card-hover);
-      box-shadow: var(--shadow-hover);
-      transform: translateY(-1px);
-      border-color: rgba(124,58,237,0.35);
-    }
-    .card:active { transform: translateY(0) scale(0.99); }
-    .card:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-
-    /* Card top row */
-    .card-top {
-      display: flex; align-items: flex-start; gap: var(--s-sm);
-      margin-bottom: var(--s-sm);
-    }
-
-    .card-img {
-      width: 38px; height: 38px; flex-shrink: 0;
-      border-radius: var(--r-sm);
-      object-fit: cover;
-      background: var(--bg-elevated);
-    }
-    .card-img-placeholder {
-      width: 38px; height: 38px; flex-shrink: 0;
-      border-radius: var(--r-sm);
-      background: var(--accent-lt);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 18px;
-    }
-
-    .card-info { flex: 1; min-width: 0; }
-
-    .card-title {
-      font-size: var(--fs-base); font-weight: 700;
-      color: var(--text-1); line-height: 1.35;
-      display: -webkit-box;
-      -webkit-line-clamp: 2; -webkit-box-orient: vertical;
-      overflow: hidden;
-      margin-bottom: 3px;
-    }
-
-    .card-meta {
-      display: flex; flex-wrap: wrap; align-items: center; gap: 5px;
-    }
-    .card-cat {
-      font-size: var(--fs-xs); font-weight: 600;
-      color: var(--accent);
-      background: var(--accent-lt);
-      border-radius: var(--r-pill);
-      padding: 2px 7px;
-    }
-    .card-date {
-      font-size: var(--fs-xs); color: var(--text-3);
-    }
-
-    /* Action buttons — visible on hover */
-    .card-actions {
-      display: flex; gap: var(--s-xs);
-      opacity: 0; transition: var(--t);
-      align-items: center;
-    }
-    .card:hover .card-actions,
-    .card:focus-within .card-actions { opacity: 1; }
-
-    .action-btn {
-      width: 32px; height: 32px;
-      background: var(--bg-elevated);
-      border: 1px solid var(--glass-border);
-      border-radius: var(--r-sm);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 14px;
-      cursor: pointer; transition: var(--t);
-      color: var(--text-2);
-      flex-shrink: 0;
-    }
-    .action-btn:hover { background: var(--accent-lt); border-color: var(--accent); color: var(--accent); }
-    .action-btn.starred { color: #fbbf24; border-color: rgba(251,191,36,0.3); background: rgba(251,191,36,0.1); }
-
-    /* Probability bars */
-    .prob-bars {
-      margin-bottom: var(--s-sm);
-    }
-
-    .prob-row {
-      display: flex; align-items: center; gap: var(--s-sm);
-      margin-bottom: 5px;
-    }
-    .prob-row:last-child { margin-bottom: 0; }
-
-    .prob-label {
-      font-size: var(--fs-xs); font-weight: 700;
-      width: 24px; flex-shrink: 0;
-    }
-    .prob-label.yes { color: var(--yes); }
-    .prob-label.no  { color: var(--no); }
-
-    .prob-bar-bg {
-      flex: 1; height: 6px;
-      background: rgba(255,255,255,0.07);
-      border-radius: 3px; overflow: hidden;
-    }
-    .prob-bar-fill {
-      height: 100%; border-radius: 3px;
-      transition: width 0.6s cubic-bezier(0.4,0,0.2,1);
-    }
-    .prob-bar-fill.yes { background: linear-gradient(90deg, var(--yes), #34d399); }
-    .prob-bar-fill.no  { background: linear-gradient(90deg, var(--no), #fb7185); }
-
-    .prob-pct {
-      font-size: var(--fs-sm); font-weight: 800;
-      width: 34px; text-align: left; flex-shrink: 0;
-      transition: var(--t);
-    }
-    .prob-pct.yes { color: var(--yes); }
-    .prob-pct.no  { color: var(--no); }
-
-    /* Price flash animation */
-    @keyframes price-flash-up {
-      0%   { background: transparent; }
-      20%  { background: rgba(16,185,129,0.22); border-radius: 4px; }
-      100% { background: transparent; }
-    }
-    @keyframes price-flash-down {
-      0%   { background: transparent; }
-      20%  { background: rgba(244,63,94,0.22); border-radius: 4px; }
-      100% { background: transparent; }
-    }
-    .flash-up   { animation: price-flash-up   1.4s ease; }
-    .flash-down { animation: price-flash-down 1.4s ease; }
-
-    /* Card footer */
-    .card-footer {
+    .portfolio-panel-head {
       display: flex; align-items: center; justify-content: space-between;
-      border-top: 1px solid var(--glass-border);
-      padding-top: var(--s-sm);
-      gap: var(--s-sm);
+      margin-bottom: var(--gap-md);
+    }
+    .portfolio-panel-title { font-size: 11px; color: var(--t3); font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; }
+    .portfolio-panel-time  { font-size: 10px; color: var(--t3); font-family: var(--mono); }
+
+    .portfolio-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: var(--gap-sm);
+      margin-bottom: var(--gap-md);
+    }
+    .pstat {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      padding: var(--gap-sm) var(--gap-sm);
+      text-align: center;
+    }
+    .pstat-val {
+      font-family: var(--mono); font-size: 18px; font-weight: 600;
+      color: var(--t1); line-height: 1.1; margin-bottom: 3px;
+    }
+    .pstat-lbl { font-size: 10px; color: var(--t3); font-weight: 500; }
+    .pstat-up   .pstat-val { color: var(--up); }
+    .pstat-down .pstat-val { color: var(--down); }
+
+    /* ═══════════════════════════════════════════════
+       POSITIONS TABLE
+    ═══════════════════════════════════════════════ */
+    .positions-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    .positions-table th {
+      font-size: 10px; font-weight: 700;
+      color: var(--t3); text-transform: uppercase; letter-spacing: 0.6px;
+      text-align: right; padding: 6px var(--gap-sm);
+      border-bottom: 1px solid var(--border-strong);
+      white-space: nowrap;
+    }
+    .positions-table th.num { text-align: left; }
+    .positions-table td {
+      padding: 10px var(--gap-sm);
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    .positions-table tr:last-child td { border-bottom: none; }
+    .positions-table tr:hover td { background: var(--bg-row-hover); }
+    .positions-table .num { text-align: left; font-family: var(--mono); }
+    .pos-title { font-size: 12px; font-weight: 600; color: var(--t1); line-height: 1.35; max-width: 160px; }
+    .pos-outcome {
+      display: inline-flex; align-items: center;
+      background: var(--up-bg); border: 1px solid var(--up-border);
+      border-radius: 4px; padding: 1px 6px;
+      font-size: 10px; font-weight: 700; color: var(--up);
+    }
+    .pos-pnl-up   { color: var(--up);   font-weight: 700; }
+    .pos-pnl-down { color: var(--down); font-weight: 700; }
+    .pos-bar {
+      height: 3px; border-radius: 2px;
+      background: var(--border-strong); overflow: hidden; margin-top: 4px;
+    }
+    .pos-bar-fill { height: 100%; border-radius: 2px; }
+    .pos-no-liq {
+      font-size: 10px; color: var(--t3);
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 4px; padding: 2px 6px; white-space: nowrap;
+    }
+    .btn-exit {
+      font-size: 11px; font-weight: 700;
+      border-radius: var(--r-xs); padding: 4px 10px;
+      cursor: pointer; white-space: nowrap;
+      font-family: 'Assistant', sans-serif;
+      transition: all 0.15s;
+    }
+    .btn-exit-active {
+      background: var(--down-bg); border: 1px solid var(--down-border); color: var(--down);
+    }
+    .btn-exit-active:hover { background: rgba(239,68,68,0.2); }
+    .btn-exit-inactive {
+      background: var(--bg-card); border: 1px solid var(--border); color: var(--t3);
+      cursor: default;
     }
 
-    /* Net return (financial truth) */
-    .net-return {
-      display: flex; align-items: baseline; gap: 4px;
+    /* ═══════════════════════════════════════════════
+       MARKET CARD — trading style
+    ═══════════════════════════════════════════════ */
+    .market-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      padding: var(--gap-md);
+      margin-bottom: var(--gap-sm);
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex; gap: var(--gap-md); align-items: center;
     }
-    .net-val {
-      font-size: var(--fs-sm); font-weight: 800;
-      color: var(--yes);
+    .market-card:hover {
+      border-color: var(--border-strong);
+      background: var(--bg-row-hover);
+      transform: translateX(-2px);
     }
-    .gross-val {
-      font-size: var(--fs-xs); color: var(--text-3);
-      font-style: italic;
+    .market-card-img {
+      width: 38px; height: 38px; border-radius: var(--r-sm);
+      object-fit: cover; flex-shrink: 0;
+      background: var(--bg-panel);
     }
-    .net-label {
-      font-size: var(--fs-xs); color: var(--text-3);
+    .market-card-body { flex: 1; min-width: 0; }
+    .market-card-title {
+      font-size: 13px; font-weight: 600; color: var(--t1);
+      line-height: 1.35; margin-bottom: 5px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
-
-    /* Volume + change badge */
-    .card-stats {
-      display: flex; align-items: center; gap: var(--s-sm);
+    .market-card-meta {
+      display: flex; gap: var(--gap-sm); align-items: center; flex-wrap: wrap;
     }
-    .vol-txt {
-      font-size: var(--fs-xs); color: var(--text-3);
+    .meta-pill {
+      font-size: 10px; color: var(--t3);
+      background: var(--bg-panel); border: 1px solid var(--border);
+      border-radius: var(--r-pill); padding: 1px 7px;
+    }
+    .market-card-right {
+      flex-shrink: 0; text-align: left; min-width: 80px;
+    }
+    .prob-bar-wrap { margin-bottom: 5px; }
+    .prob-bar {
+      height: 5px; border-radius: var(--r-pill);
+      background: var(--border-strong); overflow: hidden; margin-bottom: 3px;
+    }
+    .prob-bar-yes { height: 100%; border-radius: var(--r-pill); background: var(--up); }
+    .prob-labels {
+      display: flex; justify-content: space-between;
+      font-family: var(--mono); font-size: 10px;
+    }
+    .prob-yes { color: var(--up); font-weight: 600; }
+    .prob-no  { color: var(--down); }
+    .market-vol {
+      font-size: 10px; color: var(--t3); text-align: center;
+      font-family: var(--mono);
     }
     .change-badge {
-      font-size: var(--fs-xs); font-weight: 700;
-      border-radius: var(--r-pill);
-      padding: 2px 7px;
+      display: inline-flex; align-items: center; gap: 2px;
+      font-family: var(--mono); font-size: 11px; font-weight: 600;
+      border-radius: 3px; padding: 1px 5px;
     }
-    .change-badge.up   { color: var(--up);   background: var(--yes-bg); }
-    .change-badge.down { color: var(--down); background: var(--no-bg); }
+    .change-up   { color: var(--up);   background: var(--up-bg); }
+    .change-down { color: var(--down); background: var(--down-bg); }
+    .change-flat { color: var(--t3); }
 
     /* ═══════════════════════════════════════════════
-       WATCHLIST EMPTY STATE
+       WATCHLIST — compact table style
     ═══════════════════════════════════════════════ */
-    .empty-watch {
-      text-align: center;
-      padding: var(--s-xl) var(--s-lg);
-      color: var(--text-3);
+    .watch-btn {
+      background: transparent; border: none;
+      font-size: 14px; cursor: pointer;
+      padding: 4px; border-radius: var(--r-xs);
+      transition: transform 0.15s;
     }
-    .empty-watch .empty-icon { font-size: 36px; margin-bottom: var(--s-sm); display: block; }
-    .empty-watch p { font-size: var(--fs-sm); line-height: 1.5; }
-
-    /* ═══════════════════════════════════════════════
-       QUICK VIEW MODAL
-    ═══════════════════════════════════════════════ */
-    .modal-overlay {
-      position: fixed; inset: 0; z-index: 200;
-      background: rgba(13,8,24,0.72);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      display: flex; align-items: flex-end; justify-content: center;
-      opacity: 0; pointer-events: none;
-      transition: opacity 0.25s ease;
-    }
-    .modal-overlay.open { opacity: 1; pointer-events: all; }
-
-    .modal-sheet {
-      background: #170e2a;
-      border: 1px solid var(--glass-border);
-      border-radius: var(--r-lg) var(--r-lg) 0 0;
-      width: 100%; max-width: 520px;
-      padding: var(--s-lg);
-      padding-bottom: calc(var(--s-lg) + env(safe-area-inset-bottom));
-      transform: translateY(100%);
-      transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
-      max-height: 85vh;
-      overflow-y: auto;
-    }
-    .modal-overlay.open .modal-sheet { transform: translateY(0); }
-
-    .modal-handle {
-      width: 40px; height: 4px;
-      background: var(--text-3);
-      border-radius: 2px;
-      margin: 0 auto var(--s-md);
-    }
-
-    .modal-header { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--s-sm); margin-bottom: var(--s-md); }
-    .modal-title  { font-size: var(--fs-lg); font-weight: 800; color: var(--text-1); line-height: 1.3; flex: 1; }
-    .modal-close  {
-      width: 32px; height: 32px; flex-shrink: 0;
-      background: var(--bg-elevated); border: 1px solid var(--glass-border);
-      border-radius: var(--r-sm); cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 16px; color: var(--text-2); transition: var(--t);
-    }
-    .modal-close:hover { background: var(--no-bg); color: var(--no); }
-
-    .modal-img {
-      width: 100%; height: 130px;
-      object-fit: cover; border-radius: var(--r-md);
-      margin-bottom: var(--s-md);
-      background: var(--bg-elevated);
-    }
-
-    .modal-prob-section { margin-bottom: var(--s-md); }
-    .modal-prob-title { font-size: var(--fs-sm); color: var(--text-3); margin-bottom: var(--s-sm); font-weight: 600; }
-
-    .modal-big-prob {
-      display: flex; gap: var(--s-md);
-      margin-bottom: var(--s-md);
-    }
-    .big-prob-item {
-      flex: 1;
-      background: var(--bg-card);
-      border: 1px solid var(--glass-border);
-      border-radius: var(--r-md);
-      padding: var(--s-md);
-      text-align: center;
-    }
-    .big-prob-item.yes-item { border-color: rgba(16,185,129,0.25); background: var(--yes-bg); }
-    .big-prob-item.no-item  { border-color: rgba(244,63,94,0.2);  background: var(--no-bg); }
-    .big-prob-lbl { font-size: var(--fs-xs); font-weight: 600; margin-bottom: 2px; }
-    .big-prob-lbl.yes { color: var(--yes); }
-    .big-prob-lbl.no  { color: var(--no); }
-    .big-prob-val { font-size: var(--fs-2xl); font-weight: 800; }
-    .big-prob-val.yes { color: var(--yes); }
-    .big-prob-val.no  { color: var(--no); }
-
-    .modal-desc {
-      font-size: var(--fs-sm); color: var(--text-2); line-height: 1.6;
-      margin-bottom: var(--s-md);
-    }
-
-    .modal-meta-grid {
-      display: grid; grid-template-columns: 1fr 1fr;
-      gap: var(--s-sm); margin-bottom: var(--s-lg);
-    }
-    .meta-item { }
-    .meta-lbl  { font-size: var(--fs-xs); color: var(--text-3); margin-bottom: 2px; }
-    .meta-val  { font-size: var(--fs-sm); font-weight: 700; color: var(--text-1); }
-
-    .modal-net-box {
-      background: var(--yes-bg);
-      border: 1px solid rgba(16,185,129,0.25);
-      border-radius: var(--r-md);
-      padding: var(--s-md);
-      margin-bottom: var(--s-md);
-    }
-    .modal-net-title { font-size: var(--fs-xs); color: var(--yes); font-weight: 600; margin-bottom: 4px; }
-    .modal-net-val   { font-size: var(--fs-xl); font-weight: 800; color: var(--yes); }
-    .modal-net-sub   { font-size: var(--fs-xs); color: var(--text-3); margin-top: 2px; }
-
-    .modal-cta {
-      display: block; width: 100%;
-      background: var(--accent);
-      color: white; font-weight: 800; font-size: var(--fs-base);
-      border: none; border-radius: var(--r-md);
-      padding: 14px;
-      text-align: center; text-decoration: none;
-      transition: var(--t); cursor: pointer;
-      font-family: 'Assistant', sans-serif;
-      min-height: 44px;
-    }
-    .modal-cta:hover { background: #6d28d9; transform: translateY(-1px); }
-    .modal-cta:active { transform: scale(0.98); }
-
-    /* ═══════════════════════════════════════════════
-       LOADER / SKELETON
-    ═══════════════════════════════════════════════ */
-    .skeleton {
-      background: linear-gradient(90deg, var(--bg-card) 25%, rgba(255,255,255,0.08) 50%, var(--bg-card) 75%);
-      background-size: 200% 100%;
-      animation: shimmer 1.5s infinite;
-      border-radius: var(--r-md);
-    }
-    @keyframes shimmer {
-      0%   { background-position: 200% 0; }
-      100% { background-position: -200% 0; }
-    }
-    .skel-card { height: 120px; margin-bottom: var(--s-sm); }
+    .watch-btn:hover { transform: scale(1.2); }
 
     /* ═══════════════════════════════════════════════
        RECOMMENDATION CARD
     ═══════════════════════════════════════════════ */
     .rec-card {
-      background: linear-gradient(135deg, rgba(124,58,237,0.18) 0%, rgba(59,130,246,0.12) 100%);
-      border: 1px solid rgba(124,58,237,0.4);
+      background: linear-gradient(135deg, rgba(0,196,180,0.08) 0%, rgba(0,196,180,0.03) 100%);
+      border: 1px solid var(--accent-border);
       border-radius: var(--r-lg);
-      padding: var(--s-md);
-      margin-bottom: var(--s-lg);
-      position: relative;
-      overflow: hidden;
+      padding: var(--gap-md);
+      margin-bottom: var(--gap-lg);
     }
-    .rec-card::before {
-      content: '';
-      position: absolute; top: 0; right: 0;
-      width: 120px; height: 120px;
-      background: radial-gradient(circle, rgba(124,58,237,0.2) 0%, transparent 70%);
-      pointer-events: none;
+    .rec-header {
+      display: flex; align-items: center; gap: var(--gap-sm);
+      margin-bottom: var(--gap-sm);
     }
-    .rec-label {
-      font-size: var(--fs-xs); font-weight: 800;
-      color: var(--accent);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: var(--s-xs);
-      display: flex; align-items: center; gap: 5px;
+    .rec-badge {
+      background: var(--accent); color: #000;
+      font-size: 10px; font-weight: 800;
+      border-radius: var(--r-pill); padding: 2px 8px;
+      text-transform: uppercase; letter-spacing: 0.5px;
     }
-    .rec-title {
-      font-size: var(--fs-base); font-weight: 700;
-      color: var(--text-1); line-height: 1.4;
-      margin-bottom: var(--s-sm);
-      display: -webkit-box;
-      -webkit-line-clamp: 2; -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-    .rec-reasoning {
-      list-style: none;
-      margin-bottom: var(--s-sm);
-    }
-    .rec-reasoning li {
-      font-size: var(--fs-xs); color: var(--text-2);
-      padding: 2px 0;
-      display: flex; align-items: flex-start; gap: 5px;
-    }
-    .rec-reasoning li::before { content: '→'; color: var(--accent); flex-shrink: 0; }
-    .rec-footer {
-      display: flex; align-items: center; justify-content: space-between;
-      flex-wrap: wrap; gap: var(--s-xs);
-    }
-    .rec-side {
-      font-size: var(--fs-sm); font-weight: 800;
-      padding: 4px 10px; border-radius: var(--r-pill);
-    }
-    .rec-side.yes { background: var(--yes-bg); color: var(--yes); }
-    .rec-side.no  { background: var(--no-bg);  color: var(--no); }
-    .rec-prob {
-      font-size: var(--fs-sm); color: var(--text-2);
-    }
+    .rec-title { font-size: 14px; font-weight: 700; color: var(--t1); margin-bottom: var(--gap-sm); line-height: 1.4; }
+    .rec-reasons { display: flex; flex-direction: column; gap: 4px; margin-bottom: var(--gap-md); }
+    .rec-reason { font-size: 12px; color: var(--t2); display: flex; align-items: center; gap: 5px; }
+    .rec-reason::before { content: '›'; color: var(--accent); font-weight: 700; flex-shrink: 0; }
     .rec-cta {
-      font-size: var(--fs-xs); font-weight: 700;
-      color: white; background: var(--accent);
-      border-radius: var(--r-pill);
-      padding: 5px 12px; text-decoration: none;
-      transition: var(--t);
+      display: inline-flex; align-items: center; gap: 5px;
+      background: var(--accent); color: #000;
+      border: none; border-radius: var(--r-sm);
+      padding: 8px 18px; font-size: 13px; font-weight: 700;
+      cursor: pointer; transition: opacity 0.15s;
+      text-decoration: none; font-family: 'Assistant', sans-serif;
     }
-    .rec-cta:hover { background: #6d28d9; }
+    .rec-cta:hover { opacity: 0.85; }
 
     /* ═══════════════════════════════════════════════
-       CHART SECTIONS
+       SIGNALS TABLE
     ═══════════════════════════════════════════════ */
-    .chart-wrap {
+    .signal-row {
       background: var(--bg-card);
-      border: 1px solid var(--glass-border);
-      border-radius: var(--r-lg);
-      padding: var(--s-md);
-      margin-bottom: var(--s-lg);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      padding: var(--gap-sm) var(--gap-md);
+      margin-bottom: var(--gap-xs);
+      display: flex; gap: var(--gap-md); align-items: center;
+      transition: all 0.15s;
     }
-    .chart-title {
-      font-size: var(--fs-base); font-weight: 800;
-      color: var(--text-1); margin-bottom: 4px;
-      display: flex; align-items: center; gap: 6px;
+    .signal-row:hover { border-color: var(--border-strong); background: var(--bg-row-hover); }
+    .signal-strength {
+      font-size: 10px; font-weight: 800;
+      border-radius: 3px; padding: 2px 6px;
+      white-space: nowrap;
     }
-    .chart-subtitle {
-      font-size: var(--fs-xs); color: var(--text-3); margin-bottom: var(--s-md);
-    }
-    .chart-canvas-wrap {
-      position: relative;
-      height: 220px;
-    }
+    .signal-strong { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
+    .signal-medium { background: rgba(251,191,36,0.12); color: #fbbf24; border: 1px solid rgba(251,191,36,0.25); }
+    .signal-body { flex: 1; min-width: 0; }
+    .signal-title { font-size: 12px; font-weight: 600; color: var(--t1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .signal-meta  { font-size: 11px; color: var(--t3); margin-top: 2px; font-family: var(--mono); }
+    .signal-right { text-align: left; flex-shrink: 0; }
+    .signal-price { font-family: var(--mono); font-size: 14px; font-weight: 700; color: var(--up); }
+    .signal-size  { font-size: 10px; color: var(--t3); }
 
     /* ═══════════════════════════════════════════════
-       RESPONSIVE / ACCESSIBILITY
+       EMPTY STATE
     ═══════════════════════════════════════════════ */
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    .empty-state {
+      text-align: center; padding: var(--gap-xl) var(--gap-md);
+      color: var(--t3);
     }
-    @media (hover: none) {
-      .card-actions { opacity: 1; }
+    .empty-icon { font-size: 36px; display: block; margin-bottom: var(--gap-sm); opacity: 0.5; }
+    .empty-text { font-size: 13px; line-height: 1.5; }
+
+    /* ═══════════════════════════════════════════════
+       MODAL — exit position
+    ═══════════════════════════════════════════════ */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 500;
+      background: rgba(0,0,0,0.8); backdrop-filter: blur(8px);
+      display: flex; align-items: flex-end; justify-content: center;
+      padding: var(--gap-md);
     }
+    .modal-sheet {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--r-lg) var(--r-lg) 0 0;
+      padding: var(--gap-lg);
+      width: 100%; max-width: 540px;
+    }
+    .modal-handle {
+      width: 36px; height: 4px;
+      background: var(--border-strong);
+      border-radius: var(--r-pill); margin: 0 auto var(--gap-md);
+    }
+    .modal-title { font-size: 16px; font-weight: 800; margin-bottom: 4px; }
+    .modal-sub   { font-size: 12px; color: var(--t2); margin-bottom: var(--gap-md); line-height: 1.4; }
+    .modal-stats {
+      display: flex; gap: var(--gap-md);
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--r-md); padding: var(--gap-md);
+      margin-bottom: var(--gap-md);
+    }
+    .mstat { flex: 1; text-align: center; }
+    .mstat-val { font-family: var(--mono); font-size: 20px; font-weight: 700; color: var(--t1); }
+    .mstat-lbl { font-size: 10px; color: var(--t3); margin-top: 2px; }
+    .modal-alert {
+      background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.25);
+      border-radius: var(--r-sm); padding: var(--gap-sm) var(--gap-md);
+      font-size: 12px; color: #fbbf24; margin-bottom: var(--gap-md); line-height: 1.5;
+    }
+    .modal-actions { display: flex; flex-direction: column; gap: var(--gap-sm); }
+    .modal-btn {
+      display: block; text-align: center; padding: 12px;
+      border-radius: var(--r-sm); font-size: 14px; font-weight: 700;
+      cursor: pointer; text-decoration: none; transition: opacity 0.15s;
+      font-family: 'Assistant', sans-serif; border: none;
+    }
+    .modal-btn-primary   { background: var(--down); color: white; }
+    .modal-btn-secondary { background: var(--bg-card); border: 1px solid var(--border); color: var(--t2); }
+    .modal-btn:hover     { opacity: 0.85; }
+    .modal-btn-close     { background: transparent; border: 1px solid var(--border); color: var(--t3); margin-top: var(--gap-xs); }
+
+    /* ═══════════════════════════════════════════════
+       SKELETON
+    ═══════════════════════════════════════════════ */
+    @keyframes shimmer {
+      0%   { background-position: -600px 0; }
+      100% { background-position:  600px 0; }
+    }
+    .skel {
+      background: linear-gradient(90deg, var(--bg-panel) 25%, rgba(255,255,255,0.05) 50%, var(--bg-panel) 75%);
+      background-size: 1200px 100%;
+      animation: shimmer 1.8s infinite linear;
+      border-radius: var(--r-sm);
+    }
+    .skel-h12 { height: 12px; }
+    .skel-h16 { height: 16px; }
+    .skel-h80 { height: 80px; }
+    .skel-hc  { height: 56px; }
+
+    /* ═══════════════════════════════════════════════
+       ANALYSIS — charts
+    ═══════════════════════════════════════════════ */
+    .analysis-panel {
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      padding: var(--gap-md);
+      margin-bottom: var(--gap-md);
+    }
+    .analysis-title { font-size: 12px; font-weight: 700; color: var(--t2); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: var(--gap-md); }
+    .bar-row { display: flex; align-items: center; gap: var(--gap-sm); margin-bottom: 8px; }
+    .bar-label { font-size: 12px; color: var(--t2); min-width: 90px; text-align: right; }
+    .bar-track { flex: 1; height: 8px; background: var(--bg-card); border-radius: var(--r-pill); overflow: hidden; }
+    .bar-fill  { height: 100%; border-radius: var(--r-pill); }
+    .bar-val   { font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--t1); min-width: 36px; text-align: left; }
   </style>
 </head>
 <body>
 
-<!-- ───────────────────── HEADER ───────────────────── -->
+<!-- ─── TICKER BAR ─── -->
+<div class="ticker-bar" id="tickerBar">
+  <div class="ticker-track" id="tickerTrack">
+    <span class="ticker-item"><span class="ticker-name">טוען...</span></span>
+  </div>
+</div>
+
+<!-- ─── HEADER ─── -->
 <header>
   <div class="header-inner">
-    <div class="header-top">
-      <div class="logo">
-        <div class="logo-icon">🔮</div>
-        <div class="logo-info">
-          <span class="logo-name">PolyDash</span>
-          <span class="logo-sub">שוק הניבויים החי</span>
-        </div>
+    <div class="logo">
+      <div class="logo-mark">📊</div>
+      <div class="logo-text">
+        <div class="logo-name">PolyDash</div>
+        <div class="logo-sub">שוק הניבויים</div>
       </div>
-      <button class="live-badge" id="refreshBtn" aria-label="רענן נתונים" title="לחץ לרענון">
-        <span class="live-dot"></span>
-        <span id="liveLabel">LIVE</span>
-      </button>
     </div>
 
-    <div class="tabs-wrap" role="tablist" aria-label="סינון לפי קטגוריה">
-      <div class="tabs" id="tabs">
-        <button class="tab active" data-cat="all"      role="tab" aria-selected="true">הכל</button>
-        <button class="tab"        data-cat="politics" role="tab">🗳️ פוליטיקה</button>
-        <button class="tab"        data-cat="economy"  role="tab">💰 כלכלה</button>
-        <button class="tab"        data-cat="geo"      role="tab">🌍 גאופוליטיקה</button>
-        <button class="tab"        data-cat="sports"   role="tab">🏆 ספורט</button>
-        <button class="tab"        data-cat="crypto"   role="tab">₿ קריפטו</button>
-        <button class="tab"        data-cat="tech"     role="tab">🔬 טכנולוגיה</button>
-        <button class="tab"        data-cat="watch"    role="tab" id="watchTab">⭐ מעקב <span class="badge" id="watchBadge" style="display:none">0</span></button>
-        <button class="tab"        data-cat="bets"     role="tab" id="betsTab">💼 הימורים <span class="badge" id="betsBadge" style="display:none">0</span></button>
-        <button class="tab"        data-cat="signals"  role="tab" id="signalsTab">📡 Signals <span class="badge" id="signalsBadge" style="display:none">0</span></button>
-        <button class="tab"        data-cat="analysis" role="tab" id="analysisTab">📊 ניתוח</button>
+    <div class="header-portfolio" id="headerPortfolio">
+      <div class="hport-item">
+        <div class="hport-val" id="hPortBalance">—</div>
+        <div class="hport-lbl">יתרה</div>
       </div>
+      <div class="hport-item">
+        <div class="hport-val" id="hPortValue">—</div>
+        <div class="hport-lbl">שווי</div>
+      </div>
+      <div class="hport-item">
+        <div class="hport-val" id="hPortPnl">—</div>
+        <div class="hport-lbl">P&L</div>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <button class="btn-refresh" id="refreshBtn">
+        <span class="live-dot"></span>
+        <span id="refreshLabel">LIVE</span>
+      </button>
     </div>
   </div>
 </header>
 
-<!-- ───────────────────── STATS BAR ───────────────────── -->
-<div class="stats-bar-wrap" role="region" aria-label="סטטיסטיקות">
-  <div class="stats-bar" id="statsBar">
-    <div class="stat-pill skeleton" style="width:110px;height:34px;border-radius:100px"></div>
-    <div class="stat-pill skeleton" style="width:130px;height:34px;border-radius:100px"></div>
-    <div class="stat-pill skeleton" style="width:100px;height:34px;border-radius:100px"></div>
-    <div class="stat-pill skeleton" style="width:110px;height:34px;border-radius:100px"></div>
-  </div>
-</div>
-
-<!-- ───────────────────── MAIN CONTENT ───────────────────── -->
+<!-- ─── MAIN CONTENT ─── -->
 <main>
   <div class="content" id="mainContent">
-    <!-- Skeleton loading state -->
-    <div id="skeleton-view" style="padding-top:var(--s-md)">
-      <!-- Skeleton portfolio bar -->
-      <div class="skeleton" style="height:80px;border-radius:var(--r-lg);margin-bottom:var(--s-md)"></div>
-      <!-- Skeleton section title -->
-      <div class="skel-line skeleton" style="width:120px;margin-bottom:var(--s-md)"></div>
-      <!-- Skeleton cards -->
-      <div class="skel-card skeleton" style="height:110px"></div>
-      <div class="skel-card skeleton" style="height:90px;opacity:0.7"></div>
-      <div class="skel-card skeleton" style="height:90px;opacity:0.5"></div>
-      <div class="skel-card skeleton" style="height:90px;opacity:0.3"></div>
+    <!-- Skeleton -->
+    <div id="skeletonView" style="padding-top:8px">
+      <div class="skel skel-h80" style="margin-bottom:10px;border-radius:10px"></div>
+      <div class="skel skel-hc"  style="margin-bottom:10px;border-radius:10px;opacity:0.7"></div>
+      <div class="skel skel-hc"  style="margin-bottom:10px;border-radius:10px;opacity:0.5"></div>
+      <div class="skel skel-hc"  style="margin-bottom:10px;border-radius:10px;opacity:0.3"></div>
     </div>
-
-    <!-- Real content injected by JS -->
-    <div id="real-content" style="display:none"></div>
+    <!-- Real content -->
+    <div id="realContent" style="display:none"></div>
   </div>
 </main>
 
-<!-- ───────────────────── QUICK VIEW MODAL ───────────────────── -->
-<div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-  <div class="modal-sheet" id="modalSheet">
+<!-- ─── EXIT MODAL ─── -->
+<div class="modal-overlay" id="exitModal" style="display:none">
+  <div class="modal-sheet">
     <div class="modal-handle"></div>
-    <div class="modal-header">
-      <h2 class="modal-title" id="modalTitle">—</h2>
-      <button class="modal-close" id="modalClose" aria-label="סגור">✕</button>
-    </div>
-    <div id="modalBody"></div>
+    <div class="modal-title" id="exitModalTitle">יציאה מפוזיציה</div>
+    <div class="modal-sub"   id="exitModalSub"></div>
+    <div class="modal-stats" id="exitModalStats"></div>
+    <div id="exitModalAlert"></div>
+    <div class="modal-actions" id="exitModalActions"></div>
+    <button class="modal-btn modal-btn-close" onclick="closeExitModal()">ביטול</button>
   </div>
 </div>
 
-<!-- ───────────────────── JAVASCRIPT ───────────────────── -->
+<!-- ─── BOTTOM NAV ─── -->
+<nav class="bottom-nav" id="bottomNav">
+  <button class="nav-item active" data-view="home"      aria-label="ראשי">
+    <span class="nav-icon">🏠</span><span>ראשי</span>
+  </button>
+  <button class="nav-item" data-view="positions" aria-label="תיק">
+    <span class="nav-badge green" id="navBadgePos"></span>
+    <span class="nav-icon">💼</span><span>תיק</span>
+  </button>
+  <button class="nav-item" data-view="signals" aria-label="סיגנלים">
+    <span class="nav-badge" id="navBadgeSig"></span>
+    <span class="nav-icon">📡</span><span>סיגנלים</span>
+  </button>
+  <button class="nav-item" data-view="analysis" aria-label="ניתוח">
+    <span class="nav-icon">📊</span><span>ניתוח</span>
+  </button>
+  <button class="nav-item" data-view="watch" aria-label="מעקב">
+    <span class="nav-badge green" id="navBadgeWatch"></span>
+    <span class="nav-icon">⭐</span><span>מעקב</span>
+  </button>
+</nav>
+
 <script>
 'use strict';
 
-/* ────────────────────────────────
-   CONSTANTS & STATE
-──────────────────────────────── */
-const DATA_URL     = './data.json';
-const REFRESH_MS   = 5 * 60 * 1000;  // 5 min
-const WATCH_KEY    = 'polydash_watchlist';
-const CAT_LABELS   = { all:'הכל', politics:'🗳️ פוליטיקה', economy:'💰 כלכלה', geo:'🌍 גאופוליטיקה', sports:'🏆 ספורט', crypto:'₿ קריפטו', tech:'🔬 טכנולוגיה', other:'עוד' };
+const DATA_URL   = './data.json';
+const REFRESH_MS = 5 * 60 * 1000;
+const WATCH_KEY  = 'polydash_watchlist';
 
-let appData     = null;
-let prevData    = null;
-let activeTab   = 'all';
-let modalMarket = null;
+let appData  = null;
+let activeView = 'home';
 
-/* ────────────────────────────────
-   FINANCIAL TRUTH — NET RETURNS
-──────────────────────────────── */
-function calcNet(yesPct, bet = 100) {
-  const p = yesPct / 100;
-  if (p <= 0.01 || p >= 0.99) return null;
-  const shares    = bet / p;
-  const gross     = shares * (1 - p);
-  const afterFees = gross - (bet * 0.001);
-  const net       = afterFees * 0.75;          // 25% tax
-  const roi       = ((net / bet) * 100).toFixed(0);
-  return { net: net.toFixed(1), gross: gross.toFixed(1), roi };
-}
-
-/* ────────────────────────────────
-   WATCHLIST (localStorage)
-──────────────────────────────── */
-function getWatchlist() {
-  try { return JSON.parse(localStorage.getItem(WATCH_KEY) || '[]'); } catch { return []; }
-}
-function saveWatchlist(ids) {
-  localStorage.setItem(WATCH_KEY, JSON.stringify(ids));
-  updateWatchBadge();
-}
-function isWatched(id) { return getWatchlist().includes(String(id)); }
-function toggleWatch(id, el) {
-  const ids = getWatchlist();
-  const sid = String(id);
-  const idx = ids.indexOf(sid);
-  if (idx === -1) { ids.push(sid); el.classList.add('starred'); el.title = 'הסר ממעקב'; }
-  else            { ids.splice(idx, 1); el.classList.remove('starred'); el.title = 'הוסף למעקב'; }
-  saveWatchlist(ids);
-  if (activeTab === 'watch') renderView();
-}
-function updateWatchBadge() {
-  const n = getWatchlist().length;
-  const badge = document.getElementById('watchBadge');
-  if (badge) { badge.textContent = n; badge.style.display = n > 0 ? 'inline' : 'none'; }
-}
-
-/* ────────────────────────────────
-   HELPERS
-──────────────────────────────── */
-function fmt$( n ) { if (!n) return '$0'; const v = parseFloat(n); if (v >= 1e9) return '$'+(v/1e9).toFixed(1)+'B'; if (v >= 1e6) return '$'+(v/1e6).toFixed(1)+'M'; if (v >= 1e3) return '$'+(v/1e3).toFixed(0)+'K'; return '$'+v.toFixed(0); }
-function fmtDate(s) { if (!s) return '—'; const d = new Date(s); const now = new Date(); const diff = Math.round((d-now)/(1000*60*60*24)); if (diff < 0) return 'הסתיים'; if (diff === 0) return 'היום'; if (diff === 1) return 'מחר'; if (diff < 7) return `${diff} ימים`; if (diff < 30) return `${Math.round(diff/7)} שבועות`; if (diff < 365) return `${Math.round(diff/30)} חודשים`; return `${Math.round(diff/365)} שנים`; }
-function fmtAgo(s) { if (!s) return ''; const d = new Date(s); const diff = Math.round((Date.now()-d)/60000); if (diff < 1) return 'עכשיו'; if (diff < 60) return `לפני ${diff} דק׳`; return `לפני ${Math.round(diff/60)} שע׳`; }
-function catEmoji(c) { const m = {politics:'🗳️',economy:'💰',geo:'🌍',sports:'🏆',crypto:'₿',tech:'🔬',other:'💡'}; return (m[c]||'💡')+' '+(CAT_LABELS[c]||c); }
-function imgOrPlaceholder(m) {
-  const emoji = {politics:'🗳️',economy:'💰',geo:'🌍',sports:'🏆',crypto:'₿',tech:'🔬',other:'💡'};
-  if (m.image) return `<img class="card-img" src="${esc(m.image)}" alt="" loading="lazy" onerror="this.style.display='none'" />`;
-  return `<div class="card-img-placeholder">${emoji[m.category]||'🔮'}</div>`;
-}
+/* ─── utils ─── */
 function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function fmt$(n) { if (!n&&n!==0) return '—'; const v=parseFloat(n); if(v>=1e9) return '$'+(v/1e9).toFixed(1)+'B'; if(v>=1e6) return '$'+(v/1e6).toFixed(1)+'M'; if(v>=1e3) return '$'+(v/1e3).toFixed(0)+'K'; return '$'+v.toFixed(0); }
+function fmtNum(n, dec=2) { return n != null ? parseFloat(n).toFixed(dec) : '—'; }
+function fmtDate(s) { if(!s) return '—'; const d=new Date(s); const diff=Math.round((d-Date.now())/(1000*60*60*24)); if(diff<0) return 'הסתיים'; if(diff===0) return 'היום'; if(diff===1) return 'מחר'; if(diff<7) return `${diff}d`; if(diff<30) return `${Math.round(diff/7)}w`; return `${Math.round(diff/30)}m`; }
+function fmtAgo(s) { if(!s) return ''; const diff=Math.round((Date.now()-new Date(s))/60000); if(diff<1) return 'עכשיו'; if(diff<60) return `לפני ${diff}ד`; return `לפני ${Math.round(diff/60)}ש`; }
 
-/* ────────────────────────────────
-   RENDER CARD
-──────────────────────────────── */
-function buildCard(m, showChange) {
-  const watched   = isWatched(m.id);
-  const nr        = calcNet(m.yes_pct);
-  const netHtml   = nr ? `<div class="net-return"><span class="net-label">נטו:</span><span class="net-val">+$${nr.net}</span><span class="gross-val">(ברוטו +$${nr.gross})</span></div>` : '';
-  const volHtml   = `<span class="vol-txt">📊 ${fmt$(m.volume24hr)}/24h</span>`;
-  let changeBadge = '';
-  if (showChange && m.oneWeekPriceChange !== undefined && m.oneWeekPriceChange !== 0) {
-    const pct = (m.oneWeekPriceChange * 100).toFixed(1);
-    const cls = pct > 0 ? 'up' : 'down';
-    const arrow = pct > 0 ? '▲' : '▼';
-    changeBadge = `<span class="change-badge ${cls}">${arrow} ${Math.abs(pct)}%</span>`;
-  }
-
-  return `
-  <div class="card" data-id="${esc(m.id)}" data-cat="${esc(m.category)}"
-       role="article" tabindex="0" aria-label="${esc(m.question)}">
-    <div class="card-top">
-      ${imgOrPlaceholder(m)}
-      <div class="card-info">
-        <div class="card-title">${esc(m.question)}</div>
-        <div class="card-meta">
-          <span class="card-cat">${catEmoji(m.category)}</span>
-          <span class="card-date">⏳ ${fmtDate(m.end_date)}</span>
-        </div>
-      </div>
-      <div class="card-actions">
-        <button class="action-btn ${watched?'starred':''}" data-star="${esc(m.id)}"
-                title="${watched?'הסר ממעקב':'הוסף למעקב'}" aria-label="שמור למעקב">⭐</button>
-        <button class="action-btn" data-view="${esc(m.id)}"
-                title="תצוגה מהירה" aria-label="פתח תצוגה מהירה">👁</button>
-      </div>
-    </div>
-
-    <div class="prob-bars" id="probs-${esc(m.id)}">
-      <div class="prob-row">
-        <span class="prob-label yes">YES</span>
-        <div class="prob-bar-bg"><div class="prob-bar-fill yes" style="width:${m.yes_pct||0}%"></div></div>
-        <span class="prob-pct yes" id="yes-${esc(m.id)}">${m.yes_pct||0}%</span>
-      </div>
-      <div class="prob-row">
-        <span class="prob-label no">NO</span>
-        <div class="prob-bar-bg"><div class="prob-bar-fill no" style="width:${m.no_pct||0}%"></div></div>
-        <span class="prob-pct no">${m.no_pct||0}%</span>
-      </div>
-    </div>
-
-    <div class="card-footer">
-      ${netHtml}
-      <div class="card-stats">${volHtml}${changeBadge}</div>
-    </div>
-  </div>`;
+/* ─── watchlist ─── */
+function getWatchlist()     { try { return JSON.parse(localStorage.getItem(WATCH_KEY)||'[]'); } catch { return []; } }
+function saveWatchlist(ids) { localStorage.setItem(WATCH_KEY, JSON.stringify(ids)); }
+function isWatched(id)      { return getWatchlist().includes(String(id)); }
+function toggleWatch(id) {
+  const ids = getWatchlist();
+  const idx = ids.indexOf(String(id));
+  if (idx>=0) ids.splice(idx,1); else ids.push(String(id));
+  saveWatchlist(ids);
+  updateNavBadges(appData);
+  renderContent();
 }
 
-/* ────────────────────────────────
-   RENDER SECTIONS
-──────────────────────────────── */
-function renderSection(title, markets, showChange = false) {
-  if (!markets || !markets.length) return '';
-  const filtered = activeTab === 'all' || activeTab === 'watch' ? markets
-    : markets.filter(m => m.category === activeTab);
-  if (!filtered.length) return '';
-  return `
-  <div class="section">
-    <div class="section-header">
-      <h2 class="section-title">${title}</h2>
-      <span class="section-count">${filtered.length}</span>
-    </div>
-    ${filtered.map(m => buildCard(m, showChange)).join('')}
-  </div>`;
-}
-
-/* ────────────────────────────────
-   CHARTS — instances stored to destroy on re-render
-──────────────────────────────── */
-let chartInstances = {};
-
-function destroyChart(id) {
-  if (chartInstances[id]) {
-    chartInstances[id].destroy();
-    delete chartInstances[id];
+/* ─── data ─── */
+async function loadData(isRefresh=false) {
+  try {
+    const r = await fetch(DATA_URL + '?t=' + Date.now());
+    const d = await r.json();
+    appData = d;
+    renderAll(d, isRefresh);
+  } catch(e) {
+    console.error('loadData:', e);
   }
 }
 
-function buildHorizontalBar(canvasId, labels, values, colors, unit = '%') {
-  destroyChart(canvasId);
-  const ctx = document.getElementById(canvasId);
-  if (!ctx) return;
-  chartInstances[canvasId] = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [{
-        data: values,
-        backgroundColor: colors,
-        borderRadius: 6,
-        borderSkipped: false,
-      }]
-    },
-    options: {
-      indexAxis: 'y',
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          rtl: true,
-          callbacks: {
-            label: ctx => ` ${ctx.parsed.x}${unit}`,
-          }
-        }
-      },
-      scales: {
-        x: {
-          ticks: {
-            color: '#94a3b8',
-            font: { size: 11, family: "'Assistant', sans-serif" },
-            callback: v => `${v}${unit}`,
-          },
-          grid: { color: 'rgba(255,255,255,0.06)' },
-        },
-        y: {
-          ticks: {
-            color: '#f1f5f9',
-            font: { size: 11, family: "'Assistant', sans-serif" },
-            callback: (_, i) => {
-              const l = labels[i] || '';
-              return l.length > 22 ? l.slice(0, 22) + '…' : l;
-            }
-          },
-          grid: { display: false },
-        }
-      }
-    }
-  });
+function renderAll(d, isRefresh=false) {
+  document.getElementById('skeletonView').style.display = 'none';
+  document.getElementById('realContent').style.display  = 'block';
+  updateHeader(d);
+  updateTicker(d);
+  updateNavBadges(d);
+  renderContent();
 }
 
-/* ────────────────────────────────
-   RECOMMENDATION CARD
-──────────────────────────────── */
-function renderRecommendation(rec) {
-  if (!rec) return '';
-  const sideClass = (rec.bet_side || 'Yes').toLowerCase() === 'yes' ? 'yes' : 'no';
-  const sideLabel = rec.bet_side || 'Yes';
-  const scoreHtml = rec.score ? `<span style="font-size:12px;color:var(--text-3);margin-right:auto">ציון: ${rec.score}</span>` : '';
-  const probHtml  = rec.yes_pct ? `<span class="rec-prob">YES ${rec.yes_pct}%</span>` : '';
-  const ctaHtml   = rec.link ? `<a class="rec-cta" href="${esc(rec.link)}" target="_blank" rel="noopener">פתח ↗</a>` : '';
-  const reasonHtml = (rec.reasoning || []).filter(Boolean).map(r =>
-    `<li>${esc(r)}</li>`
-  ).join('');
-  const actionBadge = rec.action === 'EXECUTE'
-    ? `<span style="background:rgba(16,185,129,0.15);color:var(--yes);border:1px solid rgba(16,185,129,0.3);border-radius:4px;padding:2px 7px;font-size:11px;font-weight:700">🟢 EXECUTE</span>`
-    : `<span style="background:rgba(255,255,255,0.07);color:var(--text-2);border:1px solid var(--glass-border);border-radius:4px;padding:2px 7px;font-size:11px">⚪ DRY_RUN</span>`;
+/* ─── Header portfolio ─── */
+function updateHeader(d) {
+  const rp  = d.real_positions || {};
+  const port = rp.portfolio || {};
+  const balance = port.usdc_balance || 0;
+  const value   = port.total_current || 0;
+  const pnl     = port.total_pnl || 0;
+  const pnlSign = pnl >= 0 ? '+' : '';
+  const pnlClr  = pnl >= 0 ? 'var(--up)' : 'var(--down)';
 
-  return `
-  <div class="rec-card">
-    <div class="rec-label">🎯 המלצת היום ${actionBadge}</div>
-    <div class="rec-title">${esc(rec.title)}</div>
-    <ul class="rec-reasoning">${reasonHtml}</ul>
-    <div class="rec-footer">
-      <span class="rec-side ${sideClass}">הימור: ${sideLabel}</span>
-      ${probHtml}
-      ${scoreHtml}
-      ${ctaHtml}
-    </div>
-  </div>`;
+  const hBal = document.getElementById('hPortBalance');
+  const hVal = document.getElementById('hPortValue');
+  const hPnl = document.getElementById('hPortPnl');
+  if (hBal) hBal.textContent = '$' + Math.abs(balance).toFixed(0);
+  if (hVal) hVal.textContent = '$' + value.toFixed(2);
+  if (hPnl) { hPnl.textContent = pnlSign + '$' + pnl.toFixed(2); hPnl.style.color = pnlClr; }
 }
 
-/* ────────────────────────────────
-   ANALYSIS VIEW — 2 גרפים
-──────────────────────────────── */
-function renderAnalysis() {
-  if (!appData) return '';
-  const gc = appData.good_chances || [];
-  const bm = appData.beat_market  || [];
+/* ─── Ticker ─── */
+function updateTicker(d) {
+  const hot = d.hot || [];
+  if (!hot.length) return;
+  const items = hot.slice(0, 8).map(m => {
+    const ch = m.oneWeekPriceChange || 0;
+    const chPct = (ch * 100).toFixed(1);
+    const cls   = ch > 0.005 ? 'ticker-up' : ch < -0.005 ? 'ticker-down' : '';
+    const arrow = ch > 0.005 ? '▲' : ch < -0.005 ? '▼' : '—';
+    const name  = m.question.length > 28 ? m.question.slice(0,28)+'…' : m.question;
+    return `<span class="ticker-item">
+      <span class="ticker-name">${esc(name)}</span>
+      <span class="ticker-price">${m.yes_pct}%</span>
+      <span class="ticker-change ${cls}">${arrow}${Math.abs(chPct)}%</span>
+    </span>`;
+  }).join('');
+  // duplicate for seamless loop
+  const track = document.getElementById('tickerTrack');
+  if (track) track.innerHTML = items + items;
+}
 
-  // Chart 1: Good Chances — YES probability
-  const gcLabels = gc.map(m => m.question);
-  const gcValues = gc.map(m => m.yes_pct);
-  const gcColors = gc.map(m => {
-    const p = m.yes_pct;
-    if (p >= 80) return 'rgba(16,185,129,0.75)';
-    if (p >= 70) return 'rgba(52,211,153,0.65)';
-    return 'rgba(251,191,36,0.65)';
-  });
+/* ─── Nav badges ─── */
+function updateNavBadges(d) {
+  if (!d) return;
+  const posCount   = (d.real_positions?.active?.length || 0);
+  const sigCount   = d.signals_count || 0;
+  const watchCount = getWatchlist().length;
 
-  // Chart 2: Beat the Market — ROI
-  const bmLabels = bm.map(m => m.question);
-  const bmValues = bm.map(m => m.roi_pct || 0);
-  const bmColors = bm.map(m => {
-    const r = m.roi_pct || 0;
-    if (r >= 40) return 'rgba(124,58,237,0.8)';
-    if (r >= 20) return 'rgba(139,92,246,0.65)';
-    return 'rgba(167,139,250,0.55)';
-  });
+  const setBadge = (id, n) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = n;
+    el.style.display = n > 0 ? 'block' : 'none';
+  };
+  setBadge('navBadgePos',   posCount);
+  setBadge('navBadgeSig',   sigCount);
+  setBadge('navBadgeWatch', watchCount);
+}
 
-  const html = `
-  <div class="section">
-    <div class="section-header">
-      <h2 class="section-title">📊 ניתוח שוק</h2>
+/* ─── Main render ─── */
+function renderContent() {
+  const rc = document.getElementById('realContent');
+  if (!appData || !rc) return;
+
+  switch (activeView) {
+    case 'home':      rc.innerHTML = renderHome();      break;
+    case 'positions': rc.innerHTML = renderPositions(); break;
+    case 'signals':   rc.innerHTML = renderSignals();   break;
+    case 'analysis':  rc.innerHTML = renderAnalysis();  break;
+    case 'watch':     rc.innerHTML = renderWatch();     break;
+    default:          rc.innerHTML = renderHome();
+  }
+}
+
+/* ════════════════════════════════════
+   VIEW: HOME
+════════════════════════════════════ */
+function renderHome() {
+  const d = appData;
+  let html = '';
+
+  // Portfolio panel
+  const rp   = d.real_positions || {};
+  const port = rp.portfolio || {};
+  const pnl  = port.total_pnl || 0;
+  const pnlSign = pnl >= 0 ? '+' : '';
+  const pnlClr  = pnl >= 0 ? 'var(--up)' : 'var(--down)';
+
+  html += `
+  <div class="portfolio-panel">
+    <div class="portfolio-panel-head">
+      <span class="portfolio-panel-title">💼 תיק השקעות</span>
+      <span class="portfolio-panel-time" id="lastUpdate">${fmtAgo(d.updated_at)}</span>
     </div>
-
-    ${appData.recommendation ? renderRecommendation(appData.recommendation) : ''}
-
-    <!-- Chart 1 -->
-    <div class="chart-wrap">
-      <div class="chart-title">✅ סיכויים טובים</div>
-      <div class="chart-subtitle">שווקים עם הסתברות YES בין 65–90% ונזילות גבוהה — אזור הביטחון שלנו</div>
-      <div class="chart-canvas-wrap">
-        <canvas id="goodChancesChart"></canvas>
+    <div class="portfolio-grid">
+      <div class="pstat">
+        <div class="pstat-val">$${Math.max(port.usdc_balance||0,0).toFixed(2)}</div>
+        <div class="pstat-lbl">זמין</div>
+      </div>
+      <div class="pstat">
+        <div class="pstat-val">$${(port.total_current||0).toFixed(2)}</div>
+        <div class="pstat-lbl">מושקע</div>
+      </div>
+      <div class="pstat ${pnl>=0?'pstat-up':'pstat-down'}">
+        <div class="pstat-val">${pnlSign}$${pnl.toFixed(2)}</div>
+        <div class="pstat-lbl">P&L</div>
       </div>
     </div>
-
-    <!-- Chart 2 -->
-    <div class="chart-wrap">
-      <div class="chart-title">🚀 להכות את השוק</div>
-      <div class="chart-subtitle">שווקים עם ROI נטו הגבוה ביותר (אחרי מס 25% + עמלה) — ה-Edge שלנו</div>
-      <div class="chart-canvas-wrap">
-        <canvas id="beatMarketChart"></canvas>
-      </div>
-    </div>
+    ${(rp.active||[]).length > 0 ? renderPositionsCompact(rp.active) : ''}
   </div>`;
 
-  // Mount charts after DOM update
-  setTimeout(() => {
-    buildHorizontalBar('goodChancesChart', gcLabels, gcValues, gcColors, '%');
-    buildHorizontalBar('beatMarketChart',  bmLabels, bmValues, bmColors, '%');
-  }, 50);
+  // Recommendation
+  if (d.recommendation) {
+    html += renderRec(d.recommendation);
+  }
+
+  // Hot markets
+  html += renderMarketSection('🔥 חם עכשיו', d.hot || [], true);
+  html += renderMarketSection('🎯 סיכויים טובים', d.good_chances || [], false);
+  html += renderMarketSection('✨ חדש ומעניין', d.new_interesting || [], false);
 
   return html;
 }
 
-/* ────────────────────────────────
-   ACTIVE BETS VIEW
-──────────────────────────────── */
-function renderBets() {
-  const bets      = (appData && appData.active_bets)   || [];
-  const resolved  = (appData && appData.resolved_bets) || [];
-  const portfolio = (appData && appData.portfolio)      || {};
-  const allBets   = bets.length + resolved.length;
+/* ════════════════════════════════════
+   VIEW: POSITIONS
+════════════════════════════════════ */
+function renderPositions() {
+  const rp      = appData?.real_positions || {};
+  const active  = rp.active  || [];
+  const port    = rp.portfolio || {};
+  const pnl     = port.total_pnl || 0;
+  const pnlSign = pnl >= 0 ? '+' : '';
+  const pnlClr  = pnl >= 0 ? 'var(--up)' : 'var(--down)';
 
-  const pnlTotalClr = (portfolio.total_pnl || 0) >= 0 ? 'var(--yes)' : 'var(--no)';
-  const pnlSign     = (portfolio.total_pnl || 0) >= 0 ? '+' : '';
-
-  const summaryHtml = `
-  <div style="
-    background: var(--bg-card);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--r-lg);
-    padding: var(--s-md);
-    margin-bottom: var(--s-md);
-    display: flex; flex-wrap: wrap; gap: var(--s-md); align-items: center;
-  ">
-    <div style="display:flex; flex-direction:column; gap:2px; flex:1; min-width:90px">
-      <span style="font-size:var(--fs-xs); color:var(--text-3)">מושקע (מדומה)</span>
-      <span style="font-size:var(--fs-xl); font-weight:800; color:var(--text-1)">$${portfolio.total_invested || 0}</span>
-    </div>
-    <div style="display:flex; flex-direction:column; gap:2px; flex:1; min-width:90px">
-      <span style="font-size:var(--fs-xs); color:var(--text-3)">P&L מדומה</span>
-      <span style="font-size:var(--fs-xl); font-weight:800; color:${pnlTotalClr}">${pnlSign}$${portfolio.total_pnl || 0}</span>
-    </div>
-    <div style="display:flex; gap:var(--s-xs); flex-wrap:wrap">
-      <div style="background:var(--yes-bg); border:1px solid rgba(16,185,129,0.25); border-radius:var(--r-pill); padding:4px 10px; font-size:var(--fs-xs); font-weight:700; color:var(--yes)">✅ ${portfolio.wins || 0}</div>
-      <div style="background:var(--no-bg); border:1px solid rgba(244,63,94,0.2); border-radius:var(--r-pill); padding:4px 10px; font-size:var(--fs-xs); font-weight:700; color:var(--no)">❌ ${portfolio.losses || 0}</div>
-      <div style="background:rgba(124,58,237,0.15); border:1px solid rgba(124,58,237,0.3); border-radius:var(--r-pill); padding:4px 10px; font-size:var(--fs-xs); font-weight:700; color:var(--accent)">⏳ ${portfolio.active || 0}</div>
-    </div>
-  </div>`;
-
-  const strengthCfg = {
-    'STRONG':     { emoji: '🔴', color: '#f43f5e',  label: 'STRONG' },
-    'WHALE_FADE': { emoji: '🐋', color: '#a855f7',  label: 'WHALE FADE' },
-    'MEDIUM':     { emoji: '🟡', color: '#f59e0b',  label: 'MEDIUM' },
-  };
-
-  // ── bet card builder ──
-  const buildBetCard = (b, isResolved = false) => {
-    const cfg      = strengthCfg[b.strength] || { emoji: '⚫', color: 'var(--text-2)', label: b.strength || '—' };
-    const side     = b.bet_side || 'Yes';
-    const sideClr  = side === 'Yes' ? 'var(--yes)' : 'var(--no)';
-    const action   = b.action === 'EXECUTE' ? '🟢 EXECUTE' : '⚪ DRY_RUN';
-    const actionBg = b.action === 'EXECUTE'
-      ? 'background:rgba(16,185,129,0.12);color:var(--yes);border-color:rgba(16,185,129,0.3)'
-      : 'background:rgba(255,255,255,0.06);color:var(--text-3);border-color:var(--glass-border)';
-
-    // Resolved outcome badge
-    let resolvedBadge = '';
-    if (isResolved) {
-      const win = b.resolved_win;
-      resolvedBadge = win === true
-        ? `<span style="background:var(--yes-bg);color:var(--yes);border:1px solid rgba(16,185,129,0.3);border-radius:6px;padding:3px 8px;font-size:12px;font-weight:700">✅ ניצחנו</span>`
-        : win === false
-        ? `<span style="background:var(--no-bg);color:var(--no);border:1px solid rgba(244,63,94,0.2);border-radius:6px;padding:3px 8px;font-size:12px;font-weight:700">❌ הפסדנו</span>`
-        : `<span style="background:rgba(255,255,255,0.07);color:var(--text-3);border:1px solid var(--glass-border);border-radius:6px;padding:3px 8px;font-size:12px">🔒 נסגר</span>`;
-    }
-
-    // Price movement
-    const ep = b.entry_pct;
-    const cp = b.current_pct;
-    let priceHtml = '';
-    if (ep !== null && ep !== undefined) {
-      const arrow    = cp !== null && cp !== undefined ? (cp > ep ? '▲' : cp < ep ? '▼' : '—') : '—';
-      const arrowClr = cp !== null && cp !== undefined ? (cp > ep ? 'var(--yes)' : cp < ep ? 'var(--no)' : 'var(--text-3)') : 'var(--text-3)';
-      priceHtml = `
-      <div style="display:flex; gap:var(--s-md); align-items:center; margin-bottom:8px; flex-wrap:wrap; font-size:13px">
-        <span>כניסה: <strong style="color:${sideClr}">${ep}%</strong></span>
-        <span style="color:var(--text-3)">→</span>
-        <span>עכשיו: <strong style="color:${arrowClr}">${cp !== null && cp !== undefined ? cp+'%' : '—'}</strong> <span style="color:${arrowClr}">${arrow}</span></span>
-      </div>`;
-    }
-
-    // P&L badge
-    let pnlHtml = '';
-    if (b.pnl_usd !== null && b.pnl_usd !== undefined) {
-      const pnlClr = b.pnl_usd >= 0 ? 'var(--yes)' : 'var(--no)';
-      const pnlBg  = b.pnl_usd >= 0 ? 'var(--yes-bg)' : 'var(--no-bg)';
-      const pnlBdr = b.pnl_usd >= 0 ? 'rgba(16,185,129,0.25)' : 'rgba(244,63,94,0.2)';
-      const sign   = b.pnl_usd >= 0 ? '+' : '';
-      pnlHtml = `<span style="background:${pnlBg};border:1px solid ${pnlBdr};border-radius:var(--r-pill);padding:3px 9px;font-size:12px;font-weight:800;color:${pnlClr}">${sign}$${b.pnl_usd} (${sign}${b.pnl_pct}%)</span>`;
-    }
-
-    const whaleHtml = b.whale_names && b.whale_names.length
-      ? `<div style="font-size:12px;color:var(--text-2);margin-top:5px">🐋 ${b.whale_names.join(', ')}</div>`
-      : '';
-
-    const reasons = (b.reasons || []).slice(0, 3).map(r =>
-      `<span style="background:rgba(255,255,255,0.06);border-radius:4px;padding:2px 6px;font-size:11px;color:var(--text-2)">${r}</span>`
-    ).join(' ');
-
-    const link = b.link ? `<a href="${esc(b.link)}" target="_blank" rel="noopener" style="font-size:12px;color:var(--accent);text-decoration:none" onclick="event.stopPropagation()">פתח ↗</a>` : '';
-
-    return `
-    <div class="card" style="border-right: 3px solid ${cfg.color}; margin-bottom: var(--s-sm)">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
-        <span style="background:${cfg.color}22;color:${cfg.color};border:1px solid ${cfg.color}44;border-radius:6px;padding:3px 8px;font-size:12px;font-weight:700">${cfg.emoji} ${cfg.label}</span>
-        <span style="background:${sideClr}22;color:${sideClr};border-radius:6px;padding:3px 8px;font-size:12px;font-weight:600">הימור: ${side}</span>
-        <span style="border:1px solid;border-radius:6px;padding:3px 8px;font-size:11px;${actionBg}">${action}</span>
-        ${resolvedBadge}
-        <span style="margin-right:auto;font-size:11px;color:var(--text-3)">${isResolved ? '🔒 נסגר' : b.days_left+'d נותרו'}</span>
-      </div>
-
-      <div style="font-size:15px;font-weight:700;color:var(--text-1);margin-bottom:8px;line-height:1.4">${esc(b.question || b.market_title || b.slug)}</div>
-
-      ${priceHtml}
-
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap">
-        <span style="font-size:13px;color:var(--text-2)">💰 $${b.size_usd || 0}</span>
-        ${pnlHtml}
-        ${link}
-      </div>
-
-      ${whaleHtml}
-      <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px">${reasons}</div>
-    </div>`;
-  };
-
-  const activeCards   = bets.map(b => buildBetCard(b, false)).join('');
-  const resolvedCards = resolved.map(b => buildBetCard(b, true)).join('');
-
-  const activeSection = bets.length
-    ? `<div class="section">
-        <div class="section-header">
-          <h2 class="section-title">⏳ פעילים</h2>
-          <span class="section-count">${bets.length}</span>
-        </div>
-        ${activeCards}
-      </div>`
-    : `<div style="text-align:center;padding:var(--s-lg) var(--s-md);color:var(--text-3);font-size:var(--fs-sm)">
-        ⏳ אין הימורים פעילים כרגע — המנוע יזהה הזדמנות חדשה בסריקה הבאה
-      </div>`;
-
-  const resolvedSection = resolved.length
-    ? `<div class="section">
-        <div class="section-header">
-          <h2 class="section-title">📋 היסטוריה</h2>
-          <span class="section-count">${resolved.length}</span>
-        </div>
-        ${resolvedCards}
-      </div>`
-    : '';
-
-  if (!allBets) {
-    return `
-    <div class="empty-watch">
+  if (!active.length) {
+    return `<div class="empty-state">
       <span class="empty-icon">💼</span>
-      <p>אין הימורים עדיין.<br>המנוע ב-DRY_RUN — הסריקה הבאה ב-09:00 / 18:00</p>
+      <div class="empty-text">אין פוזיציות פעילות<br><small>הבוט יפתח פוזיציות אוטומטית ב-09:00 ו-18:00</small></div>
     </div>`;
   }
+
+  let html = `
+  <div class="portfolio-panel">
+    <div class="portfolio-panel-head">
+      <span class="portfolio-panel-title">סיכום תיק</span>
+    </div>
+    <div class="portfolio-grid">
+      <div class="pstat">
+        <div class="pstat-val">$${Math.max(port.usdc_balance||0,0).toFixed(2)}</div>
+        <div class="pstat-lbl">זמין</div>
+      </div>
+      <div class="pstat">
+        <div class="pstat-val">$${(port.total_current||0).toFixed(2)}</div>
+        <div class="pstat-lbl">שווי הימורים</div>
+      </div>
+      <div class="pstat ${pnl>=0?'pstat-up':'pstat-down'}">
+        <div class="pstat-val" style="color:${pnlClr}">${pnlSign}$${pnl.toFixed(2)}</div>
+        <div class="pstat-lbl">P&L כולל</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head">
+      <span class="section-title">פוזיציות פעילות</span>
+      <span class="section-count">${active.length}</span>
+    </div>
+    ${renderPositionsTable(active)}
+  </div>`;
+
+  return html;
+}
+
+function renderPositionsCompact(positions) {
+  if (!positions.length) return '';
+  return `
+  <div class="section-head" style="margin-top:0;margin-bottom:6px;padding-bottom:6px">
+    <span class="section-title">פוזיציות פעילות</span>
+    <span class="section-count">${positions.length}</span>
+  </div>
+  ${renderPositionsTable(positions)}`;
+}
+
+function renderPositionsTable(positions) {
+  const rows = positions.map(pos => {
+    const pnl     = pos.cashPnl || 0;
+    const pnlSign = pnl >= 0 ? '+' : '';
+    const pnlClr  = pnl >= 0 ? 'pos-pnl-up' : 'pos-pnl-down';
+    const pctPnl  = pos.percentPnl || 0;
+    const entryPct = Math.round((pos.avgPrice||0)*1000)/10;
+    const curPct   = Math.round((pos.curPrice||0)*1000)/10;
+    const barColor = pnl >= 0 ? 'var(--up)' : 'var(--down)';
+    const noLiq    = (pos.exitValue||0) < 0.10;
+    const daysLeft = pos.daysLeft;
+    const daysStr  = daysLeft === 0 ? '🔔 היום' : daysLeft === 1 ? '⚡ מחר' : daysLeft != null ? `${daysLeft}d` : '—';
+
+    return `
+    <tr>
+      <td>
+        <div class="pos-title">${esc(pos.title.length>55 ? pos.title.slice(0,55)+'…' : pos.title)}</div>
+        <div style="display:flex;gap:5px;align-items:center;margin-top:4px;flex-wrap:wrap">
+          <span class="pos-outcome">${pos.outcome}</span>
+          <span style="font-size:10px;color:var(--t3)">${daysStr}</span>
+        </div>
+      </td>
+      <td class="num">
+        <div style="font-size:12px;color:var(--t3)">${entryPct}%</div>
+        <div style="font-size:11px;color:var(--t3)">כניסה</div>
+      </td>
+      <td class="num">
+        <div style="font-size:13px;font-weight:700;color:${curPct>=entryPct?'var(--up)':'var(--down)'}">${curPct}%</div>
+        <div class="pos-bar"><div class="pos-bar-fill" style="width:${curPct}%;background:${barColor}"></div></div>
+      </td>
+      <td class="num">
+        <div class="${pnlClr}" style="font-size:13px">${pnlSign}$${Math.abs(pnl).toFixed(2)}</div>
+        <div style="font-size:10px;color:var(--t3)">${pnlSign}${pctPnl.toFixed(1)}%</div>
+      </td>
+      <td>
+        ${noLiq
+          ? `<span class="pos-no-liq">🔒 ללא נזילות</span>`
+          : `<button class="btn-exit btn-exit-active" onclick="openExitModal(${JSON.stringify(pos).replace(/'/g,'&apos;')})">מכור</button>`
+        }
+      </td>
+    </tr>`;
+  }).join('');
 
   return `
-  <div>
-    ${summaryHtml}
-    ${activeSection}
-    ${resolvedSection}
+  <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
+    <table class="positions-table" style="min-width:460px">
+      <thead>
+        <tr>
+          <th>שם שוק</th>
+          <th class="num">כניסה</th>
+          <th class="num">נוכחי</th>
+          <th class="num">P&amp;L</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>
   </div>`;
 }
 
-/* ────────────────────────────────
-   SIGNALS VIEW
-──────────────────────────────── */
-function timeAgo(ts) {
-  if (!ts) return '';
-  const diff = Math.round((Date.now() - new Date(ts)) / 60000);
-  if (diff < 1)  return 'עכשיו';
-  if (diff < 60) return `לפני ${diff} דק׳`;
-  const h = Math.round(diff / 60);
-  if (h < 24)    return `לפני ${h} שע׳`;
-  return `לפני ${Math.round(h/24)} ימים`;
-}
-
+/* ════════════════════════════════════
+   VIEW: SIGNALS
+════════════════════════════════════ */
 function renderSignals() {
-  const signals = (appData && appData.signals) || [];
+  const signals = appData?.signals || [];
   if (!signals.length) {
-    return `<div class="empty-watch"><span class="empty-icon">📡</span><p>אין signals עדיין — המנוע ממתין לנתונים...</p></div>`;
+    return `<div class="empty-state">
+      <span class="empty-icon">📡</span>
+      <div class="empty-text">אין סיגנלים זמינים כרגע<br><small>הסיגנלים מתעדכנים ב-09:00 ו-18:00</small></div>
+    </div>`;
   }
 
-  const strengthConfig = {
-    'STRONG':     { emoji: '🔴', color: 'var(--no)',    label: 'STRONG' },
-    'WHALE_FADE': { emoji: '🐋', color: '#a855f7',      label: 'WHALE FADE' },
-    'MEDIUM':     { emoji: '🟡', color: '#f59e0b',      label: 'MEDIUM' },
-  };
-
-  const cards = signals.map(s => {
-    const cfg      = strengthConfig[s.strength] || { emoji: '⚫', color: 'var(--text-2)', label: s.strength };
-    const betSide  = s.bet_side || 'Yes';
-    const sideClr  = betSide === 'Yes' ? 'var(--yes)' : 'var(--no)';
-    const yesPrice = (s.yes_price * 100).toFixed(1);
-    const noPrice  = (s.no_price  * 100).toFixed(1);
-    const action   = s.action === 'EXECUTE' ? '🟢 EXECUTE' : '⚪ DRY_RUN';
-    const whaleRow = s.whale_names && s.whale_names.length
-      ? `<div style="margin-top:6px;font-size:12px;color:var(--text-2)">🐋 ${s.whale_names.join(', ')}</div>`
-      : '';
-    const reasons  = (s.reasons || []).slice(0, 3).map(r =>
-      `<span style="background:rgba(255,255,255,0.07);border-radius:4px;padding:2px 6px;font-size:11px;color:var(--text-2)">${r}</span>`
-    ).join(' ');
+  const rows = signals.slice(0,15).map(s => {
+    const strength = s.strength || 'MEDIUM';
+    const cls = strength === 'STRONG' ? 'signal-strong' : 'signal-medium';
+    const emoji = strength === 'STRONG' ? '🔴' : '🟡';
+    const yesPct = s.yes_price ? Math.round(s.yes_price*1000)/10 : null;
+    const days = s.days_left ?? '—';
 
     return `
-    <div class="card" style="border-right: 3px solid ${cfg.color}; margin-bottom: var(--s-sm)">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
-        <span style="background:${cfg.color}22;color:${cfg.color};border:1px solid ${cfg.color}44;border-radius:6px;padding:3px 8px;font-size:12px;font-weight:700">${cfg.emoji} ${cfg.label}</span>
-        <span style="background:rgba(255,255,255,0.08);border-radius:6px;padding:3px 8px;font-size:12px;color:var(--text-2)">${s.score}/100</span>
-        <span style="background:${sideClr}22;color:${sideClr};border-radius:6px;padding:3px 8px;font-size:12px;font-weight:600">הימור: ${betSide}</span>
-        <span style="margin-right:auto;font-size:11px;color:var(--text-3)">${timeAgo(s.timestamp)}</span>
+    <div class="signal-row">
+      <span class="signal-strength ${cls}">${emoji} ${strength}</span>
+      <div class="signal-body">
+        <div class="signal-title">${esc(s.question?.slice(0,60)||s.market_title?.slice(0,60)||'—')}</div>
+        <div class="signal-meta">${s.type||''} · ${days}d · ${(s.reasons||[]).slice(0,1).join(', ')}</div>
       </div>
-      <div style="font-size:15px;font-weight:700;color:var(--text-1);margin-bottom:8px;line-height:1.4">${s.question}</div>
-      <div style="display:flex;gap:16px;margin-bottom:6px;font-size:13px;flex-wrap:wrap">
-        <span>כן <strong style="color:var(--yes)">${yesPrice}%</strong></span>
-        <span>לא <strong style="color:var(--no)">${noPrice}%</strong></span>
-        <span>⏱ ${s.days_left}d</span>
-        <span>Kelly ${s.kelly_pct}%</span>
-        <span>💰 $${s.size_usd}</span>
-        <span style="color:var(--text-3)">${action}</span>
+      <div class="signal-right">
+        ${yesPct != null ? `<div class="signal-price">${yesPct}%</div>` : ''}
+        ${s.size_usd ? `<div class="signal-size">$${parseFloat(s.size_usd).toFixed(0)}</div>` : ''}
       </div>
-      ${whaleRow}
-      <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px">${reasons}</div>
     </div>`;
   }).join('');
 
   return `
   <div class="section">
-    <div class="section-header">
-      <h2 class="section-title">📡 Signals — מנוע ההזדמנויות</h2>
+    <div class="section-head">
+      <span class="section-title">📡 סיגנלים פעילים</span>
       <span class="section-count">${signals.length}</span>
     </div>
-    <div style="font-size:13px;color:var(--text-3);margin-bottom:var(--s-md)">
-      מצב: ⚪ DRY_RUN (ניטור בלבד) · ${signals.filter(s=>s.strength==='STRONG').length} STRONG · ${signals.filter(s=>s.strength==='MEDIUM').length} MEDIUM · ${signals.filter(s=>s.strength==='WHALE_FADE').length} WHALE_FADE
-    </div>
-    ${cards}
+    ${rows}
   </div>`;
 }
 
-/* ────────────────────────────────
-   REAL POSITIONS — top of landing
-──────────────────────────────── */
-function renderRealPositions(rp) {
-  const positions = rp.active || [];
-  const portfolio = rp.portfolio || {};
-  if (!positions.length) return '';
+/* ════════════════════════════════════
+   VIEW: ANALYSIS
+════════════════════════════════════ */
+function renderAnalysis() {
+  const d       = appData;
+  const hot     = d.hot || [];
+  const movers  = d.movers || [];
 
-  const pnl        = portfolio.total_pnl || 0;
-  const pnlClr     = pnl >= 0 ? 'var(--yes)' : 'var(--no)';
-  const pnlSign    = pnl >= 0 ? '+' : '';
-  const balance    = portfolio.usdc_balance || 0;
+  // Category breakdown
+  const all = d.all_markets || [];
+  const catCounts = {};
+  const CAT = {politics:'🗳️ פוליטיקה',economy:'💰 כלכלה',geo:'🌍 גאו',sports:'🏆 ספורט',crypto:'₿ קריפטו',tech:'🔬 טכנולוגיה',other:'💡 אחר'};
+  all.forEach(m => { catCounts[m.category] = (catCounts[m.category]||0)+1; });
+  const maxCat = Math.max(...Object.values(catCounts), 1);
+  const catRows = Object.entries(CAT).map(([k,label]) => {
+    const n = catCounts[k]||0;
+    const pct = Math.round(n/maxCat*100);
+    return `<div class="bar-row">
+      <span class="bar-label">${label}</span>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:var(--accent)"></div></div>
+      <span class="bar-val">${n}</span>
+    </div>`;
+  }).join('');
 
-  // Portfolio summary bar
-  const summaryHtml = `
-  <div style="
-    display:flex; flex-wrap:wrap; gap:var(--s-md); align-items:center;
-    background:rgba(124,58,237,0.10); border:1px solid rgba(124,58,237,0.25);
-    border-radius:var(--r-lg); padding:var(--s-md); margin-bottom:var(--s-md);
-  ">
-    <div style="flex:1;min-width:80px">
-      <div style="font-size:var(--fs-xs);color:var(--text-3)">יתרה פנויה</div>
-      <div style="font-size:var(--fs-xl);font-weight:800;color:var(--text-1)">$${balance.toFixed(2)}</div>
-    </div>
-    <div style="flex:1;min-width:80px">
-      <div style="font-size:var(--fs-xs);color:var(--text-3)">שווי הימורים</div>
-      <div style="font-size:var(--fs-xl);font-weight:800;color:var(--text-1)">$${(portfolio.total_current||0).toFixed(2)}</div>
-    </div>
-    <div style="flex:1;min-width:80px">
-      <div style="font-size:var(--fs-xs);color:var(--text-3)">P&L</div>
-      <div style="font-size:var(--fs-xl);font-weight:800;color:${pnlClr}">${pnlSign}$${pnl.toFixed(2)}</div>
-    </div>
-    <span style="background:rgba(124,58,237,0.2);border:1px solid rgba(124,58,237,0.4);border-radius:var(--r-pill);padding:4px 12px;font-size:var(--fs-xs);font-weight:700;color:#c4b5fd">⏳ ${positions.length} פעיל</span>
-  </div>`;
-
-  // Position cards
-  const cardsHtml = positions.map(pos => {
-    const pnl       = pos.cashPnl || 0;
-    const pctPnl    = pos.percentPnl || 0;
-    const pnlClr    = pnl >= 0 ? 'var(--yes)' : 'var(--no)';
-    const pnlBg     = pnl >= 0 ? 'var(--yes-bg)' : 'var(--no-bg)';
-    const pnlBdr    = pnl >= 0 ? 'rgba(16,185,129,0.3)' : 'rgba(244,63,94,0.25)';
-    const sign      = pnl >= 0 ? '+' : '';
-
-    // Price change since last fetch
-    let changeHtml = '';
-    if (pos.priceChangeSinceUpdate !== null && pos.priceChangeSinceUpdate !== undefined) {
-      const ch    = pos.priceChangeSinceUpdate;
-      const chClr = ch > 0 ? 'var(--yes)' : ch < 0 ? 'var(--no)' : 'var(--text-3)';
-      const arrow = ch > 0 ? '▲' : ch < 0 ? '▼' : '—';
-      changeHtml  = `<span style="font-size:11px;color:${chClr};font-weight:700">${arrow} ${ch > 0 ? '+' : ''}${ch}% (24h)</span>`;
-    }
-
-    // Days left badge
-    const daysLeft = pos.daysLeft;
-    const daysClr  = daysLeft === 0 ? 'var(--no)' : daysLeft <= 3 ? '#f59e0b' : 'var(--text-3)';
-    const daysBadge = daysLeft !== null && daysLeft !== undefined
-      ? `<span style="font-size:11px;color:${daysClr};font-weight:600">${daysLeft === 0 ? '🔔 מסתיים היום' : daysLeft === 1 ? '⚡ מחר' : `${daysLeft} ימים`}</span>`
-      : '';
-
-    // Current vs entry
-    const entryPct = Math.round((pos.avgPrice || 0) * 100 * 10) / 10;
-    const curPct   = Math.round((pos.curPrice  || 0) * 100 * 10) / 10;
-
+  // Big movers
+  const moverRows = movers.slice(0,6).map(m => {
+    const ch = m.oneWeekPriceChange || 0;
+    const chPct = (ch*100).toFixed(1);
+    const cls = ch > 0 ? 'change-up' : ch < 0 ? 'change-down' : 'change-flat';
+    const arrow = ch > 0 ? '▲' : ch < 0 ? '▼' : '—';
     return `
-    <div class="\${pnl > 0.05 ? 'pos-card-win' : pnl < -0.05 ? 'pos-card-loss' : 'pos-card-flat'}" style="
-      background:var(--bg-card); border:1px solid var(--glass-border);
-      border-radius:var(--r-md); padding:var(--s-md); margin-bottom:var(--s-sm);
-      transition:var(--t); position:relative; overflow:hidden;
-    ">
-
-      <!-- Header row -->
-      <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px">
-        ${pos.icon ? `<img src="${pos.icon}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0" onerror="this.style.display='none'">` : ''}
-        <div style="flex:1;min-width:0">
-          <div style="font-size:var(--fs-sm);font-weight:700;color:var(--text-1);line-height:1.35;margin-bottom:4px">${esc(pos.title)}</div>
-          <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center">
-            <span style="background:var(--yes-bg);border:1px solid rgba(16,185,129,0.3);border-radius:var(--r-pill);padding:2px 8px;font-size:11px;font-weight:700;color:var(--yes)">${pos.outcome}</span>
-            ${daysBadge}
-            ${changeHtml}
-          </div>
+    <div class="market-card" style="cursor:default">
+      ${m.image ? `<img src="${esc(m.image)}" class="market-card-img" onerror="this.style.display='none'">` : ''}
+      <div class="market-card-body">
+        <div class="market-card-title">${esc(m.question)}</div>
+        <div class="market-card-meta">
+          <span class="meta-pill">${fmt$(m.volume24hr)} / 24h</span>
         </div>
       </div>
-
-      <!-- Price bar -->
-      <div style="display:flex;gap:var(--s-md);align-items:center;margin-bottom:10px;font-size:13px;flex-wrap:wrap">
-        <span style="color:var(--text-3)">כניסה: <strong style="color:var(--text-2)">${entryPct}%</strong></span>
-        <span style="color:var(--text-3)">→</span>
-        <span style="color:var(--text-3)">עכשיו: <strong style="color:${curPct >= entryPct ? 'var(--yes)' : 'var(--no)'}">${curPct}%</strong></span>
-        <span style="margin-right:auto;font-size:11px;color:var(--text-3)">${pos.size.toFixed(2)} tokens</span>
-      </div>
-
-      <!-- P&L + value + exit -->
-      <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
-        <span style="background:${pnlBg};border:1px solid ${pnlBdr};border-radius:var(--r-pill);padding:4px 12px;font-size:12px;font-weight:800;color:${pnlClr}">${sign}$${pnl.toFixed(2)} (${sign}${pctPnl.toFixed(1)}%)</span>
-        <span style="font-size:12px;color:var(--text-3)">שווי: <strong style="color:var(--text-2)">$${pos.currentValue.toFixed(2)}</strong></span>
-        <div style="margin-right:auto;display:flex;gap:8px">
-          <a href="${pos.link}" target="_blank" style="
-            background:rgba(255,255,255,0.07);border:1px solid var(--glass-border);
-            border-radius:var(--r-sm);padding:5px 12px;font-size:12px;color:var(--text-2);
-            text-decoration:none;font-weight:600;transition:var(--t)
-          " onmouseover="this.style.color='var(--text-1)'" onmouseout="this.style.color='var(--text-2)'">📊 שוק</a>
-          <button onclick="showExitModal(${JSON.stringify(pos).replace(/'/g,'&apos;')})" style="
-            background:${pos.exitValue < 0.10 ? 'rgba(100,100,100,0.15)' : 'rgba(244,63,94,0.15)'};
-            border:1px solid ${pos.exitValue < 0.10 ? 'rgba(100,100,100,0.3)' : 'rgba(244,63,94,0.35)'};
-            border-radius:var(--r-sm);padding:5px 14px;font-size:12px;
-            color:${pos.exitValue < 0.10 ? 'var(--text-3)' : '#fb7185'};
-            cursor:pointer;font-weight:700;transition:var(--t)
-          ">${pos.exitValue < 0.10 ? '🔒 ללא נזילות' : '🚪 יציאה'}</button>
-        </div>
+      <div class="market-card-right">
+        <span class="change-badge ${cls}">${arrow} ${Math.abs(chPct)}%</span>
+        <div class="market-vol" style="margin-top:4px">${m.yes_pct}% Yes</div>
       </div>
     </div>`;
   }).join('');
 
   return `
-  <div class="section" style="margin-bottom:var(--s-xl)">
-    <div class="section-header">
-      <h2 class="section-title">💼 הפוזיציות שלי</h2>
-      <span class="section-count">${positions.length}</span>
+  <div class="section">
+    <div class="section-head"><span class="section-title">📊 התפלגות לפי קטגוריה</span></div>
+    <div class="analysis-panel">${catRows}</div>
+  </div>
+  <div class="section">
+    <div class="section-head">
+      <span class="section-title">📈 תנועות שבועיות</span>
+      <span class="section-count">${movers.length}</span>
     </div>
-    ${summaryHtml}
-    ${cardsHtml}
+    ${moverRows}
   </div>`;
 }
 
-/* ────────────────────────────────
-   EXIT MODAL
-──────────────────────────────── */
-function showExitModal(pos) {
-  // Remove existing
-  const existing = document.getElementById('exit-modal');
-  if (existing) existing.remove();
+/* ════════════════════════════════════
+   VIEW: WATCH
+════════════════════════════════════ */
+function renderWatch() {
+  const ids = getWatchlist();
+  if (!ids.length) {
+    return `<div class="empty-state">
+      <span class="empty-icon">⭐</span>
+      <div class="empty-text">אין שווקים במעקב<br><small>לחץ ⭐ על כרטיס שוק כדי להוסיף</small></div>
+    </div>`;
+  }
+  const d   = appData;
+  const all = [...(d.hot||[]), ...(d.movers||[]), ...(d.new_interesting||[]), ...(d.worth_watching||[])];
+  const seen = new Set();
+  const watched = ids.map(id => all.find(m => String(m.id)===id)).filter(m => m && !seen.has(m.id) && seen.add(m.id));
 
-  const pct      = Math.round((pos.curPrice || 0) * 100 * 10) / 10;
-  const exitVal  = pos.exitValue || pos.currentValue || 0;
-  const pnl      = pos.cashPnl || 0;
-  const pnlSign  = pnl >= 0 ? '+' : '';
-  const pnlClr   = pnl >= 0 ? 'var(--yes)' : 'var(--no)';
-  const tgMsg    = `מכור פוזיציה: ${pos.slug}`;
-
-  const modal = document.createElement('div');
-  modal.id = 'exit-modal';
-  modal.style.cssText = `
-    position:fixed;inset:0;z-index:9999;
-    display:flex;align-items:center;justify-content:center;
-    background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);
-    padding:20px;
-  `;
-  modal.innerHTML = `
-  <div style="
-    background:#1a1128;border:1px solid rgba(244,63,94,0.3);
-    border-radius:var(--r-lg);padding:var(--s-xl);
-    max-width:420px;width:100%;
-  ">
-    <h3 style="font-size:var(--fs-lg);font-weight:800;color:var(--text-1);margin-bottom:4px">🚪 יציאה מהפוזיציה</h3>
-    <p style="font-size:var(--fs-sm);color:var(--text-2);margin-bottom:var(--s-md);line-height:1.4">${esc(pos.title)}</p>
-
-    <div style="display:flex;gap:var(--s-md);margin-bottom:var(--s-lg);flex-wrap:wrap">
-      <div>
-        <div style="font-size:11px;color:var(--text-3)">שווי יציאה נוכחי</div>
-        <div style="font-size:22px;font-weight:800;color:var(--text-1)">$${exitVal.toFixed(2)}</div>
-      </div>
-      <div>
-        <div style="font-size:11px;color:var(--text-3)">P&L</div>
-        <div style="font-size:22px;font-weight:800;color:${pnlClr}">${pnlSign}$${pnl.toFixed(2)}</div>
-      </div>
-      <div>
-        <div style="font-size:11px;color:var(--text-3)">מחיר נוכחי</div>
-        <div style="font-size:22px;font-weight:800;color:var(--text-1)">${pct}%</div>
-      </div>
+  return `
+  <div class="section">
+    <div class="section-head">
+      <span class="section-title">⭐ שווקים במעקב</span>
+      <span class="section-count">${watched.length}</span>
     </div>
-
-    ${exitVal < 0.10 ? `
-    <div style="
-      background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.3);
-      border-radius:var(--r-md);padding:12px;margin-bottom:var(--s-lg);
-      font-size:13px;color:#fcd34d;line-height:1.5;
-    ">
-      ⚠️ <strong>אין קונים זמינים</strong><br>
-      <span style="color:var(--text-2)">המחיר ירד לכמעט אפס — אין נזילות למכירה כרגע.
-      הפוזיציה תסתיים אוטומטית בנובמבר 2026.
-      ההפסד כבר נעול ולא ניתן לצמצם אותו.</span>
-    </div>` : `
-    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:var(--s-lg)">
-      <a href="${pos.link}" target="_blank" style="
-        display:block;text-align:center;
-        background:rgba(244,63,94,0.2);border:1px solid rgba(244,63,94,0.4);
-        border-radius:var(--r-md);padding:12px;font-size:14px;font-weight:700;
-        color:#fb7185;text-decoration:none;transition:var(--t)
-      ">🌐 מכור ב-Polymarket ישירות</a>
-      <button onclick="
-        navigator.clipboard.writeText('${tgMsg.replace(/'/g,"\\'")}');
-        this.textContent='✅ הועתק!';
-        setTimeout(()=>this.textContent='📋 העתק פקודת מכירה לבוט',2000);
-      " style="
-        background:rgba(124,58,237,0.15);border:1px solid rgba(124,58,237,0.35);
-        border-radius:var(--r-md);padding:12px;font-size:14px;font-weight:700;
-        color:#c4b5fd;cursor:pointer;transition:var(--t)
-      ">📋 העתק פקודת מכירה לבוט</button>
-    </div>
-    <p style="font-size:11px;color:var(--text-3);margin-bottom:var(--s-md)">
-      לביצוע מכירה דרך הבוט: שלח את הפקודה ל-<strong style="color:var(--text-2)">@OpenClaw_noam_bot</strong>
-    </p>`}
-
-    <button onclick="document.getElementById('exit-modal').remove()" style="
-      width:100%;background:rgba(255,255,255,0.06);border:1px solid var(--glass-border);
-      border-radius:var(--r-md);padding:10px;font-size:14px;color:var(--text-2);
-      cursor:pointer;font-weight:600
-    ">ביטול</button>
+    ${watched.map(m => buildMarketCard(m, false)).join('')}
   </div>`;
+}
 
+/* ════════════════════════════════════
+   MARKET CARD
+════════════════════════════════════ */
+function buildMarketCard(m, showChange=false) {
+  const ch     = m.oneWeekPriceChange || 0;
+  const chPct  = (ch*100).toFixed(1);
+  const chCls  = ch > 0.005 ? 'change-up' : ch < -0.005 ? 'change-down' : 'change-flat';
+  const arrow  = ch > 0.005 ? '▲' : ch < -0.005 ? '▼' : '—';
+  const watched = isWatched(m.id);
+
+  return `
+  <div class="market-card" data-id="${m.id}" onclick="openMarketModal('${m.id}')">
+    ${m.image ? `<img src="${esc(m.image)}" class="market-card-img" onerror="this.style.display='none'">` : ''}
+    <div class="market-card-body">
+      <div class="market-card-title">${esc(m.question)}</div>
+      <div class="market-card-meta">
+        <span class="meta-pill">${fmt$(m.volume24hr)}</span>
+        <span class="meta-pill">${fmtDate(m.end_date)}</span>
+        ${showChange ? `<span class="change-badge ${chCls}">${arrow}${Math.abs(chPct)}%</span>` : ''}
+      </div>
+    </div>
+    <div class="market-card-right">
+      <div class="prob-bar-wrap">
+        <div class="prob-bar"><div class="prob-bar-yes" style="width:${m.yes_pct}%"></div></div>
+        <div class="prob-labels">
+          <span class="prob-yes">${m.yes_pct}%</span>
+          <span class="prob-no">${m.no_pct}%</span>
+        </div>
+      </div>
+      <div class="market-vol">${fmt$(m.liquidity)} נזילות</div>
+    </div>
+  </div>`;
+}
+
+function renderMarketSection(title, markets, showChange=false) {
+  if (!markets.length) return '';
+  return `
+  <div class="section">
+    <div class="section-head">
+      <span class="section-title">${title}</span>
+      <span class="section-count">${markets.length}</span>
+    </div>
+    ${markets.slice(0,8).map(m => buildMarketCard(m, showChange)).join('')}
+  </div>`;
+}
+
+/* ════════════════════════════════════
+   RECOMMENDATION
+════════════════════════════════════ */
+function renderRec(rec) {
+  if (!rec) return '';
+  const yesPct   = rec.yes_pct || 50;
+  const reasons  = (rec.reasoning||[]).filter(Boolean).slice(0,3);
+  const link     = rec.link || '#';
+  const strength = rec.source === 'signal' ? 'STRONG SIGNAL' : rec.source === 'edge' ? 'BEST EDGE' : 'OPPORTUNITY';
+
+  return `
+  <div class="rec-card">
+    <div class="rec-header">
+      <span class="rec-badge">${strength}</span>
+      <span style="font-size:11px;color:var(--t3)">המלצת הבוט</span>
+    </div>
+    <div class="rec-title">${esc(rec.title||'')}</div>
+    <div class="rec-reasons">
+      ${reasons.map(r => `<div class="rec-reason">${esc(String(r))}</div>`).join('')}
+    </div>
+    <div style="display:flex;align-items:center;gap:var(--gap-md)">
+      <a href="${esc(link)}" target="_blank" class="rec-cta">
+        📈 הצג שוק — Yes ${yesPct}%
+      </a>
+      ${rec.size_usd ? `<span style="font-size:12px;color:var(--t3)">גודל מוצע: <strong style="color:var(--t2)">$${parseFloat(rec.size_usd).toFixed(0)}</strong></span>` : ''}
+    </div>
+  </div>`;
+}
+
+/* ════════════════════════════════════
+   MARKET MODAL (quick view)
+════════════════════════════════════ */
+function openMarketModal(id) {
+  const d   = appData;
+  const all = [...(d.hot||[]), ...(d.movers||[]), ...(d.new_interesting||[]), ...(d.worth_watching||[]), ...(d.good_chances||[])];
+  const m   = all.find(x => String(x.id) === String(id));
+  if (!m) return;
+
+  const watched = isWatched(m.id);
+  const modal = document.createElement('div');
+  modal.className = 'modal-overlay';
+  modal.id = 'marketModal';
+  modal.innerHTML = `
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:var(--gap-md)">
+      ${m.image ? `<img src="${esc(m.image)}" style="width:44px;height:44px;border-radius:8px;object-fit:cover;flex-shrink:0" onerror="this.style.display='none'">` : ''}
+      <div style="flex:1">
+        <div class="modal-title" style="font-size:14px">${esc(m.question)}</div>
+        <div style="font-size:11px;color:var(--t3);margin-top:3px">${fmtDate(m.end_date)} · ${fmt$(m.volume24hr)} נפח · ${m.category}</div>
+      </div>
+    </div>
+
+    <div class="modal-stats">
+      <div class="mstat"><div class="mstat-val" style="color:var(--up)">${m.yes_pct}%</div><div class="mstat-lbl">Yes</div></div>
+      <div class="mstat"><div class="mstat-val" style="color:var(--down)">${m.no_pct}%</div><div class="mstat-lbl">No</div></div>
+      <div class="mstat"><div class="mstat-val">${fmt$(m.liquidity)}</div><div class="mstat-lbl">נזילות</div></div>
+    </div>
+
+    <div style="margin-bottom:var(--gap-md)">
+      <div class="prob-bar" style="height:8px;margin-bottom:6px">
+        <div class="prob-bar-yes" style="width:${m.yes_pct}%"></div>
+      </div>
+      <p style="font-size:12px;color:var(--t2);line-height:1.5">${esc(m.interesting||'')}</p>
+    </div>
+
+    <div class="modal-actions">
+      <a href="${esc(m.link||'#')}" target="_blank" class="modal-btn modal-btn-primary" style="background:var(--accent);color:#000">📊 פתח ב-Polymarket</a>
+      <button onclick="toggleWatch('${m.id}');this.textContent=isWatched('${m.id}')?'✅ במעקב':'⭐ הוסף למעקב'" 
+        class="modal-btn modal-btn-secondary">${watched ? '✅ במעקב' : '⭐ הוסף למעקב'}</button>
+      <button class="modal-btn modal-btn-close" onclick="document.getElementById('marketModal').remove()">סגור</button>
+    </div>
+  </div>`;
   modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
   document.body.appendChild(modal);
 }
 
-function renderView() {
-  const rc = document.getElementById('real-content');
-  if (!appData) return;
+/* ════════════════════════════════════
+   EXIT MODAL
+════════════════════════════════════ */
+function openExitModal(pos) {
+  const pct     = Math.round((pos.curPrice||0)*1000)/10;
+  const exitVal = pos.exitValue || pos.currentValue || 0;
+  const pnl     = pos.cashPnl || 0;
+  const noLiq   = exitVal < 0.10;
+  const pnlSign = pnl >= 0 ? '+' : '';
+  const pnlClr  = pnl >= 0 ? 'var(--up)' : 'var(--down)';
 
-  if (activeTab === 'bets') {
-    rc.innerHTML = renderBets();
-    return;
+  document.getElementById('exitModalTitle').textContent = 'יציאה מפוזיציה';
+  document.getElementById('exitModalSub').textContent   = pos.title;
+  document.getElementById('exitModalStats').innerHTML   = `
+    <div class="mstat"><div class="mstat-val">$${exitVal.toFixed(2)}</div><div class="mstat-lbl">שווי יציאה</div></div>
+    <div class="mstat"><div class="mstat-val" style="color:${pnlClr}">${pnlSign}$${pnl.toFixed(2)}</div><div class="mstat-lbl">P&L</div></div>
+    <div class="mstat"><div class="mstat-val">${pct}%</div><div class="mstat-lbl">מחיר</div></div>`;
+
+  const alertEl   = document.getElementById('exitModalAlert');
+  const actionsEl = document.getElementById('exitModalActions');
+
+  if (noLiq) {
+    alertEl.innerHTML = `<div class="modal-alert">⚠️ <strong>אין קונים זמינים</strong> — המחיר ירד לכמעט אפס. לא ניתן למכור כרגע. הפוזיציה תסתיים אוטומטית ב-${pos.endDate||'?'}.</div>`;
+    actionsEl.innerHTML = '';
+  } else {
+    alertEl.innerHTML  = '';
+    actionsEl.innerHTML = `
+      <a href="${esc(pos.link||'#')}" target="_blank" class="modal-btn modal-btn-primary">🌐 מכור ב-Polymarket</a>
+      <button onclick="navigator.clipboard.writeText('sell ${esc(pos.slug||'')}');this.textContent='✅ הועתק!';setTimeout(()=>this.textContent='📋 העתק פקודה לבוט',2000)" class="modal-btn modal-btn-secondary">📋 העתק פקודה לבוט</button>`;
   }
 
-  if (activeTab === 'signals') {
-    rc.innerHTML = renderSignals();
-    return;
-  }
-
-  if (activeTab === 'analysis') {
-    rc.innerHTML = renderAnalysis();
-    return;
-  }
-
-  if (activeTab === 'watch') {
-    const ids = getWatchlist();
-    if (!ids.length) {
-      rc.innerHTML = `<div class="empty-watch"><span class="empty-icon">⭐</span><p>אין שווקים במעקב עדיין.<br>לחץ על ⭐ בכל שוק כדי להוסיף.</p></div>`;
-      return;
-    }
-    const all = [...(appData.hot||[]), ...(appData.movers||[]), ...(appData.new_interesting||[]), ...(appData.worth_watching||appData.watching||[])];
-    const seen = new Set();
-    const watched = ids.map(id => all.find(m => String(m.id) === id)).filter(Boolean).filter(m => { if (seen.has(m.id)) return false; seen.add(m.id); return true; });
-    rc.innerHTML = renderSection('⭐ שווקים במעקב', watched);
-    return;
-  }
-
-  let html = '';
-  // ── Active positions — ALWAYS first ──
-  const rp = appData.real_positions || {};
-  if ((rp.active || []).length > 0) {
-    html += renderRealPositions(rp);
-  }
-  // Show recommendation only on 'all' tab
-  if (activeTab === 'all' && appData.recommendation) {
-    html += `<div style="padding-top:var(--s-sm)">${renderRecommendation(appData.recommendation)}</div>`;
-  }
-  html += renderSection('🔥 חם עכשיו',        appData.hot              || [], false);
-  html += renderSection('📈 תנועות גדולות',    appData.movers           || [], true);
-  html += renderSection('✨ חדש ומעניין',      appData.new_interesting  || [], false);
-  html += renderSection('🎯 שווה לעקוב',       appData.worth_watching   || appData.watching || [], false);
-  rc.innerHTML = html || `<div class="empty-watch"><span class="empty-icon">🔍</span><p>אין שווקים בקטגוריה זו כרגע.</p></div>`;
+  document.getElementById('exitModal').style.display = 'flex';
 }
-
-/* ────────────────────────────────
-   STATS BAR
-──────────────────────────────── */
-function renderStats(d) {
-  const totalVol = [...(d.hot||[]), ...(d.movers||[])].reduce((s, m) => s + (m.volume24hr||0), 0);
-  const total    = (d.total_markets || (d.all_markets && d.all_markets.length) || 0);
-  const updated  = fmtAgo(d.updated_at);
-  document.getElementById('statsBar').innerHTML = `
-    <div class="stat-pill"><span class="stat-icon">📊</span><span class="stat-val">${total}</span><span class="stat-lbl"> שווקים</span></div>
-    <div class="stat-pill"><span class="stat-icon">💰</span><span class="stat-val">${fmt$(totalVol)}</span><span class="stat-lbl"> נפח 24h</span></div>
-    <div class="stat-pill"><span class="stat-icon">🔥</span><span class="stat-val">${(d.hot||[]).length}</span><span class="stat-lbl"> חם עכשיו</span></div>
-    <div class="stat-pill"><span class="stat-icon">⏰</span><span class="stat-val">${updated}</span><span class="stat-lbl"></span></div>
-  `;
-}
-
-/* ────────────────────────────────
-   PRICE FLASH (micro-interaction)
-──────────────────────────────── */
-function flashUpdated(newData, oldData) {
-  if (!oldData) return;
-  const allNew = [...(newData.hot||[]), ...(newData.movers||[])];
-  const allOld = [...(oldData.hot||[]), ...(oldData.movers||[])];
-  const oldMap  = Object.fromEntries(allOld.map(m => [m.id, m.yes_pct]));
-  allNew.forEach(m => {
-    const oldPct = oldMap[m.id];
-    const el     = document.getElementById(`yes-${m.id}`);
-    if (el && oldPct !== undefined && oldPct !== m.yes_pct) {
-      el.classList.remove('flash-up','flash-down');
-      void el.offsetWidth; // force reflow
-      el.classList.add(m.yes_pct > oldPct ? 'flash-up' : 'flash-down');
-    }
-  });
-}
-
-/* ────────────────────────────────
-   DATA LOADING
-──────────────────────────────── */
-async function loadData(isRefresh = false) {
-  if (isRefresh) {
-    const btn = document.getElementById('liveLabel');
-    if (btn) btn.textContent = '...';
-  }
-  try {
-    const r = await fetch(`${DATA_URL}?v=${Date.now()}`);
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    const d = await r.json();
-    prevData = appData;
-    appData  = d;
-
-    // First load
-    document.getElementById('skeleton-view').style.display = 'none';
-    document.getElementById('real-content').style.display  = 'block';
-
-    renderStats(d);
-    renderView();
-    if (isRefresh) flashUpdated(d, prevData);
-    updateWatchBadge();
-    updateBottomNavBadges(d);
-    // Bets badge
-    const betsBadge = document.getElementById('betsBadge');
-    if (betsBadge && d.active_bets_count > 0) {
-      betsBadge.textContent = d.active_bets_count;
-      betsBadge.style.display = 'inline';
-    }
-    // Signals badge
-    const sigBadge = document.getElementById('signalsBadge');
-    if (sigBadge && d.signals_count > 0) {
-      sigBadge.textContent = d.signals_count;
-      sigBadge.style.display = 'inline';
-    }
-
-    const lbl = document.getElementById('liveLabel');
-    if (lbl) lbl.textContent = 'LIVE';
-  } catch(e) {
-    console.error('PolyDash load error:', e);
-    const lbl = document.getElementById('liveLabel');
-    if (lbl) lbl.textContent = '⚠️';
-  }
-}
-
-/* ────────────────────────────────
-   QUICK VIEW MODAL
-──────────────────────────────── */
-function openModal(m) {
-  modalMarket = m;
-  const nr    = calcNet(m.yes_pct);
-  const overlay = document.getElementById('modalOverlay');
-  document.getElementById('modalTitle').textContent = m.question;
-
-  let imgHtml = '';
-  if (m.image) imgHtml = `<img class="modal-img" src="${esc(m.image)}" alt="" loading="lazy" onerror="this.style.display='none'" />`;
-
-  let netBoxHtml = '';
-  if (nr) {
-    netBoxHtml = `
-    <div class="modal-net-box">
-      <div class="modal-net-title">💰 נטו אחרי מס ועמלה (על $100 הימור)</div>
-      <div class="modal-net-val">+$${nr.net} <small style="font-size:16px;opacity:0.7">(ROI ${nr.roi}%)</small></div>
-      <div class="modal-net-sub">ברוטו: +$${nr.gross} • מס 25%: -$${(parseFloat(nr.gross)*0.25).toFixed(1)} • עמלה: -$0.1</div>
-    </div>`;
-  }
-
-  document.getElementById('modalBody').innerHTML = `
-    ${imgHtml}
-    <div class="modal-big-prob">
-      <div class="big-prob-item yes-item">
-        <div class="big-prob-lbl yes">YES</div>
-        <div class="big-prob-val yes">${m.yes_pct||0}%</div>
-      </div>
-      <div class="big-prob-item no-item">
-        <div class="big-prob-lbl no">NO</div>
-        <div class="big-prob-val no">${m.no_pct||0}%</div>
-      </div>
-    </div>
-    ${netBoxHtml}
-    <div class="modal-meta-grid">
-      <div class="meta-item"><div class="meta-lbl">קטגוריה</div><div class="meta-val">${catEmoji(m.category)}</div></div>
-      <div class="meta-item"><div class="meta-lbl">נפח 24h</div><div class="meta-val">${fmt$(m.volume24hr)}</div></div>
-      <div class="meta-item"><div class="meta-lbl">נפח כולל</div><div class="meta-val">${fmt$(m.volume)}</div></div>
-      <div class="meta-item"><div class="meta-lbl">תאריך סגירה</div><div class="meta-val">${fmtDate(m.end_date)}</div></div>
-    </div>
-    ${m.interesting ? `<div class="modal-desc">💡 ${esc(m.interesting)}</div>` : ''}
-    <a class="modal-cta" href="${esc(m.link||'https://polymarket.com')}" target="_blank" rel="noopener">פתח ב-Polymarket ↗</a>
-  `;
-
-  overlay.classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-
-function closeModal() {
-  document.getElementById('modalOverlay').classList.remove('open');
-  document.body.style.overflow = '';
-  modalMarket = null;
-}
-
-/* ────────────────────────────────
-   EVENT DELEGATION
-──────────────────────────────── */
-document.getElementById('mainContent').addEventListener('click', e => {
-  // Star button
-  const starBtn = e.target.closest('[data-star]');
-  if (starBtn) { e.preventDefault(); e.stopPropagation(); toggleWatch(starBtn.dataset.star, starBtn); return; }
-
-  // View button
-  const viewBtn = e.target.closest('[data-view]');
-  if (viewBtn) {
-    e.preventDefault(); e.stopPropagation();
-    const id  = viewBtn.dataset.view;
-    const all = [...(appData?.hot||[]), ...(appData?.movers||[]), ...(appData?.new_interesting||[]), ...(appData?.worth_watching||appData?.watching||[])];
-    const m   = all.find(x => String(x.id) === String(id));
-    if (m) openModal(m);
-    return;
-  }
-
-  // Card click → open modal
-  const card = e.target.closest('.card');
-  if (card && appData) {
-    const id  = card.dataset.id;
-    const all = [...(appData.hot||[]), ...(appData.movers||[]), ...(appData.new_interesting||[]), ...(appData.worth_watching||appData.watching||[])];
-    const m   = all.find(x => String(x.id) === String(id));
-    if (m) openModal(m);
-  }
+function closeExitModal() { document.getElementById('exitModal').style.display = 'none'; }
+document.getElementById('exitModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('exitModal')) closeExitModal();
 });
 
-// Keyboard accessibility for cards
-document.getElementById('mainContent').addEventListener('keydown', e => {
-  if (e.key === 'Enter' || e.key === ' ') {
-    const card = e.target.closest('.card');
-    if (card) { e.preventDefault(); card.click(); }
-  }
-});
-
-// Modal close
-document.getElementById('modalClose').addEventListener('click', closeModal);
-document.getElementById('modalOverlay').addEventListener('click', e => {
-  if (e.target === document.getElementById('modalOverlay')) closeModal();
-});
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
-
-// Tabs (category filters — top scrollable)
-document.getElementById('tabs').addEventListener('click', e => {
-  const tab = e.target.closest('.tab');
-  if (!tab) return;
-  document.querySelectorAll('.tab').forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected','false'); });
-  tab.classList.add('active');
-  tab.setAttribute('aria-selected','true');
-  activeTab = tab.dataset.cat;
-  renderView();
-});
-
-// Bottom nav
+/* ════════════════════════════════════
+   NAVIGATION
+════════════════════════════════════ */
 document.getElementById('bottomNav').addEventListener('click', e => {
   const item = e.target.closest('.nav-item');
   if (!item) return;
-  const view = item.dataset.view;
-  // update bottom nav active state
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   item.classList.add('active');
-  // map to tab system
-  const viewToTab = { home:'all', positions:'bets', signals:'signals', analysis:'analysis', watch:'watch' };
-  const target = viewToTab[view] || 'all';
-  // sync top tabs
-  document.querySelectorAll('.tab').forEach(t => {
-    t.classList.toggle('active', t.dataset.cat === target);
-    t.setAttribute('aria-selected', t.dataset.cat === target ? 'true' : 'false');
-  });
-  activeTab = target;
-  renderView();
+  activeView = item.dataset.view;
+  renderContent();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 });
 
-// Refresh button
 document.getElementById('refreshBtn').addEventListener('click', () => {
-  document.getElementById('refreshBtn').querySelector('span:last-child').textContent = 'טוען...';
-  loadData(true).finally(() => {
-    setTimeout(() => { document.getElementById('refreshBtn').querySelector('span:last-child').textContent = 'LIVE'; }, 500);
-  });
+  const lbl = document.getElementById('refreshLabel');
+  lbl.textContent = 'טוען...';
+  loadData(true).finally(() => { setTimeout(() => { lbl.textContent = 'LIVE'; }, 500); });
 });
 
-// Update bottom nav badges
-function updateBottomNavBadges(d) {
-  const posCount  = (d.real_positions?.active?.length || 0) + (d.active_bets_count || 0);
-  const sigCount  = d.signals_count || 0;
-  const watchCount = getWatchlist().length;
-  const posEl  = document.getElementById('navBadgePos');
-  const sigEl  = document.getElementById('navBadgeSig');
-  const watEl  = document.getElementById('navBadgeWatch');
-  if (posEl)  { posEl.textContent = posCount;   posEl.style.display  = posCount  > 0 ? 'block' : 'none'; }
-  if (sigEl)  { sigEl.textContent = sigCount;   sigEl.style.display  = sigCount  > 0 ? 'block' : 'none'; }
-  if (watEl)  { watEl.textContent = watchCount; watEl.style.display  = watchCount > 0 ? 'block' : 'none'; }
-}
-
-/* ────────────────────────────────
-   INIT & AUTO-REFRESH
-──────────────────────────────── */
+/* ════════════════════════════════════
+   INIT
+════════════════════════════════════ */
 loadData();
 setInterval(() => loadData(true), REFRESH_MS);
-updateWatchBadge();
 </script>
-
-<!-- ───────────────────── BOTTOM NAV ───────────────────── -->
-<nav class="bottom-nav" id="bottomNav" role="navigation" aria-label="ניווט ראשי">
-  <button class="nav-item active" data-view="home" aria-label="ראשי">
-    <span class="nav-icon">🏠</span>
-    <span>ראשי</span>
-  </button>
-  <button class="nav-item" data-view="positions" aria-label="פוזיציות">
-    <span class="nav-badge" id="navBadgePos"></span>
-    <span class="nav-icon">💼</span>
-    <span>פוזיציות</span>
-  </button>
-  <button class="nav-item" data-view="signals" aria-label="סיגנלים">
-    <span class="nav-badge" id="navBadgeSig"></span>
-    <span class="nav-icon">📡</span>
-    <span>סיגנלים</span>
-  </button>
-  <button class="nav-item" data-view="analysis" aria-label="ניתוח">
-    <span class="nav-icon">📊</span>
-    <span>ניתוח</span>
-  </button>
-  <button class="nav-item" data-view="watch" aria-label="מעקב">
-    <span class="nav-badge" id="navBadgeWatch"></span>
-    <span class="nav-icon">⭐</span>
-    <span>מעקב</span>
-  </button>
-</nav>
 </body>
 </html>
