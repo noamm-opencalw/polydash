@@ -7,10 +7,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.48.0/dist/apexcharts.min.js"></script>
 
   <style>
     :root {
-      /* Trading platform palette */
       --bg-base:        #0a0e17;
       --bg-panel:       #0f1520;
       --bg-card:        #131b28;
@@ -18,47 +18,27 @@
       --bg-row-hover:   #1a2535;
       --border:         rgba(255,255,255,0.07);
       --border-strong:  rgba(255,255,255,0.14);
-
-      /* Accent — teal like trading platforms */
       --accent:         #00c4b4;
       --accent-dim:     rgba(0,196,180,0.12);
       --accent-border:  rgba(0,196,180,0.35);
-
-      /* P&L colors */
       --up:             #00c087;
       --up-bg:          rgba(0,192,135,0.10);
       --up-border:      rgba(0,192,135,0.30);
       --down:           #ef4444;
       --down-bg:        rgba(239,68,68,0.10);
       --down-border:    rgba(239,68,68,0.28);
+      --warn:           #f59e0b;
       --neutral:        #6b7a99;
-
-      /* Text hierarchy */
-      --t1:  #e8edf5;
-      --t2:  #8fa3c0;
-      --t3:  #4d607d;
-      --t4:  #2d3a50;
-
-      /* Numbers — monospace */
+      --t1: #e8edf5;
+      --t2: #8fa3c0;
+      --t3: #4d607d;
+      --t4: #2d3a50;
       --mono: 'IBM Plex Mono', monospace;
-
-      /* Spacing */
-      --gap-xs:  4px;
-      --gap-sm:  8px;
-      --gap-md:  14px;
-      --gap-lg:  20px;
-      --gap-xl:  28px;
-
-      /* Border radius */
-      --r-xs:  4px;
-      --r-sm:  6px;
-      --r-md:  10px;
-      --r-lg:  14px;
-      --r-pill: 100px;
+      --gap-xs: 4px; --gap-sm: 8px; --gap-md: 14px; --gap-lg: 20px; --gap-xl: 28px;
+      --r-xs: 4px; --r-sm: 6px; --r-md: 10px; --r-lg: 14px; --r-pill: 100px;
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     html { scroll-behavior: smooth; }
 
     body {
@@ -68,114 +48,91 @@
       min-height: 100vh;
       direction: rtl;
       -webkit-overflow-scrolling: touch;
-      padding-bottom: calc(62px + env(safe-area-inset-bottom));
+      padding-bottom: calc(66px + env(safe-area-inset-bottom));
       overflow-x: hidden;
     }
 
-    /* Grid background texture */
     body::before {
       content: '';
       position: fixed; inset: 0; pointer-events: none; z-index: 0;
       background-image:
-        linear-gradient(rgba(0,196,180,0.02) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0,196,180,0.02) 1px, transparent 1px);
+        linear-gradient(rgba(0,196,180,0.015) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,196,180,0.015) 1px, transparent 1px);
       background-size: 32px 32px;
     }
 
     main, header, nav { position: relative; z-index: 1; }
 
-    /* ═══════════════════════════════════════════════
-       TICKER BAR — top scrolling prices
-    ═══════════════════════════════════════════════ */
+    /* ══ TICKER ══ */
     .ticker-bar {
       background: var(--bg-panel);
       border-bottom: 1px solid var(--border);
-      height: 32px;
-      overflow: hidden;
+      height: 30px; overflow: hidden;
       display: flex; align-items: center;
       padding-top: env(safe-area-inset-top);
     }
     .ticker-track {
       display: flex; gap: 0; white-space: nowrap;
-      animation: ticker-scroll 35s linear infinite;
+      animation: ticker-scroll 40s linear infinite;
     }
     .ticker-track:hover { animation-play-state: paused; }
-    @keyframes ticker-scroll {
-      0%   { transform: translateX(0); }
-      100% { transform: translateX(-50%); }
-    }
+    @keyframes ticker-scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
     .ticker-item {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 0 var(--gap-lg);
-      font-size: 11.5px; font-family: var(--mono);
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 0 14px; font-size: 11px; font-family: var(--mono);
       border-right: 1px solid var(--border);
     }
-    .ticker-name  { color: var(--t2); }
+    .ticker-name  { color: var(--t3); }
     .ticker-price { color: var(--t1); font-weight: 600; }
-    .ticker-change { font-size: 11px; }
     .ticker-up    { color: var(--up); }
     .ticker-down  { color: var(--down); }
 
-    /* ═══════════════════════════════════════════════
-       HEADER
-    ═══════════════════════════════════════════════ */
+    /* ══ HEADER ══ */
     header {
       position: sticky; top: 0; z-index: 100;
-      background: rgba(10,14,23,0.96);
+      background: rgba(10,14,23,0.97);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       border-bottom: 1px solid var(--border-strong);
     }
-
     .header-inner {
       max-width: 600px; margin: 0 auto;
-      padding: var(--gap-sm) var(--gap-md);
-      display: flex; align-items: center; gap: var(--gap-md);
+      padding: 10px 14px;
+      display: flex; align-items: center; gap: 12px;
     }
-
-    .logo {
-      display: flex; align-items: center; gap: var(--gap-sm);
-      flex-shrink: 0;
-    }
+    .logo { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
     .logo-mark {
-      width: 32px; height: 32px;
+      width: 30px; height: 30px;
       background: linear-gradient(135deg, var(--accent), #0e9f92);
-      border-radius: var(--r-sm);
+      border-radius: 7px;
       display: flex; align-items: center; justify-content: center;
-      font-size: 15px;
-      box-shadow: 0 0 12px rgba(0,196,180,0.3);
+      font-size: 14px;
+      box-shadow: 0 0 10px rgba(0,196,180,0.3);
     }
-    .logo-text { line-height: 1.15; }
-    .logo-name { font-size: 16px; font-weight: 800; color: var(--t1); letter-spacing: -0.3px; }
-    .logo-sub  { font-size: 10px; color: var(--t3); font-weight: 500; }
+    .logo-name { font-size: 15px; font-weight: 800; color: var(--t1); letter-spacing: -0.3px; }
+    .logo-sub  { font-size: 9px; color: var(--t3); font-weight: 500; }
 
-    /* Portfolio mini summary in header */
-    .header-portfolio {
-      flex: 1;
-      display: flex; gap: var(--gap-md); align-items: center;
-      justify-content: center;
+    .header-pnl {
+      flex: 1; display: flex; align-items: center; justify-content: center; gap: 16px;
       border-right: 1px solid var(--border);
-      border-left:  1px solid var(--border);
-      padding: 0 var(--gap-md);
+      border-left: 1px solid var(--border);
+      padding: 0 12px;
     }
-    .hport-item { text-align: center; }
-    .hport-val  { font-family: var(--mono); font-size: 14px; font-weight: 600; color: var(--t1); }
-    .hport-lbl  { font-size: 9px; color: var(--t3); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 1px; }
+    .hpnl-item { text-align: center; }
+    .hpnl-val { font-family: var(--mono); font-size: 13px; font-weight: 700; color: var(--t1); }
+    .hpnl-lbl { font-size: 9px; color: var(--t3); font-weight: 500; text-transform: uppercase; letter-spacing: 0.4px; margin-top: 1px; }
 
-    .header-actions {
-      display: flex; align-items: center; gap: var(--gap-sm);
-      flex-shrink: 0;
-    }
     .btn-refresh {
       display: flex; align-items: center; gap: 4px;
       background: transparent;
       border: 1px solid var(--border-strong);
       border-radius: var(--r-sm);
-      padding: 5px 10px;
+      padding: 5px 9px;
       font-size: 11px; font-weight: 600;
       color: var(--t2); cursor: pointer;
       transition: all 0.15s;
       font-family: 'Assistant', sans-serif;
+      flex-shrink: 0;
     }
     .btn-refresh:hover { border-color: var(--accent); color: var(--accent); }
     .live-dot {
@@ -183,18 +140,12 @@
       background: var(--up); border-radius: 50%;
       animation: pulse 2s infinite;
     }
-    @keyframes pulse {
-      0%,100% { opacity:1; transform:scale(1); }
-      50%      { opacity:0.5; transform:scale(1.3); }
-    }
+    @keyframes pulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:0.5; transform:scale(1.3); } }
 
-    /* ═══════════════════════════════════════════════
-       BOTTOM NAVIGATION
-    ═══════════════════════════════════════════════ */
+    /* ══ BOTTOM NAV ══ */
     .bottom-nav {
-      position: fixed; bottom: 0; left: 0; right: 0;
-      z-index: 200;
-      background: rgba(10,14,23,0.97);
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
+      background: rgba(10,14,23,0.98);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       border-top: 1px solid var(--border-strong);
@@ -212,347 +163,239 @@
       padding: 8px 4px; position: relative;
       transition: color 0.15s;
     }
-    .nav-item:hover  { color: var(--t2); }
+    .nav-item:hover { color: var(--t2); }
     .nav-item.active { color: var(--accent); }
     .nav-item.active::after {
-      content: '';
-      position: absolute; top: 0; left: 25%; right: 25%;
+      content: ''; position: absolute; top: 0; left: 20%; right: 20%;
       height: 2px; background: var(--accent);
       border-radius: 0 0 2px 2px;
     }
-    .nav-icon { font-size: 18px; line-height: 1; }
+    .nav-icon { font-size: 17px; line-height: 1; }
     .nav-badge {
-      position: absolute; top: 5px; right: calc(50% - 20px);
-      background: var(--down); color: white;
-      border-radius: var(--r-pill);
-      padding: 1px 5px; font-size: 9px; font-weight: 800;
-      min-width: 15px; text-align: center; display: none;
+      position: absolute; top: 5px; right: calc(50% - 18px);
+      background: var(--accent); color: #000;
+      border-radius: var(--r-pill); padding: 1px 4px;
+      font-size: 9px; font-weight: 800; min-width: 14px;
+      text-align: center; display: none;
     }
-    .nav-badge.green { background: var(--accent); }
+    .nav-badge.red { background: var(--down); color: white; }
 
-    /* ═══════════════════════════════════════════════
-       LAYOUT
-    ═══════════════════════════════════════════════ */
+    /* ══ LAYOUT ══ */
     .content {
       max-width: 600px; margin: 0 auto;
-      padding: var(--gap-md) var(--gap-md) var(--gap-xl);
+      padding: 12px 12px 20px;
     }
-
-    /* ─── Section ─── */
-    .section { margin-bottom: var(--gap-xl); }
+    .section { margin-bottom: 20px; }
     .section-head {
       display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: var(--gap-sm);
-      padding-bottom: var(--gap-sm);
+      margin-bottom: 8px; padding-bottom: 8px;
       border-bottom: 1px solid var(--border);
     }
-    .section-title {
-      font-size: 12px; font-weight: 700;
-      color: var(--t3); text-transform: uppercase; letter-spacing: 0.8px;
-    }
-    .section-count {
-      font-size: 11px; color: var(--t3);
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--r-pill);
-      padding: 1px 7px; font-family: var(--mono);
-    }
-
-    /* ═══════════════════════════════════════════════
-       PORTFOLIO PANEL — top of page
-    ═══════════════════════════════════════════════ */
-    .portfolio-panel {
-      background: var(--bg-panel);
-      border: 1px solid var(--border-strong);
-      border-radius: var(--r-lg);
-      padding: var(--gap-md);
-      margin-bottom: var(--gap-md);
-    }
-    .portfolio-panel-head {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: var(--gap-md);
-    }
-    .portfolio-panel-title { font-size: 11px; color: var(--t3); font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; }
-    .portfolio-panel-time  { font-size: 10px; color: var(--t3); font-family: var(--mono); }
-
-    .portfolio-grid {
-      display: grid; grid-template-columns: repeat(3, 1fr);
-      gap: var(--gap-sm);
-      margin-bottom: var(--gap-md);
-    }
-    .pstat {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--r-sm);
-      padding: var(--gap-sm) var(--gap-sm);
-      text-align: center;
-    }
-    .pstat-val {
-      font-family: var(--mono); font-size: 18px; font-weight: 600;
-      color: var(--t1); line-height: 1.1; margin-bottom: 3px;
-    }
-    .pstat-lbl { font-size: 10px; color: var(--t3); font-weight: 500; }
-    .pstat-up   .pstat-val { color: var(--up); }
-    .pstat-down .pstat-val { color: var(--down); }
-
-    /* ═══════════════════════════════════════════════
-       POSITIONS TABLE
-    ═══════════════════════════════════════════════ */
-    .positions-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 13px;
-    }
-    .positions-table th {
-      font-size: 10px; font-weight: 700;
-      color: var(--t3); text-transform: uppercase; letter-spacing: 0.6px;
-      text-align: right; padding: 6px var(--gap-sm);
-      border-bottom: 1px solid var(--border-strong);
-      white-space: nowrap;
-    }
-    .positions-table th.num { text-align: left; }
-    .positions-table td {
-      padding: 10px var(--gap-sm);
-      border-bottom: 1px solid var(--border);
-      vertical-align: middle;
-    }
-    .positions-table tr:last-child td { border-bottom: none; }
-    .positions-table tr:hover td { background: var(--bg-row-hover); }
-    .positions-table .num { text-align: left; font-family: var(--mono); }
-    .pos-title { font-size: 12px; font-weight: 600; color: var(--t1); line-height: 1.35; max-width: 160px; }
-    .pos-outcome {
-      display: inline-flex; align-items: center;
-      background: var(--up-bg); border: 1px solid var(--up-border);
-      border-radius: 4px; padding: 1px 6px;
-      font-size: 10px; font-weight: 700; color: var(--up);
-    }
-    .pos-pnl-up   { color: var(--up);   font-weight: 700; }
-    .pos-pnl-down { color: var(--down); font-weight: 700; }
-    .pos-bar {
-      height: 3px; border-radius: 2px;
-      background: var(--border-strong); overflow: hidden; margin-top: 4px;
-    }
-    .pos-bar-fill { height: 100%; border-radius: 2px; }
-    .pos-no-liq {
+    .section-title { font-size: 11px; font-weight: 700; color: var(--t3); text-transform: uppercase; letter-spacing: 0.8px; }
+    .section-badge {
       font-size: 10px; color: var(--t3);
       background: var(--bg-card); border: 1px solid var(--border);
-      border-radius: 4px; padding: 2px 6px; white-space: nowrap;
-    }
-    .btn-exit {
-      font-size: 11px; font-weight: 700;
-      border-radius: var(--r-xs); padding: 4px 10px;
-      cursor: pointer; white-space: nowrap;
-      font-family: 'Assistant', sans-serif;
-      transition: all 0.15s;
-    }
-    .btn-exit-active {
-      background: var(--down-bg); border: 1px solid var(--down-border); color: var(--down);
-    }
-    .btn-exit-active:hover { background: rgba(239,68,68,0.2); }
-    .btn-exit-inactive {
-      background: var(--bg-card); border: 1px solid var(--border); color: var(--t3);
-      cursor: default;
+      border-radius: var(--r-pill); padding: 1px 7px; font-family: var(--mono);
     }
 
-    /* ═══════════════════════════════════════════════
-       MARKET CARD — trading style
-    ═══════════════════════════════════════════════ */
-    .market-card {
+    /* ══ PORTFOLIO HERO ══ */
+    .hero-card {
+      background: linear-gradient(135deg, var(--bg-panel) 0%, rgba(0,196,180,0.04) 100%);
+      border: 1px solid var(--accent-border);
+      border-radius: var(--r-lg);
+      padding: 16px;
+      margin-bottom: 12px;
+      position: relative; overflow: hidden;
+    }
+    .hero-card::before {
+      content: '';
+      position: absolute; top: -20px; left: -20px;
+      width: 120px; height: 120px;
+      background: radial-gradient(circle, rgba(0,196,180,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-label { font-size: 10px; font-weight: 700; color: var(--t3); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; }
+    .hero-pnl {
+      font-family: var(--mono); font-size: 36px; font-weight: 800;
+      line-height: 1; margin-bottom: 4px;
+    }
+    .hero-pnl-sub { font-size: 12px; color: var(--t3); margin-bottom: 14px; }
+
+    .hero-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    .hstat {
+      background: rgba(0,0,0,0.25);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      padding: 8px 6px; text-align: center;
+    }
+    .hstat-val { font-family: var(--mono); font-size: 15px; font-weight: 700; color: var(--t1); }
+    .hstat-lbl { font-size: 9px; color: var(--t3); font-weight: 600; margin-top: 2px; text-transform: uppercase; }
+    .hstat.up   .hstat-val { color: var(--up); }
+    .hstat.down .hstat-val { color: var(--down); }
+    .hstat.accent .hstat-val { color: var(--accent); }
+
+    /* ══ POLYMARKET LINK ══ */
+    .poly-link {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--r-md);
+      padding: 12px;
+      text-decoration: none;
+      color: var(--t2);
+      font-size: 13px; font-weight: 600;
+      transition: all 0.15s;
+      margin-bottom: 12px;
+    }
+    .poly-link:hover { border-color: var(--accent); color: var(--accent); }
+    .poly-link-logo { font-size: 18px; }
+    .poly-link-arrow { margin-right: auto; font-size: 16px; opacity: 0.5; }
+
+    /* ══ WIN/LOSS STRIP ══ */
+    .wl-strip {
+      display: grid; grid-template-columns: 1fr 1px 1fr;
       background: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: var(--r-md);
-      padding: var(--gap-md);
-      margin-bottom: var(--gap-sm);
-      cursor: pointer;
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+    .wl-divider { background: var(--border-strong); }
+    .wl-side { padding: 12px; text-align: center; }
+    .wl-val { font-family: var(--mono); font-size: 22px; font-weight: 800; }
+    .wl-sub { font-size: 10px; color: var(--t3); font-weight: 600; margin-top: 3px; }
+    .wl-pnl { font-size: 12px; font-family: var(--mono); margin-top: 4px; font-weight: 700; }
+    .wl-side.win .wl-val { color: var(--up); }
+    .wl-side.loss .wl-val { color: var(--down); }
+
+    /* ══ POSITION CARD ══ */
+    .pos-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      padding: 12px;
+      margin-bottom: 8px;
       transition: all 0.15s;
-      display: flex; gap: var(--gap-md); align-items: center;
     }
-    .market-card:hover {
-      border-color: var(--border-strong);
-      background: var(--bg-row-hover);
-      transform: translateX(-2px);
+    .pos-card:hover { border-color: var(--border-strong); background: var(--bg-row-hover); }
+    .pos-card-head {
+      display: flex; align-items: flex-start; gap: 10px;
+      margin-bottom: 10px;
     }
-    .market-card-img {
-      width: 38px; height: 38px; border-radius: var(--r-sm);
+    .pos-card-img {
+      width: 36px; height: 36px; border-radius: var(--r-sm);
       object-fit: cover; flex-shrink: 0;
       background: var(--bg-panel);
     }
-    .market-card-body { flex: 1; min-width: 0; }
-    .market-card-title {
-      font-size: 13px; font-weight: 600; color: var(--t1);
+    .pos-card-title-wrap { flex: 1; min-width: 0; }
+    .pos-card-title {
+      font-size: 13px; font-weight: 700; color: var(--t1);
       line-height: 1.35; margin-bottom: 5px;
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
-    .market-card-meta {
-      display: flex; gap: var(--gap-sm); align-items: center; flex-wrap: wrap;
-    }
-    .meta-pill {
-      font-size: 10px; color: var(--t3);
-      background: var(--bg-panel); border: 1px solid var(--border);
-      border-radius: var(--r-pill); padding: 1px 7px;
-    }
-    .market-card-right {
-      flex-shrink: 0; text-align: left; min-width: 80px;
-    }
-    .prob-bar-wrap { margin-bottom: 5px; }
-    .prob-bar {
-      height: 5px; border-radius: var(--r-pill);
-      background: var(--border-strong); overflow: hidden; margin-bottom: 3px;
-    }
-    .prob-bar-yes { height: 100%; border-radius: var(--r-pill); background: var(--up); }
-    .prob-labels {
-      display: flex; justify-content: space-between;
-      font-family: var(--mono); font-size: 10px;
-    }
-    .prob-yes { color: var(--up); font-weight: 600; }
-    .prob-no  { color: var(--down); }
-    .market-vol {
-      font-size: 10px; color: var(--t3); text-align: center;
-      font-family: var(--mono);
-    }
-    .change-badge {
-      display: inline-flex; align-items: center; gap: 2px;
-      font-family: var(--mono); font-size: 11px; font-weight: 600;
-      border-radius: 3px; padding: 1px 5px;
-    }
-    .change-up   { color: var(--up);   background: var(--up-bg); }
-    .change-down { color: var(--down); background: var(--down-bg); }
-    .change-flat { color: var(--t3); }
+    .pos-card-badges { display: flex; gap: 5px; flex-wrap: wrap; align-items: center; }
 
-    /* ═══════════════════════════════════════════════
-       WATCHLIST — compact table style
-    ═══════════════════════════════════════════════ */
-    .watch-btn {
-      background: transparent; border: none;
-      font-size: 14px; cursor: pointer;
-      padding: 4px; border-radius: var(--r-xs);
-      transition: transform 0.15s;
+    .badge {
+      display: inline-flex; align-items: center;
+      border-radius: var(--r-xs); padding: 2px 6px;
+      font-size: 10px; font-weight: 700;
     }
-    .watch-btn:hover { transform: scale(1.2); }
+    .badge-yes  { background: var(--up-bg);   border: 1px solid var(--up-border);   color: var(--up);   }
+    .badge-no   { background: var(--down-bg);  border: 1px solid var(--down-border);  color: var(--down); }
+    .badge-days { background: var(--bg-panel); border: 1px solid var(--border);       color: var(--t3);   }
+    .badge-win  { background: var(--up-bg);   border: 1px solid var(--up-border);   color: var(--up);   }
+    .badge-loss { background: var(--down-bg);  border: 1px solid var(--down-border);  color: var(--down); }
+    .badge-open { background: rgba(0,196,180,0.1); border: 1px solid var(--accent-border); color: var(--accent); }
+    .badge-neutral { background: var(--bg-panel); border: 1px solid var(--border); color: var(--t3); }
 
-    /* ═══════════════════════════════════════════════
-       RECOMMENDATION CARD
-    ═══════════════════════════════════════════════ */
-    .rec-card {
-      background: linear-gradient(135deg, rgba(0,196,180,0.08) 0%, rgba(0,196,180,0.03) 100%);
-      border: 1px solid var(--accent-border);
-      border-radius: var(--r-lg);
-      padding: var(--gap-md);
-      margin-bottom: var(--gap-lg);
+    .pos-card-metrics {
+      display: grid; grid-template-columns: 1fr 1fr 1fr;
+      gap: 6px;
     }
-    .rec-header {
-      display: flex; align-items: center; gap: var(--gap-sm);
-      margin-bottom: var(--gap-sm);
+    .pos-metric {
+      background: rgba(0,0,0,0.2);
+      border-radius: var(--r-xs);
+      padding: 7px 8px; text-align: center;
     }
-    .rec-badge {
-      background: var(--accent); color: #000;
-      font-size: 10px; font-weight: 800;
-      border-radius: var(--r-pill); padding: 2px 8px;
-      text-transform: uppercase; letter-spacing: 0.5px;
-    }
-    .rec-title { font-size: 14px; font-weight: 700; color: var(--t1); margin-bottom: var(--gap-sm); line-height: 1.4; }
-    .rec-reasons { display: flex; flex-direction: column; gap: 4px; margin-bottom: var(--gap-md); }
-    .rec-reason { font-size: 12px; color: var(--t2); display: flex; align-items: center; gap: 5px; }
-    .rec-reason::before { content: '›'; color: var(--accent); font-weight: 700; flex-shrink: 0; }
-    .rec-cta {
-      display: inline-flex; align-items: center; gap: 5px;
-      background: var(--accent); color: #000;
-      border: none; border-radius: var(--r-sm);
-      padding: 8px 18px; font-size: 13px; font-weight: 700;
-      cursor: pointer; transition: opacity 0.15s;
-      text-decoration: none; font-family: 'Assistant', sans-serif;
-    }
-    .rec-cta:hover { opacity: 0.85; }
+    .pos-metric-val { font-family: var(--mono); font-size: 14px; font-weight: 700; color: var(--t1); }
+    .pos-metric-lbl { font-size: 9px; color: var(--t3); font-weight: 600; text-transform: uppercase; margin-top: 2px; }
+    .pos-metric.up   .pos-metric-val { color: var(--up); }
+    .pos-metric.down .pos-metric-val { color: var(--down); }
 
-    /* ═══════════════════════════════════════════════
-       SIGNALS TABLE
-    ═══════════════════════════════════════════════ */
-    .signal-row {
+    .pos-progress { height: 3px; border-radius: 2px; background: var(--border-strong); overflow: hidden; margin-top: 8px; }
+    .pos-progress-fill { height: 100%; border-radius: 2px; transition: width 0.3s; }
+
+    .pos-card-actions { display: flex; gap: 6px; margin-top: 10px; }
+    .btn-sm {
+      flex: 1; display: flex; align-items: center; justify-content: center; gap: 4px;
+      padding: 7px 10px; border-radius: var(--r-sm);
+      font-size: 11px; font-weight: 700;
+      font-family: 'Assistant', sans-serif;
+      cursor: pointer; text-decoration: none;
+      border: none; transition: all 0.15s;
+    }
+    .btn-sm-primary { background: var(--accent); color: #000; }
+    .btn-sm-primary:hover { opacity: 0.85; }
+    .btn-sm-ghost  { background: var(--bg-panel); border: 1px solid var(--border); color: var(--t2); }
+    .btn-sm-ghost:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-sm-danger { background: var(--down-bg); border: 1px solid var(--down-border); color: var(--down); }
+
+    /* ══ HISTORY ITEM ══ */
+    .hist-item {
       background: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: var(--r-md);
-      padding: var(--gap-sm) var(--gap-md);
-      margin-bottom: var(--gap-xs);
-      display: flex; gap: var(--gap-md); align-items: center;
-      transition: all 0.15s;
+      padding: 12px;
+      margin-bottom: 8px;
+      display: flex; gap: 10px; align-items: flex-start;
     }
-    .signal-row:hover { border-color: var(--border-strong); background: var(--bg-row-hover); }
-    .signal-strength {
-      font-size: 10px; font-weight: 800;
-      border-radius: 3px; padding: 2px 6px;
-      white-space: nowrap;
-    }
-    .signal-strong { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
-    .signal-medium { background: rgba(251,191,36,0.12); color: #fbbf24; border: 1px solid rgba(251,191,36,0.25); }
-    .signal-body { flex: 1; min-width: 0; }
-    .signal-title { font-size: 12px; font-weight: 600; color: var(--t1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .signal-meta  { font-size: 11px; color: var(--t3); margin-top: 2px; font-family: var(--mono); }
-    .signal-right { text-align: left; flex-shrink: 0; }
-    .signal-price { font-family: var(--mono); font-size: 14px; font-weight: 700; color: var(--up); }
-    .signal-size  { font-size: 10px; color: var(--t3); }
+    .hist-icon { font-size: 22px; flex-shrink: 0; margin-top: 2px; }
+    .hist-body { flex: 1; min-width: 0; }
+    .hist-title { font-size: 13px; font-weight: 600; color: var(--t1); line-height: 1.35; margin-bottom: 4px; }
+    .hist-meta  { font-size: 11px; color: var(--t3); display: flex; gap: 8px; flex-wrap: wrap; }
+    .hist-right { text-align: left; flex-shrink: 0; }
+    .hist-pnl { font-family: var(--mono); font-size: 16px; font-weight: 800; }
+    .hist-pnl.up   { color: var(--up); }
+    .hist-pnl.down { color: var(--down); }
+    .hist-pct { font-size: 10px; color: var(--t3); margin-top: 2px; font-family: var(--mono); }
 
-    /* ═══════════════════════════════════════════════
-       EMPTY STATE
-    ═══════════════════════════════════════════════ */
-    .empty-state {
-      text-align: center; padding: var(--gap-xl) var(--gap-md);
-      color: var(--t3);
+    /* ══ INSIGHT CARD ══ */
+    .insight-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 8px; margin-bottom: 12px;
     }
-    .empty-icon { font-size: 36px; display: block; margin-bottom: var(--gap-sm); opacity: 0.5; }
-    .empty-text { font-size: 13px; line-height: 1.5; }
+    .insight-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      padding: 12px;
+    }
+    .insight-card.full { grid-column: 1 / -1; }
+    .insight-label { font-size: 10px; color: var(--t3); font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 6px; }
+    .insight-val   { font-family: var(--mono); font-size: 24px; font-weight: 800; color: var(--t1); line-height: 1.1; }
+    .insight-sub   { font-size: 11px; color: var(--t3); margin-top: 4px; }
+    .insight-val.up   { color: var(--up); }
+    .insight-val.down { color: var(--down); }
+    .insight-val.accent { color: var(--accent); }
 
-    /* ═══════════════════════════════════════════════
-       MODAL — exit position
-    ═══════════════════════════════════════════════ */
-    .modal-overlay {
-      position: fixed; inset: 0; z-index: 500;
-      background: rgba(0,0,0,0.8); backdrop-filter: blur(8px);
-      display: flex; align-items: flex-end; justify-content: center;
-      padding: var(--gap-md);
+    /* Win rate bar */
+    .winrate-bar {
+      height: 6px; border-radius: var(--r-pill);
+      background: var(--border-strong); overflow: hidden; margin-top: 8px;
     }
-    .modal-sheet {
+    .winrate-fill { height: 100%; border-radius: var(--r-pill); background: var(--up); transition: width 0.5s; }
+
+    /* ══ CHART CONTAINER ══ */
+    .chart-card {
       background: var(--bg-panel);
-      border: 1px solid var(--border-strong);
-      border-radius: var(--r-lg) var(--r-lg) 0 0;
-      padding: var(--gap-lg);
-      width: 100%; max-width: 540px;
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      padding: 14px;
+      margin-bottom: 12px;
     }
-    .modal-handle {
-      width: 36px; height: 4px;
-      background: var(--border-strong);
-      border-radius: var(--r-pill); margin: 0 auto var(--gap-md);
-    }
-    .modal-title { font-size: 16px; font-weight: 800; margin-bottom: 4px; }
-    .modal-sub   { font-size: 12px; color: var(--t2); margin-bottom: var(--gap-md); line-height: 1.4; }
-    .modal-stats {
-      display: flex; gap: var(--gap-md);
-      background: var(--bg-card); border: 1px solid var(--border);
-      border-radius: var(--r-md); padding: var(--gap-md);
-      margin-bottom: var(--gap-md);
-    }
-    .mstat { flex: 1; text-align: center; }
-    .mstat-val { font-family: var(--mono); font-size: 20px; font-weight: 700; color: var(--t1); }
-    .mstat-lbl { font-size: 10px; color: var(--t3); margin-top: 2px; }
-    .modal-alert {
-      background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.25);
-      border-radius: var(--r-sm); padding: var(--gap-sm) var(--gap-md);
-      font-size: 12px; color: #fbbf24; margin-bottom: var(--gap-md); line-height: 1.5;
-    }
-    .modal-actions { display: flex; flex-direction: column; gap: var(--gap-sm); }
-    .modal-btn {
-      display: block; text-align: center; padding: 12px;
-      border-radius: var(--r-sm); font-size: 14px; font-weight: 700;
-      cursor: pointer; text-decoration: none; transition: opacity 0.15s;
-      font-family: 'Assistant', sans-serif; border: none;
-    }
-    .modal-btn-primary   { background: var(--down); color: white; }
-    .modal-btn-secondary { background: var(--bg-card); border: 1px solid var(--border); color: var(--t2); }
-    .modal-btn:hover     { opacity: 0.85; }
-    .modal-btn-close     { background: transparent; border: 1px solid var(--border); color: var(--t3); margin-top: var(--gap-xs); }
+    .chart-title { font-size: 12px; font-weight: 700; color: var(--t2); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+    .chart-wrap  { min-height: 200px; }
 
-    /* ═══════════════════════════════════════════════
-       SKELETON
-    ═══════════════════════════════════════════════ */
+    /* ══ SKELETON ══ */
     @keyframes shimmer {
       0%   { background-position: -600px 0; }
       100% { background-position:  600px 0; }
@@ -561,122 +404,105 @@
       background: linear-gradient(90deg, var(--bg-panel) 25%, rgba(255,255,255,0.05) 50%, var(--bg-panel) 75%);
       background-size: 1200px 100%;
       animation: shimmer 1.8s infinite linear;
-      border-radius: var(--r-sm);
-    }
-    .skel-h12 { height: 12px; }
-    .skel-h16 { height: 16px; }
-    .skel-h80 { height: 80px; }
-    .skel-hc  { height: 56px; }
-
-    /* ═══════════════════════════════════════════════
-       ANALYSIS — charts
-    ═══════════════════════════════════════════════ */
-    .analysis-panel {
-      background: var(--bg-panel);
-      border: 1px solid var(--border);
       border-radius: var(--r-md);
-      padding: var(--gap-md);
-      margin-bottom: var(--gap-md);
     }
-    .analysis-title { font-size: 12px; font-weight: 700; color: var(--t2); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: var(--gap-md); }
-    .bar-row { display: flex; align-items: center; gap: var(--gap-sm); margin-bottom: 8px; }
-    .bar-label { font-size: 12px; color: var(--t2); min-width: 90px; text-align: right; }
-    .bar-track { flex: 1; height: 8px; background: var(--bg-card); border-radius: var(--r-pill); overflow: hidden; }
-    .bar-fill  { height: 100%; border-radius: var(--r-pill); }
-    .bar-val   { font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--t1); min-width: 36px; text-align: left; }
+
+    /* ══ EMPTY STATE ══ */
+    .empty-state {
+      text-align: center; padding: 40px 16px;
+      color: var(--t3);
+    }
+    .empty-icon { font-size: 40px; display: block; margin-bottom: 10px; opacity: 0.4; }
+    .empty-text { font-size: 13px; line-height: 1.6; }
+
+    /* ══ UPDATE TIME ══ */
+    .update-pill {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 10px; color: var(--t3);
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--r-pill); padding: 3px 10px;
+      margin-bottom: 10px; width: fit-content;
+    }
+
+    /* ══ APEXCHARTS OVERRIDE ══ */
+    .apexcharts-tooltip { background: var(--bg-panel) !important; border-color: var(--border-strong) !important; color: var(--t1) !important; }
+    .apexcharts-tooltip-title { background: var(--bg-card) !important; border-bottom-color: var(--border) !important; }
+    .apexcharts-legend-text { color: var(--t2) !important; }
+    .apexcharts-text { fill: var(--t2) !important; }
   </style>
 </head>
 <body>
 
-<!-- ─── TICKER BAR ─── -->
+<!-- TICKER -->
 <div class="ticker-bar" id="tickerBar">
   <div class="ticker-track" id="tickerTrack">
     <span class="ticker-item"><span class="ticker-name">טוען...</span></span>
   </div>
 </div>
 
-<!-- ─── HEADER ─── -->
+<!-- HEADER -->
 <header>
   <div class="header-inner">
     <div class="logo">
       <div class="logo-mark">📊</div>
-      <div class="logo-text">
+      <div>
         <div class="logo-name">PolyDash</div>
         <div class="logo-sub">שוק הניבויים</div>
       </div>
     </div>
 
-    <div class="header-portfolio" id="headerPortfolio">
-      <div class="hport-item">
-        <div class="hport-val" id="hPortBalance">—</div>
-        <div class="hport-lbl">יתרה</div>
+    <div class="header-pnl">
+      <div class="hpnl-item">
+        <div class="hpnl-val" id="hBalance">—</div>
+        <div class="hpnl-lbl">זמין</div>
       </div>
-      <div class="hport-item">
-        <div class="hport-val" id="hPortValue">—</div>
-        <div class="hport-lbl">שווי</div>
+      <div class="hpnl-item">
+        <div class="hpnl-val" id="hPnl">—</div>
+        <div class="hpnl-lbl">P&L</div>
       </div>
-      <div class="hport-item">
-        <div class="hport-val" id="hPortPnl">—</div>
-        <div class="hport-lbl">P&L</div>
+      <div class="hpnl-item">
+        <div class="hpnl-val" id="hActive">—</div>
+        <div class="hpnl-lbl">פתוחים</div>
       </div>
     </div>
 
-    <div class="header-actions">
-      <button class="btn-refresh" id="refreshBtn">
-        <span class="live-dot"></span>
-        <span id="refreshLabel">LIVE</span>
-      </button>
-    </div>
+    <button class="btn-refresh" id="refreshBtn">
+      <span class="live-dot"></span> LIVE
+    </button>
   </div>
 </header>
 
-<!-- ─── MAIN CONTENT ─── -->
+<!-- MAIN -->
 <main>
   <div class="content" id="mainContent">
-    <!-- Skeleton -->
-    <div id="skeletonView" style="padding-top:8px">
-      <div class="skel skel-h80" style="margin-bottom:10px;border-radius:10px"></div>
-      <div class="skel skel-hc"  style="margin-bottom:10px;border-radius:10px;opacity:0.7"></div>
-      <div class="skel skel-hc"  style="margin-bottom:10px;border-radius:10px;opacity:0.5"></div>
-      <div class="skel skel-hc"  style="margin-bottom:10px;border-radius:10px;opacity:0.3"></div>
+    <div id="skeletonView" style="padding-top:4px">
+      <div class="skel" style="height:140px;margin-bottom:10px"></div>
+      <div class="skel" style="height:50px;margin-bottom:8px;opacity:.8"></div>
+      <div class="skel" style="height:80px;margin-bottom:8px;opacity:.6"></div>
+      <div class="skel" style="height:80px;opacity:.4"></div>
     </div>
-    <!-- Real content -->
     <div id="realContent" style="display:none"></div>
   </div>
 </main>
 
-<!-- ─── EXIT MODAL ─── -->
-<div class="modal-overlay" id="exitModal" style="display:none">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div class="modal-title" id="exitModalTitle">יציאה מפוזיציה</div>
-    <div class="modal-sub"   id="exitModalSub"></div>
-    <div class="modal-stats" id="exitModalStats"></div>
-    <div id="exitModalAlert"></div>
-    <div class="modal-actions" id="exitModalActions"></div>
-    <button class="modal-btn modal-btn-close" onclick="closeExitModal()">ביטול</button>
-  </div>
-</div>
-
-<!-- ─── BOTTOM NAV ─── -->
+<!-- BOTTOM NAV -->
 <nav class="bottom-nav" id="bottomNav">
-  <button class="nav-item active" data-view="home"      aria-label="ראשי">
+  <button class="nav-item active" data-view="home" aria-label="ראשי">
     <span class="nav-icon">🏠</span><span>ראשי</span>
   </button>
-  <button class="nav-item" data-view="positions" aria-label="תיק">
-    <span class="nav-badge green" id="navBadgePos"></span>
-    <span class="nav-icon">💼</span><span>תיק</span>
+  <button class="nav-item" data-view="open" aria-label="פתוחים">
+    <span class="nav-badge" id="navBadgeOpen"></span>
+    <span class="nav-icon">📂</span><span>פתוחים</span>
   </button>
-  <button class="nav-item" data-view="signals" aria-label="סיגנלים">
-    <span class="nav-badge" id="navBadgeSig"></span>
-    <span class="nav-icon">📡</span><span>סיגנלים</span>
+  <button class="nav-item" data-view="history" aria-label="היסטוריה">
+    <span class="nav-badge red" id="navBadgeHist"></span>
+    <span class="nav-icon">📜</span><span>היסטוריה</span>
   </button>
-  <button class="nav-item" data-view="analysis" aria-label="ניתוח">
-    <span class="nav-icon">📊</span><span>ניתוח</span>
+  <button class="nav-item" data-view="pnl" aria-label="P&L">
+    <span class="nav-icon">📊</span><span>P&L</span>
   </button>
-  <button class="nav-item" data-view="watch" aria-label="מעקב">
-    <span class="nav-badge green" id="navBadgeWatch"></span>
-    <span class="nav-icon">⭐</span><span>מעקב</span>
+  <button class="nav-item" data-view="insights" aria-label="תובנות">
+    <span class="nav-icon">🧠</span><span>תובנות</span>
   </button>
 </nav>
 
@@ -685,608 +511,708 @@
 
 const DATA_URL   = './data.json';
 const REFRESH_MS = 5 * 60 * 1000;
-const WATCH_KEY  = 'polydash_watchlist';
 
-let appData  = null;
+let appData    = null;
 let activeView = 'home';
+let chartInstances = {};
 
 /* ─── utils ─── */
-function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-function fmt$(n) { if (!n&&n!==0) return '—'; const v=parseFloat(n); if(v>=1e9) return '$'+(v/1e9).toFixed(1)+'B'; if(v>=1e6) return '$'+(v/1e6).toFixed(1)+'M'; if(v>=1e3) return '$'+(v/1e3).toFixed(0)+'K'; return '$'+v.toFixed(0); }
-function fmtNum(n, dec=2) { return n != null ? parseFloat(n).toFixed(dec) : '—'; }
-function fmtDate(s) { if(!s) return '—'; const d=new Date(s); const diff=Math.round((d-Date.now())/(1000*60*60*24)); if(diff<0) return 'הסתיים'; if(diff===0) return 'היום'; if(diff===1) return 'מחר'; if(diff<7) return `${diff}d`; if(diff<30) return `${Math.round(diff/7)}w`; return `${Math.round(diff/30)}m`; }
-function fmtAgo(s) { if(!s) return ''; const diff=Math.round((Date.now()-new Date(s))/60000); if(diff<1) return 'עכשיו'; if(diff<60) return `לפני ${diff}ד`; return `לפני ${Math.round(diff/60)}ש`; }
-
-/* ─── watchlist ─── */
-function getWatchlist()     { try { return JSON.parse(localStorage.getItem(WATCH_KEY)||'[]'); } catch { return []; } }
-function saveWatchlist(ids) { localStorage.setItem(WATCH_KEY, JSON.stringify(ids)); }
-function isWatched(id)      { return getWatchlist().includes(String(id)); }
-function toggleWatch(id) {
-  const ids = getWatchlist();
-  const idx = ids.indexOf(String(id));
-  if (idx>=0) ids.splice(idx,1); else ids.push(String(id));
-  saveWatchlist(ids);
-  updateNavBadges(appData);
-  renderContent();
-}
+const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const fmt$ = n => { if(!n&&n!==0) return '—'; const v=parseFloat(n); if(Math.abs(v)>=1e6) return '$'+(v/1e6).toFixed(1)+'M'; if(Math.abs(v)>=1e3) return '$'+(v/1e3).toFixed(0)+'K'; return '$'+v.toFixed(2); };
+const fmtPct = n => (n != null ? parseFloat(n).toFixed(1)+'%' : '—');
+const fmtAgo = s => { if(!s) return ''; const diff=Math.round((Date.now()-new Date(s))/60000); if(diff<1) return 'עכשיו'; if(diff<60) return `לפני ${diff}ד'`; return `לפני ${Math.round(diff/60)}ש'`; };
+const fmtDate = s => { if(!s) return '—'; const d=new Date(s); const diff=Math.round((d-Date.now())/(1000*60*60*24)); if(diff<0) return 'הסתיים'; if(diff===0) return 'היום'; if(diff===1) return 'מחר'; if(diff<7) return `${diff}d`; if(diff<30) return `${Math.round(diff/7)}w`; return `${Math.round(diff/30)}m`; };
+const truncate = (s, n) => s && s.length > n ? s.slice(0,n)+'…' : (s||'');
+const destroyChart = id => { if(chartInstances[id]) { try { chartInstances[id].destroy(); } catch(e){} delete chartInstances[id]; } };
 
 /* ─── data ─── */
 async function loadData(isRefresh=false) {
   try {
     const r = await fetch(DATA_URL + '?t=' + Date.now());
-    const d = await r.json();
-    appData = d;
-    renderAll(d, isRefresh);
+    appData = await r.json();
+    renderAll();
   } catch(e) {
     console.error('loadData:', e);
   }
 }
 
-function renderAll(d, isRefresh=false) {
+function renderAll() {
   document.getElementById('skeletonView').style.display = 'none';
   document.getElementById('realContent').style.display  = 'block';
-  updateHeader(d);
-  updateTicker(d);
-  updateNavBadges(d);
-  renderContent();
+  updateHeader();
+  updateTicker();
+  updateBadges();
+  renderView();
 }
 
-/* ─── Header portfolio ─── */
-function updateHeader(d) {
-  const rp  = d.real_positions || {};
-  const port = rp.portfolio || {};
-  const balance = port.usdc_balance || 0;
-  const value   = port.total_current || 0;
-  const pnl     = port.total_pnl || 0;
-  const pnlSign = pnl >= 0 ? '+' : '';
-  const pnlClr  = pnl >= 0 ? 'var(--up)' : 'var(--down)';
+/* ─── Header ─── */
+function updateHeader() {
+  const port = appData?.real_positions?.portfolio || {};
+  const pnl  = port.total_pnl || 0;
+  const bal  = Math.max(port.usdc_balance||0, 0);
+  const act  = port.active || 0;
 
-  const hBal = document.getElementById('hPortBalance');
-  const hVal = document.getElementById('hPortValue');
-  const hPnl = document.getElementById('hPortPnl');
-  if (hBal) hBal.textContent = '$' + Math.abs(balance).toFixed(0);
-  if (hVal) hVal.textContent = '$' + value.toFixed(2);
-  if (hPnl) { hPnl.textContent = pnlSign + '$' + pnl.toFixed(2); hPnl.style.color = pnlClr; }
+  const hBal  = document.getElementById('hBalance');
+  const hPnl  = document.getElementById('hPnl');
+  const hAct  = document.getElementById('hActive');
+  if (hBal) hBal.textContent = '$'+bal.toFixed(2);
+  if (hAct) hAct.textContent = act;
+  if (hPnl) {
+    hPnl.textContent = (pnl>=0?'+':'')+fmt$(pnl);
+    hPnl.style.color = pnl>=0 ? 'var(--up)' : 'var(--down)';
+  }
 }
 
 /* ─── Ticker ─── */
-function updateTicker(d) {
-  const hot = d.hot || [];
+function updateTicker() {
+  const hot = (appData?.hot || []).slice(0,8);
   if (!hot.length) return;
-  const items = hot.slice(0, 8).map(m => {
-    const ch = m.oneWeekPriceChange || 0;
-    const chPct = (ch * 100).toFixed(1);
-    const cls   = ch > 0.005 ? 'ticker-up' : ch < -0.005 ? 'ticker-down' : '';
-    const arrow = ch > 0.005 ? '▲' : ch < -0.005 ? '▼' : '—';
-    const name  = m.question.length > 28 ? m.question.slice(0,28)+'…' : m.question;
-    return `<span class="ticker-item">
-      <span class="ticker-name">${esc(name)}</span>
-      <span class="ticker-price">${m.yes_pct}%</span>
-      <span class="ticker-change ${cls}">${arrow}${Math.abs(chPct)}%</span>
-    </span>`;
-  }).join('');
-  // duplicate for seamless loop
+  const items = hot.map(m => `
+    <span class="ticker-item">
+      <span class="ticker-name">${esc(truncate(m.question,30))}</span>
+      <span class="ticker-price ${m.yes_pct>=50?'ticker-up':'ticker-down'}">${m.yes_pct}%</span>
+    </span>`).join('');
   const track = document.getElementById('tickerTrack');
   if (track) track.innerHTML = items + items;
 }
 
-/* ─── Nav badges ─── */
-function updateNavBadges(d) {
-  if (!d) return;
-  const posCount   = (d.real_positions?.active?.length || 0);
-  const sigCount   = d.signals_count || 0;
-  const watchCount = getWatchlist().length;
+/* ─── Badges ─── */
+function updateBadges() {
+  const rp = appData?.real_positions || {};
+  const openN = (rp.active||[]).length;
+  const histN = (rp.resolved||[]).length;
 
-  const setBadge = (id, n) => {
+  const setB = (id, n, cls='') => {
     const el = document.getElementById(id);
     if (!el) return;
     el.textContent = n;
-    el.style.display = n > 0 ? 'block' : 'none';
+    el.style.display = n > 0 ? '' : 'none';
+    if (cls) el.className = 'nav-badge ' + cls;
   };
-  setBadge('navBadgePos',   posCount);
-  setBadge('navBadgeSig',   sigCount);
-  setBadge('navBadgeWatch', watchCount);
+  setB('navBadgeOpen', openN);
+  setB('navBadgeHist', histN, 'red');
 }
 
 /* ─── Main render ─── */
-function renderContent() {
+function renderView() {
   const rc = document.getElementById('realContent');
   if (!appData || !rc) return;
 
+  // Destroy existing charts
+  Object.keys(chartInstances).forEach(destroyChart);
+
   switch (activeView) {
-    case 'home':      rc.innerHTML = renderHome();      break;
-    case 'positions': rc.innerHTML = renderPositions(); break;
-    case 'signals':   rc.innerHTML = renderSignals();   break;
-    case 'analysis':  rc.innerHTML = renderAnalysis();  break;
-    case 'watch':     rc.innerHTML = renderWatch();     break;
-    default:          rc.innerHTML = renderHome();
+    case 'home':     rc.innerHTML = renderHome();     break;
+    case 'open':     rc.innerHTML = renderOpen();     break;
+    case 'history':  rc.innerHTML = renderHistory();  break;
+    case 'pnl':      rc.innerHTML = renderPnl();      initPnlCharts(); break;
+    case 'insights': rc.innerHTML = renderInsights(); break;
+    default:         rc.innerHTML = renderHome();
   }
 }
 
-/* ════════════════════════════════════
+/* ══════════════════════════════════
    VIEW: HOME
-════════════════════════════════════ */
+══════════════════════════════════ */
 function renderHome() {
-  const d = appData;
-  let html = '';
-
-  // Portfolio panel
+  const d    = appData;
   const rp   = d.real_positions || {};
   const port = rp.portfolio || {};
   const pnl  = port.total_pnl || 0;
   const pnlSign = pnl >= 0 ? '+' : '';
   const pnlClr  = pnl >= 0 ? 'var(--up)' : 'var(--down)';
+  const active  = rp.active || [];
+  const resolved = rp.resolved || [];
 
-  html += `
-  <div class="portfolio-panel">
-    <div class="portfolio-panel-head">
-      <span class="portfolio-panel-title">💼 תיק השקעות</span>
-      <span class="portfolio-panel-time" id="lastUpdate">${fmtAgo(d.updated_at)}</span>
+  const totalInvested = port.total_invested || 0;
+  const totalCurrent  = port.total_current  || 0;
+  const wins  = port.wins  || 0;
+  const losses = port.losses || 0;
+  const winRate = (wins+losses) > 0 ? Math.round(wins/(wins+losses)*100) : 0;
+
+  return `
+  <div class="update-pill">
+    <span>⏱</span><span>עודכן ${fmtAgo(d.updated_at)}</span>
+  </div>
+
+  <!-- Hero P&L -->
+  <div class="hero-card">
+    <div class="hero-label">סך רווח / הפסד</div>
+    <div class="hero-pnl" style="color:${pnlClr}">${pnlSign}${fmt$(pnl)}</div>
+    <div class="hero-pnl-sub">מהשקעה כוללת של ${fmt$(totalInvested)} · שווי נוכחי ${fmt$(totalCurrent)}</div>
+    <div class="hero-stats">
+      <div class="hstat accent">
+        <div class="hstat-val">${active.length}</div>
+        <div class="hstat-lbl">פתוחים</div>
+      </div>
+      <div class="hstat">
+        <div class="hstat-val">${wins+losses}</div>
+        <div class="hstat-lbl">סגורים</div>
+      </div>
+      <div class="hstat up">
+        <div class="hstat-val">${wins}</div>
+        <div class="hstat-lbl">זכיות</div>
+      </div>
+      <div class="hstat down">
+        <div class="hstat-val">${losses}</div>
+        <div class="hstat-lbl">הפסדים</div>
+      </div>
     </div>
-    <div class="portfolio-grid">
-      <div class="pstat">
-        <div class="pstat-val">$${Math.max(port.usdc_balance||0,0).toFixed(2)}</div>
-        <div class="pstat-lbl">זמין</div>
-      </div>
-      <div class="pstat">
-        <div class="pstat-val">$${(port.total_current||0).toFixed(2)}</div>
-        <div class="pstat-lbl">מושקע</div>
-      </div>
-      <div class="pstat ${pnl>=0?'pstat-up':'pstat-down'}">
-        <div class="pstat-val">${pnlSign}$${pnl.toFixed(2)}</div>
-        <div class="pstat-lbl">P&L</div>
-      </div>
+  </div>
+
+  <!-- Win/Loss strip -->
+  ${(wins+losses) > 0 ? `
+  <div class="wl-strip">
+    <div class="wl-side win">
+      <div class="wl-val">✅ ${wins}</div>
+      <div class="wl-sub">זכיות</div>
+      <div class="wl-pnl" style="color:var(--up)">Win rate ${winRate}%</div>
     </div>
-    ${(rp.active||[]).length > 0 ? renderPositionsCompact(rp.active) : ''}
-  </div>`;
+    <div class="wl-divider"></div>
+    <div class="wl-side loss">
+      <div class="wl-val">❌ ${losses}</div>
+      <div class="wl-sub">הפסדים</div>
+      <div class="wl-pnl" style="color:var(--down)">${100-winRate}%</div>
+    </div>
+  </div>` : ''}
 
-  // Recommendation
-  if (d.recommendation) {
-    html += renderRec(d.recommendation);
-  }
+  <!-- Active positions preview -->
+  ${active.length > 0 ? `
+  <div class="section">
+    <div class="section-head">
+      <span class="section-title">📂 פוזיציות פתוחות</span>
+      <span class="section-badge">${active.length}</span>
+    </div>
+    ${active.slice(0,2).map(p => renderPosCard(p, true)).join('')}
+    ${active.length > 2 ? `<button onclick="switchView('open')" style="width:100%;padding:10px;background:transparent;border:1px dashed var(--border);border-radius:var(--r-md);color:var(--t3);font-size:12px;cursor:pointer;font-family:'Assistant',sans-serif;margin-top:4px">+ עוד ${active.length-2} פוזיציות</button>` : ''}
+  </div>` : `
+  <div class="empty-state" style="padding:24px 0">
+    <span class="empty-icon">💼</span>
+    <div class="empty-text">אין פוזיציות פתוחות<br><small>הבוט יפתח ב-09:00 / 18:00</small></div>
+  </div>`}
 
-  // Hot markets
-  html += renderMarketSection('🔥 חם עכשיו', d.hot || [], true);
-  html += renderMarketSection('🎯 סיכויים טובים', d.good_chances || [], false);
-  html += renderMarketSection('✨ חדש ומעניין', d.new_interesting || [], false);
-
-  return html;
+  <!-- Link to Polymarket -->
+  <a href="https://polymarket.com" target="_blank" class="poly-link">
+    <span class="poly-link-logo">🌐</span>
+    <div>
+      <div style="font-size:13px;font-weight:700;color:var(--t1)">Polymarket</div>
+      <div style="font-size:10px;color:var(--t3);margin-top:1px">גישה לכל השווקים →</div>
+    </div>
+    <span class="poly-link-arrow">↗</span>
+  </a>
+  `;
 }
 
-/* ════════════════════════════════════
-   VIEW: POSITIONS
-════════════════════════════════════ */
-function renderPositions() {
-  const rp      = appData?.real_positions || {};
-  const active  = rp.active  || [];
-  const port    = rp.portfolio || {};
-  const pnl     = port.total_pnl || 0;
+/* ══════════════════════════════════
+   VIEW: OPEN POSITIONS
+══════════════════════════════════ */
+function renderOpen() {
+  const rp     = appData?.real_positions || {};
+  const active = rp.active || [];
+  const port   = rp.portfolio || {};
+  const pnl    = port.total_pnl || 0;
   const pnlSign = pnl >= 0 ? '+' : '';
-  const pnlClr  = pnl >= 0 ? 'var(--up)' : 'var(--down)';
 
   if (!active.length) {
     return `<div class="empty-state">
-      <span class="empty-icon">💼</span>
-      <div class="empty-text">אין פוזיציות פעילות<br><small>הבוט יפתח פוזיציות אוטומטית ב-09:00 ו-18:00</small></div>
+      <span class="empty-icon">📂</span>
+      <div class="empty-text">אין פוזיציות פתוחות כרגע<br><small>הבוט מריץ סריקה ב-09:00 ו-18:00</small></div>
     </div>`;
   }
 
-  let html = `
-  <div class="portfolio-panel">
-    <div class="portfolio-panel-head">
-      <span class="portfolio-panel-title">סיכום תיק</span>
-    </div>
-    <div class="portfolio-grid">
-      <div class="pstat">
-        <div class="pstat-val">$${Math.max(port.usdc_balance||0,0).toFixed(2)}</div>
-        <div class="pstat-lbl">זמין</div>
+  const totalInv = active.reduce((s,p) => s + (p.initialValue||0), 0);
+  const totalCur = active.reduce((s,p) => s + (p.currentValue||0), 0);
+
+  return `
+  <div class="hero-card" style="padding:12px">
+    <div class="hero-stats" style="grid-template-columns:repeat(3,1fr)">
+      <div class="hstat">
+        <div class="hstat-val">$${totalInv.toFixed(2)}</div>
+        <div class="hstat-lbl">הושקע</div>
       </div>
-      <div class="pstat">
-        <div class="pstat-val">$${(port.total_current||0).toFixed(2)}</div>
-        <div class="pstat-lbl">שווי הימורים</div>
+      <div class="hstat">
+        <div class="hstat-val">$${totalCur.toFixed(2)}</div>
+        <div class="hstat-lbl">שווי</div>
       </div>
-      <div class="pstat ${pnl>=0?'pstat-up':'pstat-down'}">
-        <div class="pstat-val" style="color:${pnlClr}">${pnlSign}$${pnl.toFixed(2)}</div>
-        <div class="pstat-lbl">P&L כולל</div>
+      <div class="hstat ${pnl>=0?'up':'down'}">
+        <div class="hstat-val">${pnlSign}${fmt$(pnl)}</div>
+        <div class="hstat-lbl">P&L</div>
       </div>
     </div>
   </div>
 
   <div class="section">
     <div class="section-head">
-      <span class="section-title">פוזיציות פעילות</span>
-      <span class="section-count">${active.length}</span>
+      <span class="section-title">פוזיציות פתוחות</span>
+      <span class="section-badge">${active.length}</span>
     </div>
-    ${renderPositionsTable(active)}
-  </div>`;
-
-  return html;
-}
-
-function renderPositionsCompact(positions) {
-  if (!positions.length) return '';
-  return `
-  <div class="section-head" style="margin-top:0;margin-bottom:6px;padding-bottom:6px">
-    <span class="section-title">פוזיציות פעילות</span>
-    <span class="section-count">${positions.length}</span>
+    ${active.map(p => renderPosCard(p, false)).join('')}
   </div>
-  ${renderPositionsTable(positions)}`;
+  `;
 }
 
-function renderPositionsTable(positions) {
-  const rows = positions.map(pos => {
-    const pnl     = pos.cashPnl || 0;
-    const pnlSign = pnl >= 0 ? '+' : '';
-    const pnlClr  = pnl >= 0 ? 'pos-pnl-up' : 'pos-pnl-down';
-    const pctPnl  = pos.percentPnl || 0;
-    const entryPct = Math.round((pos.avgPrice||0)*1000)/10;
-    const curPct   = Math.round((pos.curPrice||0)*1000)/10;
-    const barColor = pnl >= 0 ? 'var(--up)' : 'var(--down)';
-    const noLiq    = (pos.exitValue||0) < 0.10;
-    const daysLeft = pos.daysLeft;
-    const daysStr  = daysLeft === 0 ? '🔔 היום' : daysLeft === 1 ? '⚡ מחר' : daysLeft != null ? `${daysLeft}d` : '—';
+function renderPosCard(pos, compact=false) {
+  const pnl      = pos.cashPnl || 0;
+  const pnlSign  = pnl >= 0 ? '+' : '';
+  const pnlCls   = pnl >= 0 ? 'up' : 'down';
+  const pctPnl   = pos.percentPnl || 0;
+  const entryPct = Math.round((pos.avgPrice||0)*1000)/10;
+  const curPct   = Math.round((pos.curPrice||0)*1000)/10;
+  const barColor = pnl >= 0 ? 'var(--up)' : 'var(--down)';
+  const noLiq    = (pos.exitValue||0) < 0.10;
+  const daysStr  = pos.daysLeft === 0 ? '🔔 היום' : pos.daysLeft === 1 ? '⚡ מחר' : pos.daysLeft != null ? `${pos.daysLeft}d` : fmtDate(pos.endDate);
+  const outcomeCls = pos.outcome === 'Yes' ? 'badge-yes' : 'badge-no';
 
-    return `
-    <tr>
-      <td>
-        <div class="pos-title">${esc(pos.title.length>55 ? pos.title.slice(0,55)+'…' : pos.title)}</div>
-        <div style="display:flex;gap:5px;align-items:center;margin-top:4px;flex-wrap:wrap">
-          <span class="pos-outcome">${pos.outcome}</span>
-          <span style="font-size:10px;color:var(--t3)">${daysStr}</span>
+  return `
+  <div class="pos-card">
+    <div class="pos-card-head">
+      ${pos.icon ? `<img src="${esc(pos.icon)}" class="pos-card-img" onerror="this.style.display='none'" loading="lazy">` : ''}
+      <div class="pos-card-title-wrap">
+        <div class="pos-card-title">${esc(truncate(pos.title, compact?70:100))}</div>
+        <div class="pos-card-badges">
+          <span class="badge ${outcomeCls}">${pos.outcome}</span>
+          <span class="badge badge-days">⏱ ${daysStr}</span>
+          ${noLiq ? `<span class="badge badge-neutral">🔒 ללא נזילות</span>` : ''}
         </div>
-      </td>
-      <td class="num">
-        <div style="font-size:12px;color:var(--t3)">${entryPct}%</div>
-        <div style="font-size:11px;color:var(--t3)">כניסה</div>
-      </td>
-      <td class="num">
-        <div style="font-size:13px;font-weight:700;color:${curPct>=entryPct?'var(--up)':'var(--down)'}">${curPct}%</div>
-        <div class="pos-bar"><div class="pos-bar-fill" style="width:${curPct}%;background:${barColor}"></div></div>
-      </td>
-      <td class="num">
-        <div class="${pnlClr}" style="font-size:13px">${pnlSign}$${Math.abs(pnl).toFixed(2)}</div>
-        <div style="font-size:10px;color:var(--t3)">${pnlSign}${pctPnl.toFixed(1)}%</div>
-      </td>
-      <td>
-        ${noLiq
-          ? `<span class="pos-no-liq">🔒 ללא נזילות</span>`
-          : `<button class="btn-exit btn-exit-active" onclick="openExitModal(${JSON.stringify(pos).replace(/'/g,'&apos;')})">מכור</button>`
-        }
-      </td>
-    </tr>`;
-  }).join('');
+      </div>
+    </div>
 
-  return `
-  <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
-    <table class="positions-table" style="min-width:460px">
-      <thead>
-        <tr>
-          <th>שם שוק</th>
-          <th class="num">כניסה</th>
-          <th class="num">נוכחי</th>
-          <th class="num">P&amp;L</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>${rows}</tbody>
-    </table>
+    <div class="pos-card-metrics">
+      <div class="pos-metric">
+        <div class="pos-metric-val">${entryPct}%</div>
+        <div class="pos-metric-lbl">כניסה</div>
+      </div>
+      <div class="pos-metric">
+        <div class="pos-metric-val" style="color:${curPct>=entryPct?'var(--up)':'var(--down)'}">${curPct}%</div>
+        <div class="pos-metric-lbl">נוכחי</div>
+      </div>
+      <div class="pos-metric ${pnlCls}">
+        <div class="pos-metric-val">${pnlSign}$${Math.abs(pnl).toFixed(2)}</div>
+        <div class="pos-metric-lbl">${pnlSign}${pctPnl.toFixed(1)}%</div>
+      </div>
+    </div>
+
+    <div class="pos-progress">
+      <div class="pos-progress-fill" style="width:${Math.min(curPct,100)}%;background:${barColor}"></div>
+    </div>
+
+    ${!compact ? `
+    <div class="pos-card-actions">
+      <a href="${esc(pos.link||'#')}" target="_blank" class="btn-sm btn-sm-primary">🌐 פתח ב-Polymarket</a>
+      ${!noLiq ? `<a href="${esc(pos.link||'#')}" target="_blank" class="btn-sm btn-sm-danger">מכור</a>` : ''}
+    </div>` : ''}
   </div>`;
 }
 
-/* ════════════════════════════════════
-   VIEW: SIGNALS
-════════════════════════════════════ */
-function renderSignals() {
-  const signals = appData?.signals || [];
-  if (!signals.length) {
+/* ══════════════════════════════════
+   VIEW: HISTORY
+══════════════════════════════════ */
+function renderHistory() {
+  const rp       = appData?.real_positions || {};
+  const resolved = rp.resolved || [];
+  const port     = rp.portfolio || {};
+  const wins     = port.wins || 0;
+  const losses   = port.losses || 0;
+
+  if (!resolved.length) {
     return `<div class="empty-state">
-      <span class="empty-icon">📡</span>
-      <div class="empty-text">אין סיגנלים זמינים כרגע<br><small>הסיגנלים מתעדכנים ב-09:00 ו-18:00</small></div>
+      <span class="empty-icon">📜</span>
+      <div class="empty-text">אין הימורים סגורים עדיין<br><small>ההיסטוריה תופיע כאן לאחר סיום הימורים</small></div>
     </div>`;
   }
 
-  const rows = signals.slice(0,15).map(s => {
-    const strength = s.strength || 'MEDIUM';
-    const cls = strength === 'STRONG' ? 'signal-strong' : 'signal-medium';
-    const emoji = strength === 'STRONG' ? '🔴' : '🟡';
-    const yesPct = s.yes_price ? Math.round(s.yes_price*1000)/10 : null;
-    const days = s.days_left ?? '—';
-
-    return `
-    <div class="signal-row">
-      <span class="signal-strength ${cls}">${emoji} ${strength}</span>
-      <div class="signal-body">
-        <div class="signal-title">${esc(s.question?.slice(0,60)||s.market_title?.slice(0,60)||'—')}</div>
-        <div class="signal-meta">${s.type||''} · ${days}d · ${(s.reasons||[]).slice(0,1).join(', ')}</div>
-      </div>
-      <div class="signal-right">
-        ${yesPct != null ? `<div class="signal-price">${yesPct}%</div>` : ''}
-        ${s.size_usd ? `<div class="signal-size">$${parseFloat(s.size_usd).toFixed(0)}</div>` : ''}
-      </div>
-    </div>`;
-  }).join('');
+  const totalPnl = resolved.reduce((s,r) => s + (r.cashPnl||0), 0);
+  const totalPnlSign = totalPnl >= 0 ? '+' : '';
 
   return `
+  <div class="wl-strip" style="margin-bottom:12px">
+    <div class="wl-side win">
+      <div class="wl-val">✅ ${wins}</div>
+      <div class="wl-sub">זכיות</div>
+    </div>
+    <div class="wl-divider"></div>
+    <div class="wl-side loss">
+      <div class="wl-val">❌ ${losses}</div>
+      <div class="wl-sub">הפסדים</div>
+    </div>
+  </div>
+
   <div class="section">
     <div class="section-head">
-      <span class="section-title">📡 סיגנלים פעילים</span>
-      <span class="section-count">${signals.length}</span>
+      <span class="section-title">היסטוריית הימורים</span>
+      <span class="section-badge">${resolved.length} · ${totalPnlSign}${fmt$(totalPnl)}</span>
     </div>
-    ${rows}
+    ${resolved.map(r => renderHistItem(r)).join('')}
   </div>`;
 }
 
-/* ════════════════════════════════════
-   VIEW: ANALYSIS
-════════════════════════════════════ */
-function renderAnalysis() {
-  const d       = appData;
-  const hot     = d.hot || [];
-  const movers  = d.movers || [];
+function renderHistItem(r) {
+  const pnl     = r.cashPnl || 0;
+  const pnlSign = pnl >= 0 ? '+' : '';
+  const isWin   = r.winner === true || pnl > 0;
+  const isLoss  = r.winner === false || pnl < 0;
+  const icon    = isWin ? '✅' : isLoss ? '❌' : '⏳';
+  const pnlCls  = pnl > 0 ? 'up' : pnl < 0 ? 'down' : '';
+  const pct     = r.percentPnl || 0;
+
+  return `
+  <div class="hist-item">
+    <span class="hist-icon">${icon}</span>
+    <div class="hist-body">
+      <div class="hist-title">${esc(truncate(r.title, 80))}</div>
+      <div class="hist-meta">
+        <span class="badge ${r.outcome==='Yes'?'badge-yes':'badge-no'}" style="font-size:9px">${esc(r.outcome||'')}</span>
+        <span>${r.endDate ? new Date(r.endDate).toLocaleDateString('he-IL') : '—'}</span>
+        <span>${fmt$(r.initialValue||0)} הושקע</span>
+      </div>
+    </div>
+    <div class="hist-right">
+      <div class="hist-pnl ${pnlCls}">${pnlSign}${fmt$(pnl)}</div>
+      <div class="hist-pct">${pnlSign}${pct.toFixed(1)}%</div>
+    </div>
+  </div>`;
+}
+
+/* ══════════════════════════════════
+   VIEW: P&L CHARTS
+══════════════════════════════════ */
+function renderPnl() {
+  const rp      = appData?.real_positions || {};
+  const active  = rp.active || [];
+  const resolved= rp.resolved || [];
+  const port    = rp.portfolio || {};
+  const allBets = [...resolved, ...active];
+
+  const pnl       = port.total_pnl || 0;
+  const invested  = port.total_invested || 0;
+  const pnlSign   = pnl >= 0 ? '+' : '';
+  const wins      = port.wins || 0;
+  const losses    = port.losses || 0;
+
+  return `
+  <div class="hero-card" style="padding:12px;margin-bottom:12px">
+    <div class="hero-label">סך P&L</div>
+    <div class="hero-pnl" style="color:${pnl>=0?'var(--up)':'var(--down)'};font-size:28px">${pnlSign}${fmt$(pnl)}</div>
+    <div class="hero-pnl-sub">מתוך $${invested.toFixed(2)} שהושקעו</div>
+  </div>
+
+  <!-- Donut: wins vs losses -->
+  <div class="chart-card">
+    <div class="chart-title">התפלגות תוצאות</div>
+    <div id="chartDonut" class="chart-wrap" style="min-height:220px"></div>
+  </div>
+
+  <!-- Bar: P&L per bet -->
+  ${allBets.length > 0 ? `
+  <div class="chart-card">
+    <div class="chart-title">P&L לפי הימור</div>
+    <div id="chartBar" class="chart-wrap" style="min-height:${Math.max(allBets.length*44,150)}px"></div>
+  </div>` : ''}
+
+  <!-- Individual breakdown -->
+  <div class="section">
+    <div class="section-head">
+      <span class="section-title">פירוט לפי הימור</span>
+      <span class="section-badge">${allBets.length}</span>
+    </div>
+    ${allBets.map(b => {
+      const bPnl  = b.cashPnl || 0;
+      const bSign = bPnl >= 0 ? '+' : '';
+      const bCls  = bPnl > 0 ? 'badge-win' : bPnl < 0 ? 'badge-loss' : 'badge-open';
+      const label = b.redeemable === true ? 'ממומש' : (b.endDate && new Date(b.endDate) < new Date()) ? 'סגור' : 'פתוח';
+      return `
+      <div class="hist-item">
+        <span class="hist-icon">${bPnl>0?'✅':bPnl<0?'❌':'🟡'}</span>
+        <div class="hist-body">
+          <div class="hist-title">${esc(truncate(b.title,70))}</div>
+          <div class="hist-meta">
+            <span class="badge ${b.outcome==='Yes'?'badge-yes':'badge-no'}" style="font-size:9px">${esc(b.outcome||'')}</span>
+            <span class="badge ${bCls}" style="font-size:9px">${label}</span>
+            <span>${fmt$(b.initialValue||0)} הושקע</span>
+          </div>
+        </div>
+        <div class="hist-right">
+          <div class="hist-pnl ${bPnl>=0?'up':'down'}">${bSign}${fmt$(bPnl)}</div>
+          <div class="hist-pct">${Math.round((b.curPrice||0)*100)}% נוכחי</div>
+        </div>
+      </div>`;
+    }).join('')}
+  </div>
+  `;
+}
+
+function initPnlCharts() {
+  const rp       = appData?.real_positions || {};
+  const active   = rp.active || [];
+  const resolved = rp.resolved || [];
+  const port     = rp.portfolio || {};
+  const allBets  = [...resolved, ...active];
+  const wins     = port.wins || 0;
+  const losses   = port.losses || 0;
+
+  /* Donut */
+  const totalWinPnl  = resolved.filter(r=>(r.cashPnl||0)>0).reduce((s,r)=>s+(r.cashPnl||0),0);
+  const totalLossPnl = Math.abs(resolved.filter(r=>(r.cashPnl||0)<0).reduce((s,r)=>s+(r.cashPnl||0),0));
+  const openVal      = active.reduce((s,p)=>s+(p.currentValue||0),0);
+
+  const donutEl = document.getElementById('chartDonut');
+  if (donutEl && (wins>0||losses>0||active.length>0)) {
+    destroyChart('donut');
+    chartInstances['donut'] = new ApexCharts(donutEl, {
+      chart: { type: 'donut', height: 220, background: 'transparent', fontFamily: 'Assistant, sans-serif' },
+      series: [
+        totalWinPnl > 0 ? parseFloat(totalWinPnl.toFixed(2)) : 0,
+        totalLossPnl > 0 ? parseFloat(totalLossPnl.toFixed(2)) : 0,
+        openVal > 0 ? parseFloat(openVal.toFixed(2)) : 0,
+      ].filter((v,i) => v > 0 || [totalWinPnl,totalLossPnl,openVal][i] > 0),
+      labels: ['רווח 💚', 'הפסד ❌', 'פתוח 🟡'].filter((l,i) => [totalWinPnl,totalLossPnl,openVal][i] > 0),
+      colors: ['#00c087', '#ef4444', '#00c4b4'],
+      dataLabels: { enabled: true, style: { fontSize: '11px', fontFamily: 'IBM Plex Mono, monospace' } },
+      legend: { position: 'bottom', labels: { colors: '#8fa3c0' } },
+      plotOptions: { pie: { donut: { size: '60%', labels: {
+        show: true,
+        total: {
+          show: true,
+          label: 'P&L',
+          color: '#8fa3c0',
+          fontSize: '11px',
+          formatter: () => { const pnl=port.total_pnl||0; return (pnl>=0?'+':'')+fmt$(pnl); }
+        }
+      }}}}
+    });
+    chartInstances['donut'].render();
+  } else if (donutEl) {
+    donutEl.innerHTML = `<div class="empty-state" style="padding:30px 0"><span class="empty-icon" style="font-size:28px">📊</span><div class="empty-text">אין נתוני זכיות/הפסדים עדיין</div></div>`;
+  }
+
+  /* Bar chart — P&L per bet */
+  const barEl = document.getElementById('chartBar');
+  if (barEl && allBets.length > 0) {
+    destroyChart('bar');
+    const labels = allBets.map(b => truncate(b.title, 25));
+    const values = allBets.map(b => parseFloat((b.cashPnl||0).toFixed(2)));
+    const colors = values.map(v => v >= 0 ? '#00c087' : '#ef4444');
+
+    chartInstances['bar'] = new ApexCharts(barEl, {
+      chart: {
+        type: 'bar', height: Math.max(allBets.length*44,150),
+        background: 'transparent', fontFamily: 'Assistant, sans-serif',
+        toolbar: { show: false }
+      },
+      series: [{ name: 'P&L', data: values }],
+      xaxis: {
+        categories: labels,
+        labels: { style: { colors: '#8fa3c0', fontSize: '10px', fontFamily: 'Assistant, sans-serif' } }
+      },
+      yaxis: {
+        labels: {
+          style: { colors: '#8fa3c0', fontSize: '10px', fontFamily: 'IBM Plex Mono, monospace' },
+          formatter: v => '$'+v.toFixed(2)
+        }
+      },
+      plotOptions: {
+        bar: {
+          horizontal: true, borderRadius: 4,
+          distributed: true,
+          dataLabels: { position: 'right' }
+        }
+      },
+      dataLabels: {
+        enabled: true,
+        formatter: v => (v>=0?'+':'')+v.toFixed(2),
+        style: { fontSize: '10px', fontFamily: 'IBM Plex Mono, monospace', colors: ['#e8edf5'] },
+        offsetX: 4
+      },
+      colors: colors,
+      grid: { borderColor: 'rgba(255,255,255,0.06)', strokeDashArray: 3 },
+      tooltip: {
+        theme: 'dark',
+        y: { formatter: v => '$'+v.toFixed(2) }
+      },
+      legend: { show: false },
+    });
+    chartInstances['bar'].render();
+  }
+}
+
+/* ══════════════════════════════════
+   VIEW: INSIGHTS
+══════════════════════════════════ */
+function renderInsights() {
+  const rp       = appData?.real_positions || {};
+  const active   = rp.active || [];
+  const resolved = rp.resolved || [];
+  const port     = rp.portfolio || {};
+  const signals  = appData?.signals || [];
+
+  const wins    = port.wins    || 0;
+  const losses  = port.losses  || 0;
+  const total   = wins + losses;
+  const winRate = total > 0 ? Math.round(wins/total*100) : 0;
+  const pnl     = port.total_pnl || 0;
+  const invested= port.total_invested || 0;
+  const roi     = invested > 0 ? (pnl/invested*100) : 0;
+
+  // Best and worst
+  const allClosed = resolved.filter(r => (r.cashPnl||0) !== 0);
+  const best  = allClosed.reduce((b,r) => (r.cashPnl||0) > (b?.cashPnl||0) ? r : b, null);
+  const worst = allClosed.reduce((w,r) => (r.cashPnl||0) < (w?.cashPnl||Number.MAX_VALUE) ? r : w, null);
+
+  const avgBet = (active.length+resolved.length) > 0
+    ? ((active.reduce((s,p)=>s+(p.initialValue||0),0) + resolved.reduce((s,r)=>s+(r.initialValue||0),0)) / (active.length+resolved.length))
+    : 0;
 
   // Category breakdown
-  const all = d.all_markets || [];
+  const all = appData?.all_markets || [];
+  const CAT = {politics:'🗳️ פוליטיקה',economy:'💰 כלכלה',geo:'🌍 גאו',sports:'🏆 ספורט',crypto:'₿ קריפטו',tech:'🔬 טק',other:'💡 אחר'};
   const catCounts = {};
-  const CAT = {politics:'🗳️ פוליטיקה',economy:'💰 כלכלה',geo:'🌍 גאו',sports:'🏆 ספורט',crypto:'₿ קריפטו',tech:'🔬 טכנולוגיה',other:'💡 אחר'};
   all.forEach(m => { catCounts[m.category] = (catCounts[m.category]||0)+1; });
   const maxCat = Math.max(...Object.values(catCounts), 1);
-  const catRows = Object.entries(CAT).map(([k,label]) => {
-    const n = catCounts[k]||0;
-    const pct = Math.round(n/maxCat*100);
-    return `<div class="bar-row">
-      <span class="bar-label">${label}</span>
-      <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:var(--accent)"></div></div>
-      <span class="bar-val">${n}</span>
-    </div>`;
-  }).join('');
-
-  // Big movers
-  const moverRows = movers.slice(0,6).map(m => {
-    const ch = m.oneWeekPriceChange || 0;
-    const chPct = (ch*100).toFixed(1);
-    const cls = ch > 0 ? 'change-up' : ch < 0 ? 'change-down' : 'change-flat';
-    const arrow = ch > 0 ? '▲' : ch < 0 ? '▼' : '—';
-    return `
-    <div class="market-card" style="cursor:default">
-      ${m.image ? `<img src="${esc(m.image)}" class="market-card-img" onerror="this.style.display='none'">` : ''}
-      <div class="market-card-body">
-        <div class="market-card-title">${esc(m.question)}</div>
-        <div class="market-card-meta">
-          <span class="meta-pill">${fmt$(m.volume24hr)} / 24h</span>
-        </div>
-      </div>
-      <div class="market-card-right">
-        <span class="change-badge ${cls}">${arrow} ${Math.abs(chPct)}%</span>
-        <div class="market-vol" style="margin-top:4px">${m.yes_pct}% Yes</div>
-      </div>
-    </div>`;
-  }).join('');
 
   return `
-  <div class="section">
-    <div class="section-head"><span class="section-title">📊 התפלגות לפי קטגוריה</span></div>
-    <div class="analysis-panel">${catRows}</div>
+  <!-- Key stats grid -->
+  <div class="insight-grid">
+    <div class="insight-card">
+      <div class="insight-label">שיעור הצלחה</div>
+      <div class="insight-val ${winRate>=50?'up':'down'}">${winRate}%</div>
+      <div class="insight-sub">${wins} זכיות מתוך ${total} הימורים</div>
+      <div class="winrate-bar"><div class="winrate-fill" style="width:${winRate}%"></div></div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-label">ROI כולל</div>
+      <div class="insight-val ${roi>=0?'up':'down'}">${roi>=0?'+':''}${roi.toFixed(1)}%</div>
+      <div class="insight-sub">${fmt$(pnl)} על $${invested.toFixed(2)}</div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-label">הימור ממוצע</div>
+      <div class="insight-val accent">$${avgBet.toFixed(2)}</div>
+      <div class="insight-sub">${active.length+resolved.length} הימורים סה"כ</div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-label">סיגנלים פעילים</div>
+      <div class="insight-val accent">${signals.length}</div>
+      <div class="insight-sub">${(signals.filter(s=>s.strength==='STRONG')).length} חזקים</div>
+    </div>
   </div>
+
+  <!-- Best / Worst -->
+  ${best ? `
+  <div class="insight-card full" style="border-color:var(--up-border);background:var(--up-bg);margin-bottom:8px">
+    <div class="insight-label">🏆 ההימור הטוב ביותר</div>
+    <div class="insight-val up">+${fmt$(best.cashPnl)}</div>
+    <div class="insight-sub">${esc(truncate(best.title,70))}</div>
+    <div style="margin-top:4px"><span class="badge badge-yes">${best.outcome||''}</span></div>
+  </div>` : ''}
+
+  ${worst && worst.cashPnl < 0 ? `
+  <div class="insight-card full" style="border-color:var(--down-border);background:var(--down-bg);margin-bottom:12px">
+    <div class="insight-label">💔 ההפסד הגדול ביותר</div>
+    <div class="insight-val down">${fmt$(worst.cashPnl)}</div>
+    <div class="insight-sub">${esc(truncate(worst.title,70))}</div>
+    <div style="margin-top:4px"><span class="badge badge-no">${worst.outcome||''}</span></div>
+  </div>` : ''}
+
+  <!-- Active positions summary -->
+  ${active.length > 0 ? `
   <div class="section">
     <div class="section-head">
-      <span class="section-title">📈 תנועות שבועיות</span>
-      <span class="section-count">${movers.length}</span>
+      <span class="section-title">📂 פוזיציות פתוחות — מצב</span>
+      <span class="section-badge">${active.length}</span>
     </div>
-    ${moverRows}
-  </div>`;
-}
-
-/* ════════════════════════════════════
-   VIEW: WATCH
-════════════════════════════════════ */
-function renderWatch() {
-  const ids = getWatchlist();
-  if (!ids.length) {
-    return `<div class="empty-state">
-      <span class="empty-icon">⭐</span>
-      <div class="empty-text">אין שווקים במעקב<br><small>לחץ ⭐ על כרטיס שוק כדי להוסיף</small></div>
-    </div>`;
-  }
-  const d   = appData;
-  const all = [...(d.hot||[]), ...(d.movers||[]), ...(d.new_interesting||[]), ...(d.worth_watching||[])];
-  const seen = new Set();
-  const watched = ids.map(id => all.find(m => String(m.id)===id)).filter(m => m && !seen.has(m.id) && seen.add(m.id));
-
-  return `
-  <div class="section">
-    <div class="section-head">
-      <span class="section-title">⭐ שווקים במעקב</span>
-      <span class="section-count">${watched.length}</span>
-    </div>
-    ${watched.map(m => buildMarketCard(m, false)).join('')}
-  </div>`;
-}
-
-/* ════════════════════════════════════
-   MARKET CARD
-════════════════════════════════════ */
-function buildMarketCard(m, showChange=false) {
-  const ch     = m.oneWeekPriceChange || 0;
-  const chPct  = (ch*100).toFixed(1);
-  const chCls  = ch > 0.005 ? 'change-up' : ch < -0.005 ? 'change-down' : 'change-flat';
-  const arrow  = ch > 0.005 ? '▲' : ch < -0.005 ? '▼' : '—';
-  const watched = isWatched(m.id);
-
-  return `
-  <div class="market-card" data-id="${m.id}" onclick="openMarketModal('${m.id}')">
-    ${m.image ? `<img src="${esc(m.image)}" class="market-card-img" onerror="this.style.display='none'">` : ''}
-    <div class="market-card-body">
-      <div class="market-card-title">${esc(m.question)}</div>
-      <div class="market-card-meta">
-        <span class="meta-pill">${fmt$(m.volume24hr)}</span>
-        <span class="meta-pill">${fmtDate(m.end_date)}</span>
-        ${showChange ? `<span class="change-badge ${chCls}">${arrow}${Math.abs(chPct)}%</span>` : ''}
-      </div>
-    </div>
-    <div class="market-card-right">
-      <div class="prob-bar-wrap">
-        <div class="prob-bar"><div class="prob-bar-yes" style="width:${m.yes_pct}%"></div></div>
-        <div class="prob-labels">
-          <span class="prob-yes">${m.yes_pct}%</span>
-          <span class="prob-no">${m.no_pct}%</span>
+    ${active.map(p => {
+      const pnl     = p.cashPnl || 0;
+      const pnlSign = pnl >= 0 ? '+' : '';
+      const pnlCls  = pnl >= 0 ? 'up' : 'down';
+      const entryPct = Math.round((p.avgPrice||0)*1000)/10;
+      const curPct   = Math.round((p.curPrice||0)*1000)/10;
+      return `
+      <div class="hist-item">
+        <span class="hist-icon">${pnl>=0?'🟢':'🔴'}</span>
+        <div class="hist-body">
+          <div class="hist-title">${esc(truncate(p.title,60))}</div>
+          <div class="hist-meta">
+            <span>כניסה ${entryPct}%</span>
+            <span>→ נוכחי ${curPct}%</span>
+          </div>
         </div>
-      </div>
-      <div class="market-vol">${fmt$(m.liquidity)} נזילות</div>
-    </div>
-  </div>`;
-}
+        <div class="hist-right">
+          <div class="hist-pnl ${pnlCls}">${pnlSign}$${Math.abs(pnl).toFixed(2)}</div>
+          <div class="hist-pct">${pnlSign}${(p.percentPnl||0).toFixed(1)}%</div>
+        </div>
+      </div>`;
+    }).join('')}
+  </div>` : ''}
 
-function renderMarketSection(title, markets, showChange=false) {
-  if (!markets.length) return '';
-  return `
+  <!-- Category breakdown -->
+  ${Object.keys(catCounts).length > 0 ? `
+  <div class="section">
+    <div class="section-head"><span class="section-title">📊 התפלגות שוק לפי קטגוריה</span></div>
+    <div class="chart-card" style="padding:10px 12px">
+      ${Object.entries(CAT).filter(([k])=>catCounts[k]>0).map(([k,label]) => {
+        const n = catCounts[k]||0;
+        const pct = Math.round(n/maxCat*100);
+        return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:7px">
+          <span style="font-size:11px;color:var(--t2);min-width:90px;text-align:right">${label}</span>
+          <div style="flex:1;height:6px;border-radius:99px;background:var(--border-strong);overflow:hidden">
+            <div style="width:${pct}%;height:100%;border-radius:99px;background:var(--accent)"></div>
+          </div>
+          <span style="font-family:var(--mono);font-size:11px;font-weight:600;color:var(--t1);min-width:24px;text-align:left">${n}</span>
+        </div>`;
+      }).join('')}
+    </div>
+  </div>` : ''}
+
+  <!-- Signals list -->
+  ${signals.length > 0 ? `
   <div class="section">
     <div class="section-head">
-      <span class="section-title">${title}</span>
-      <span class="section-count">${markets.length}</span>
+      <span class="section-title">📡 סיגנלים</span>
+      <span class="section-badge">${signals.length}</span>
     </div>
-    ${markets.slice(0,8).map(m => buildMarketCard(m, showChange)).join('')}
-  </div>`;
+    ${signals.slice(0,5).map(s => {
+      const strong = s.strength==='STRONG';
+      return `
+      <div class="hist-item" style="align-items:center">
+        <span style="font-size:18px">${strong?'🔴':'🟡'}</span>
+        <div class="hist-body">
+          <div class="hist-title" style="font-size:12px">${esc(truncate(s.question||s.market_title||'',60))}</div>
+          <div class="hist-meta"><span>${s.type||''}</span><span>${s.days_left!=null?s.days_left+'d':'—'}</span></div>
+        </div>
+        <div class="hist-right">
+          <span class="badge ${strong?'badge-loss':'badge-neutral'}" style="font-size:9px">${s.strength}</span>
+        </div>
+      </div>`;
+    }).join('')}
+  </div>` : ''}
+  `;
 }
 
-/* ════════════════════════════════════
-   RECOMMENDATION
-════════════════════════════════════ */
-function renderRec(rec) {
-  if (!rec) return '';
-  const yesPct   = rec.yes_pct || 50;
-  const reasons  = (rec.reasoning||[]).filter(Boolean).slice(0,3);
-  const link     = rec.link || '#';
-  const strength = rec.source === 'signal' ? 'STRONG SIGNAL' : rec.source === 'edge' ? 'BEST EDGE' : 'OPPORTUNITY';
-
-  return `
-  <div class="rec-card">
-    <div class="rec-header">
-      <span class="rec-badge">${strength}</span>
-      <span style="font-size:11px;color:var(--t3)">המלצת הבוט</span>
-    </div>
-    <div class="rec-title">${esc(rec.title||'')}</div>
-    <div class="rec-reasons">
-      ${reasons.map(r => `<div class="rec-reason">${esc(String(r))}</div>`).join('')}
-    </div>
-    <div style="display:flex;align-items:center;gap:var(--gap-md)">
-      <a href="${esc(link)}" target="_blank" class="rec-cta">
-        📈 הצג שוק — Yes ${yesPct}%
-      </a>
-      ${rec.size_usd ? `<span style="font-size:12px;color:var(--t3)">גודל מוצע: <strong style="color:var(--t2)">$${parseFloat(rec.size_usd).toFixed(0)}</strong></span>` : ''}
-    </div>
-  </div>`;
+/* ─── helper ─── */
+function switchView(view) {
+  activeView = view;
+  document.querySelectorAll('.nav-item').forEach(n => {
+    n.classList.toggle('active', n.dataset.view === view);
+  });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  renderView();
 }
 
-/* ════════════════════════════════════
-   MARKET MODAL (quick view)
-════════════════════════════════════ */
-function openMarketModal(id) {
-  const d   = appData;
-  const all = [...(d.hot||[]), ...(d.movers||[]), ...(d.new_interesting||[]), ...(d.worth_watching||[]), ...(d.good_chances||[])];
-  const m   = all.find(x => String(x.id) === String(id));
-  if (!m) return;
-
-  const watched = isWatched(m.id);
-  const modal = document.createElement('div');
-  modal.className = 'modal-overlay';
-  modal.id = 'marketModal';
-  modal.innerHTML = `
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:var(--gap-md)">
-      ${m.image ? `<img src="${esc(m.image)}" style="width:44px;height:44px;border-radius:8px;object-fit:cover;flex-shrink:0" onerror="this.style.display='none'">` : ''}
-      <div style="flex:1">
-        <div class="modal-title" style="font-size:14px">${esc(m.question)}</div>
-        <div style="font-size:11px;color:var(--t3);margin-top:3px">${fmtDate(m.end_date)} · ${fmt$(m.volume24hr)} נפח · ${m.category}</div>
-      </div>
-    </div>
-
-    <div class="modal-stats">
-      <div class="mstat"><div class="mstat-val" style="color:var(--up)">${m.yes_pct}%</div><div class="mstat-lbl">Yes</div></div>
-      <div class="mstat"><div class="mstat-val" style="color:var(--down)">${m.no_pct}%</div><div class="mstat-lbl">No</div></div>
-      <div class="mstat"><div class="mstat-val">${fmt$(m.liquidity)}</div><div class="mstat-lbl">נזילות</div></div>
-    </div>
-
-    <div style="margin-bottom:var(--gap-md)">
-      <div class="prob-bar" style="height:8px;margin-bottom:6px">
-        <div class="prob-bar-yes" style="width:${m.yes_pct}%"></div>
-      </div>
-      <p style="font-size:12px;color:var(--t2);line-height:1.5">${esc(m.interesting||'')}</p>
-    </div>
-
-    <div class="modal-actions">
-      <a href="${esc(m.link||'#')}" target="_blank" class="modal-btn modal-btn-primary" style="background:var(--accent);color:#000">📊 פתח ב-Polymarket</a>
-      <button onclick="toggleWatch('${m.id}');this.textContent=isWatched('${m.id}')?'✅ במעקב':'⭐ הוסף למעקב'" 
-        class="modal-btn modal-btn-secondary">${watched ? '✅ במעקב' : '⭐ הוסף למעקב'}</button>
-      <button class="modal-btn modal-btn-close" onclick="document.getElementById('marketModal').remove()">סגור</button>
-    </div>
-  </div>`;
-  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
-  document.body.appendChild(modal);
-}
-
-/* ════════════════════════════════════
-   EXIT MODAL
-════════════════════════════════════ */
-function openExitModal(pos) {
-  const pct     = Math.round((pos.curPrice||0)*1000)/10;
-  const exitVal = pos.exitValue || pos.currentValue || 0;
-  const pnl     = pos.cashPnl || 0;
-  const noLiq   = exitVal < 0.10;
-  const pnlSign = pnl >= 0 ? '+' : '';
-  const pnlClr  = pnl >= 0 ? 'var(--up)' : 'var(--down)';
-
-  document.getElementById('exitModalTitle').textContent = 'יציאה מפוזיציה';
-  document.getElementById('exitModalSub').textContent   = pos.title;
-  document.getElementById('exitModalStats').innerHTML   = `
-    <div class="mstat"><div class="mstat-val">$${exitVal.toFixed(2)}</div><div class="mstat-lbl">שווי יציאה</div></div>
-    <div class="mstat"><div class="mstat-val" style="color:${pnlClr}">${pnlSign}$${pnl.toFixed(2)}</div><div class="mstat-lbl">P&L</div></div>
-    <div class="mstat"><div class="mstat-val">${pct}%</div><div class="mstat-lbl">מחיר</div></div>`;
-
-  const alertEl   = document.getElementById('exitModalAlert');
-  const actionsEl = document.getElementById('exitModalActions');
-
-  if (noLiq) {
-    alertEl.innerHTML = `<div class="modal-alert">⚠️ <strong>אין קונים זמינים</strong> — המחיר ירד לכמעט אפס. לא ניתן למכור כרגע. הפוזיציה תסתיים אוטומטית ב-${pos.endDate||'?'}.</div>`;
-    actionsEl.innerHTML = '';
-  } else {
-    alertEl.innerHTML  = '';
-    actionsEl.innerHTML = `
-      <a href="${esc(pos.link||'#')}" target="_blank" class="modal-btn modal-btn-primary">🌐 מכור ב-Polymarket</a>
-      <button onclick="navigator.clipboard.writeText('sell ${esc(pos.slug||'')}');this.textContent='✅ הועתק!';setTimeout(()=>this.textContent='📋 העתק פקודה לבוט',2000)" class="modal-btn modal-btn-secondary">📋 העתק פקודה לבוט</button>`;
-  }
-
-  document.getElementById('exitModal').style.display = 'flex';
-}
-function closeExitModal() { document.getElementById('exitModal').style.display = 'none'; }
-document.getElementById('exitModal').addEventListener('click', e => {
-  if (e.target === document.getElementById('exitModal')) closeExitModal();
-});
-
-/* ════════════════════════════════════
-   NAVIGATION
-════════════════════════════════════ */
+/* ─── Navigation ─── */
 document.getElementById('bottomNav').addEventListener('click', e => {
   const item = e.target.closest('.nav-item');
-  if (!item) return;
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  item.classList.add('active');
-  activeView = item.dataset.view;
-  renderContent();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (!item || !item.dataset.view) return;
+  switchView(item.dataset.view);
 });
 
 document.getElementById('refreshBtn').addEventListener('click', () => {
-  const lbl = document.getElementById('refreshLabel');
-  lbl.textContent = 'טוען...';
-  loadData(true).finally(() => { setTimeout(() => { lbl.textContent = 'LIVE'; }, 500); });
+  const btn = document.getElementById('refreshBtn');
+  btn.style.opacity = '0.5';
+  loadData().finally(() => { btn.style.opacity = ''; });
 });
 
-/* ════════════════════════════════════
-   INIT
-════════════════════════════════════ */
+/* ─── Init ─── */
 loadData();
-setInterval(() => loadData(true), REFRESH_MS);
+setInterval(() => loadData(), REFRESH_MS);
 </script>
 </body>
 </html>
