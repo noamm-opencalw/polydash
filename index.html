@@ -1428,10 +1428,12 @@ function renderRealPositions(rp) {
             text-decoration:none;font-weight:600;transition:var(--t)
           " onmouseover="this.style.color='var(--text-1)'" onmouseout="this.style.color='var(--text-2)'">📊 שוק</a>
           <button onclick="showExitModal(${JSON.stringify(pos).replace(/'/g,'&apos;')})" style="
-            background:rgba(244,63,94,0.15);border:1px solid rgba(244,63,94,0.35);
-            border-radius:var(--r-sm);padding:5px 14px;font-size:12px;color:#fb7185;
+            background:${pos.exitValue < 0.10 ? 'rgba(100,100,100,0.15)' : 'rgba(244,63,94,0.15)'};
+            border:1px solid ${pos.exitValue < 0.10 ? 'rgba(100,100,100,0.3)' : 'rgba(244,63,94,0.35)'};
+            border-radius:var(--r-sm);padding:5px 14px;font-size:12px;
+            color:${pos.exitValue < 0.10 ? 'var(--text-3)' : '#fb7185'};
             cursor:pointer;font-weight:700;transition:var(--t)
-          " onmouseover="this.style.background='rgba(244,63,94,0.25)'" onmouseout="this.style.background='rgba(244,63,94,0.15)'">🚪 יציאה</button>
+          ">${pos.exitValue < 0.10 ? '🔒 ללא נזילות' : '🚪 יציאה'}</button>
         </div>
       </div>
     </div>`;
@@ -1495,6 +1497,17 @@ function showExitModal(pos) {
       </div>
     </div>
 
+    ${exitVal < 0.10 ? `
+    <div style="
+      background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.3);
+      border-radius:var(--r-md);padding:12px;margin-bottom:var(--s-lg);
+      font-size:13px;color:#fcd34d;line-height:1.5;
+    ">
+      ⚠️ <strong>אין קונים זמינים</strong><br>
+      <span style="color:var(--text-2)">המחיר ירד לכמעט אפס — אין נזילות למכירה כרגע.
+      הפוזיציה תסתיים אוטומטית בנובמבר 2026.
+      ההפסד כבר נעול ולא ניתן לצמצם אותו.</span>
+    </div>` : `
     <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:var(--s-lg)">
       <a href="${pos.link}" target="_blank" style="
         display:block;text-align:center;
@@ -1502,9 +1515,8 @@ function showExitModal(pos) {
         border-radius:var(--r-md);padding:12px;font-size:14px;font-weight:700;
         color:#fb7185;text-decoration:none;transition:var(--t)
       ">🌐 מכור ב-Polymarket ישירות</a>
-
       <button onclick="
-        navigator.clipboard.writeText('${tgMsg.replace(/'/g,"\\'")}'.replace('מכור פוזיציה','sell'));
+        navigator.clipboard.writeText('${tgMsg.replace(/'/g,"\\'")}');
         this.textContent='✅ הועתק!';
         setTimeout(()=>this.textContent='📋 העתק פקודת מכירה לבוט',2000);
       " style="
@@ -1513,10 +1525,9 @@ function showExitModal(pos) {
         color:#c4b5fd;cursor:pointer;transition:var(--t)
       ">📋 העתק פקודת מכירה לבוט</button>
     </div>
-
     <p style="font-size:11px;color:var(--text-3);margin-bottom:var(--s-md)">
       לביצוע מכירה דרך הבוט: שלח את הפקודה ל-<strong style="color:var(--text-2)">@OpenClaw_noam_bot</strong>
-    </p>
+    </p>`}
 
     <button onclick="document.getElementById('exit-modal').remove()" style="
       width:100%;background:rgba(255,255,255,0.06);border:1px solid var(--glass-border);
