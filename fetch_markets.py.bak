@@ -169,135 +169,7 @@ def load_active_bets() -> list:
         "resolved": sorted(resolved, key=lambda x: x.get("timestamp", ""), reverse=True),
     }
 
-BASE_URL   = "https://gamma-api.polymarket.com"
-PROXY_WALLET = "0xBDDB0bFB7dbf1cffdeaD288f6E3027AB1a4D7bF1"
-
-
-def fetch_real_positions() -> dict:
-    """שולף פוזיציות אמיתיות מPolymarket API עבור ה-proxy wallet."""
-    try:
-        resp = requests.get(
-            f"https://data-api.polymarket.com/positions",
-            params={"user": PROXY_WALLET, "limit": 50},
-            timeout=10,
-        )
-        resp.raise_for_status()
-        positions = resp.json() or []
-    except Exception as e:
-        print(f"Warning: positions fetch failed: {e}")
-        return {"active": [], "resolved": []}
-
-    # טען מחירים קודמים לחישוב שינוי 24h
-    prev_prices = {}
-    if os.path.exists("data.json"):
-        try:
-            with open("data.json") as f:
-                old = json.load(f)
-            for p in old.get("real_positions", {}).get("active", []):
-                prev_prices[p["asset"]] = {
-                    "price": p.get("curPrice"),
-                    "ts": old.get("updated_at", ""),
-                }
-        except Exception:
-            pass
-
-    now = datetime.now(timezone.utc)
-    active, resolved = [], []
-
-    for p in positions:
-        cur_price    = float(p.get("curPrice", 0))
-        avg_price    = float(p.get("avgPrice", 0))
-        size         = float(p.get("size", 0))
-        initial_val  = float(p.get("initialValue", 0))
-        current_val  = float(p.get("currentValue", 0))
-        cash_pnl     = float(p.get("cashPnl", 0))
-        pct_pnl      = float(p.get("percentPnl", 0))
-        end_date_str = p.get("endDate", "")
-
-        # שינוי מחיר מאז העדכון האחרון
-        prev = prev_prices.get(p.get("asset", ""), {})
-        prev_price   = prev.get("price")
-        price_change = None
-        if prev_price is not None:
-            price_change = round((cur_price - prev_price) * 100, 2)
-
-        # ימים לסיום
-        days_left = None
-        try:
-            ed = datetime.fromisoformat(end_date_str.replace("Z", "+00:00"))
-            days_left = max(0, (ed - now).days)
-        except Exception:
-            pass
-
-        # שווי יציאה משוערך (אם מכרנו עכשיו)
-        exit_value = round(size * cur_price, 2)
-
-        enriched = {
-            "asset":          p.get("asset", ""),
-            "conditionId":    p.get("conditionId", ""),
-            "title":          p.get("title", ""),
-            "outcome":        p.get("outcome", "Yes"),
-            "slug":           p.get("slug", ""),
-            "eventSlug":      p.get("eventSlug", ""),
-            "icon":           p.get("icon", ""),
-            "size":           round(size, 4),
-            "avgPrice":       round(avg_price, 4),
-            "curPrice":       round(cur_price, 4),
-            "initialValue":   round(initial_val, 2),
-            "currentValue":   round(current_val, 2),
-            "exitValue":      exit_value,
-            "cashPnl":        round(cash_pnl, 2),
-            "percentPnl":     round(pct_pnl, 2),
-            "priceChangeSinceUpdate": price_change,
-            "endDate":        end_date_str,
-            "daysLeft":       days_left,
-            "redeemable":     p.get("redeemable", False),
-            "negativeRisk":   p.get("negativeRisk", False),
-            "link":           f"https://polymarket.com/event/{p.get('eventSlug', p.get('slug', ''))}",
-        }
-
-        if days_left == 0 or p.get("redeemable"):
-            resolved.append(enriched)
-        else:
-            active.append(enriched)
-
-    # מיון: הכי גדול קודם
-    active.sort(key=lambda x: abs(x["currentValue"]), reverse=True)
-
-    # סטטיסטיקת תיק אמיתי
-    total_invested = sum(p["initialValue"] for p in active + resolved)
-    total_current  = sum(p["currentValue"] for p in active)
-    total_pnl      = sum(p["cashPnl"] for p in active + resolved)
-    wins   = sum(1 for p in resolved if p["cashPnl"] > 0)
-    losses = sum(1 for p in resolved if p["cashPnl"] <= 0)
-
-    # יתרת USDC
-    usdc_balance = 0.0
-    try:
-        r = requests.get(
-            f"https://data-api.polymarket.com/value",
-            params={"user": PROXY_WALLET},
-            timeout=8,
-        )
-        data_val = r.json()
-        if isinstance(data_val, list) and data_val:
-            usdc_balance = float(data_val[0].get("value", 0)) - total_current
-    except Exception:
-        pass
-
-    return {
-        "active":   active,
-        "resolved": resolved,
-        "portfolio": {
-            "total_invested":  round(total_invested, 2),
-            "total_current":   round(total_current, 2),
-            "total_pnl":       round(total_pnl, 2),
-            "wins":   wins,
-            "losses": losses,
-            "active": len(active),
-            "usdc_balance": round(usdc_balance, 2),
-        },
-    }
+BASE_URL = "https://gamma-api.polymarket.com"
 
 CATEGORY_KEYWORDS = {
     "politics": ["election", "president", "congress", "senate", "vote", "biden", "trump", "democrat", "republican",
@@ -582,9 +454,6 @@ def main():
         reverse=True
     )[:10]
 
-    # --- Real positions from Polymarket ---
-    real_positions = fetch_real_positions()
-
     # --- Recommendation: top pick with reasoning ---
     signals          = load_signals()
     bets_result      = load_active_bets()
@@ -674,7 +543,6 @@ def main():
 
     data = {
         "updated_at": now.isoformat(),
-        "real_positions": real_positions,
         "hot": hot,
         "movers": movers,
         "new_interesting": new_interesting,
