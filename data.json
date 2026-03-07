@@ -35,8 +35,8 @@
     }
   },
   "portfolio": {
-    "total_capital": 137.84,
-    "cash": 125.95,
+    "total_capital": 125.84,
+    "cash": 113.95,
     "positions_value": 11.89,
     "total_pnl": -34.03,
     "realized_pnl": -33.91,
