@@ -8,47 +8,129 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <style>
-/* ── NEW ICON PACK (icons.png) ── */
-/* 512x279 | 8 cols x 3 rows | 64x93 per cell | rendered at 32px */
-.ic {
+/* ── ICON PACK (icons.png) — 100px grid, 8x3 ── */
+.poly-icon {
   display: inline-block;
   background-image: url('icons.png');
   background-repeat: no-repeat;
-  width: 32px; height: 32px;
-  background-size: 256px 96px;
-  vertical-align: middle;
+  background-size: 800px 300px;
   flex-shrink: 0;
+  vertical-align: middle;
 }
-.ic.ic-lg { width: 44px; height: 44px; background-size: 352px 132px }
-.ic.ic-sm { width: 24px; height: 24px; background-size: 192px 72px }
+.pi-32 { width:32px; height:32px; background-size:256px 96px  }
+.pi-24 { width:24px; height:24px; background-size:192px 72px  }
+.pi-44 { width:44px; height:44px; background-size:352px 132px }
+.pi-56 { width:56px; height:56px; background-size:448px 168px }
 
-/* Row 0 */
-.ic-home        { background-position: -0px   -0px  }
-.ic-bets        { background-position: -32px  -0px  }
-.ic-signals     { background-position: -64px  -0px  }
-.ic-scanner     { background-position: -96px  -0px  }
-.ic-scanner2    { background-position: -128px -0px  }
-.ic-target      { background-position: -160px -0px  }
-.ic-half-circle { background-position: -192px -0px  }
-.ic-moon        { background-position: -224px -0px  }
-/* Row 1 */
-.ic-portfolio   { background-position: -0px   -32px }
-.ic-pnl         { background-position: -32px  -32px }
-.ic-winrate     { background-position: -64px  -32px }
-.ic-active-bets { background-position: -96px  -32px }
-.ic-refresh     { background-position: -128px -32px }
-.ic-moon2       { background-position: -160px -32px }
-.ic-positions   { background-position: -192px -32px }
-.ic-review      { background-position: -224px -32px }
-/* Row 2 */
-.ic-bitcoin     { background-position: -0px   -64px }
-.ic-globe       { background-position: -32px  -64px }
-.ic-chart-up    { background-position: -64px  -64px }
-.ic-lightning   { background-position: -96px  -64px }
-.ic-bitcoin2    { background-position: -128px -64px }
-.ic-geopolitics { background-position: -160px -64px }
-.ic-markets     { background-position: -192px -64px }
-.ic-chain       { background-position: -224px -64px }
+/* Row 1 (Y=0) */
+.icon-home          { background-position: 0px    0px }
+.icon-bets          { background-position: -100px 0px }
+.icon-signals       { background-position: -200px 0px }
+.icon-scanner       { background-position: -300px 0px }
+.icon-target        { background-position: -400px 0px }
+.icon-day-night     { background-position: -500px 0px }
+.icon-moon-cloud    { background-position: -600px 0px }
+
+/* Row 2 (Y=-100px) */
+.icon-portfolio     { background-position: 0px    -100px }
+.icon-pl-cash       { background-position: -100px -100px }
+.icon-win-rate      { background-position: -200px -100px }
+.icon-active-bets   { background-position: -300px -100px }
+.icon-refresh       { background-position: -400px -100px }
+.icon-sun           { background-position: -500px -100px }
+.icon-positions-map { background-position: -600px -100px }
+.icon-under-review  { background-position: -700px -100px }
+
+/* Row 3 (Y=-200px) */
+.icon-crypto-b      { background-position: 0px    -200px }
+.icon-globe         { background-position: -100px -200px }
+.icon-market-chart  { background-position: -200px -200px }
+.icon-lightning     { background-position: -300px -200px }
+.icon-crypto-gold   { background-position: -400px -200px }
+.icon-geo-map       { background-position: -500px -200px }
+.icon-market-green  { background-position: -600px -200px }
+.icon-chain         { background-position: -700px -200px }
+
+/* pi-32 scaled offsets (x0.32) */
+.pi-32.icon-home          { background-position: 0px    0px   }
+.pi-32.icon-bets          { background-position: -32px  0px   }
+.pi-32.icon-signals       { background-position: -64px  0px   }
+.pi-32.icon-scanner       { background-position: -96px  0px   }
+.pi-32.icon-target        { background-position: -128px 0px   }
+.pi-32.icon-day-night     { background-position: -160px 0px   }
+.pi-32.icon-moon-cloud    { background-position: -192px 0px   }
+.pi-32.icon-portfolio     { background-position: 0px    -32px }
+.pi-32.icon-pl-cash       { background-position: -32px  -32px }
+.pi-32.icon-win-rate      { background-position: -64px  -32px }
+.pi-32.icon-active-bets   { background-position: -96px  -32px }
+.pi-32.icon-refresh       { background-position: -128px -32px }
+.pi-32.icon-sun           { background-position: -160px -32px }
+.pi-32.icon-positions-map { background-position: -192px -32px }
+.pi-32.icon-under-review  { background-position: -224px -32px }
+.pi-32.icon-crypto-b      { background-position: 0px    -64px }
+.pi-32.icon-globe         { background-position: -32px  -64px }
+.pi-32.icon-market-chart  { background-position: -64px  -64px }
+.pi-32.icon-lightning     { background-position: -96px  -64px }
+.pi-32.icon-crypto-gold   { background-position: -128px -64px }
+.pi-32.icon-geo-map       { background-position: -160px -64px }
+.pi-32.icon-market-green  { background-position: -192px -64px }
+.pi-32.icon-chain         { background-position: -224px -64px }
+
+/* pi-24 scaled offsets (x0.24) */
+.pi-24.icon-home          { background-position: 0px    0px   }
+.pi-24.icon-bets          { background-position: -24px  0px   }
+.pi-24.icon-signals       { background-position: -48px  0px   }
+.pi-24.icon-scanner       { background-position: -72px  0px   }
+.pi-24.icon-target        { background-position: -96px  0px   }
+.pi-24.icon-day-night     { background-position: -120px 0px   }
+.pi-24.icon-moon-cloud    { background-position: -144px 0px   }
+.pi-24.icon-portfolio     { background-position: 0px    -24px }
+.pi-24.icon-pl-cash       { background-position: -24px  -24px }
+.pi-24.icon-win-rate      { background-position: -48px  -24px }
+.pi-24.icon-active-bets   { background-position: -72px  -24px }
+.pi-24.icon-refresh       { background-position: -96px  -24px }
+.pi-24.icon-sun           { background-position: -120px -24px }
+.pi-24.icon-positions-map { background-position: -144px -24px }
+.pi-24.icon-under-review  { background-position: -168px -24px }
+.pi-24.icon-crypto-b      { background-position: 0px    -48px }
+.pi-24.icon-globe         { background-position: -24px  -48px }
+.pi-24.icon-market-chart  { background-position: -48px  -48px }
+.pi-24.icon-lightning     { background-position: -72px  -48px }
+.pi-24.icon-crypto-gold   { background-position: -96px  -48px }
+.pi-24.icon-geo-map       { background-position: -120px -48px }
+.pi-24.icon-market-green  { background-position: -144px -48px }
+.pi-24.icon-chain         { background-position: -168px -48px }
+
+/* pi-44 scaled offsets (x0.44) */
+.pi-44.icon-home          { background-position: 0px    0px   }
+.pi-44.icon-bets          { background-position: -44px  0px   }
+.pi-44.icon-signals       { background-position: -88px  0px   }
+.pi-44.icon-scanner       { background-position: -132px 0px   }
+.pi-44.icon-target        { background-position: -176px 0px   }
+.pi-44.icon-portfolio     { background-position: 0px    -44px }
+.pi-44.icon-pl-cash       { background-position: -44px  -44px }
+.pi-44.icon-win-rate      { background-position: -88px  -44px }
+.pi-44.icon-active-bets   { background-position: -132px -44px }
+.pi-44.icon-refresh       { background-position: -176px -44px }
+.pi-44.icon-positions-map { background-position: -264px -44px }
+.pi-44.icon-under-review  { background-position: -308px -44px }
+.pi-44.icon-crypto-b      { background-position: 0px    -88px }
+.pi-44.icon-globe         { background-position: -44px  -88px }
+.pi-44.icon-market-chart  { background-position: -88px  -88px }
+.pi-44.icon-lightning     { background-position: -132px -88px }
+.pi-44.icon-crypto-gold   { background-position: -176px -88px }
+.pi-44.icon-geo-map       { background-position: -220px -88px }
+.pi-44.icon-market-green  { background-position: -264px -88px }
+.pi-44.icon-chain         { background-position: -308px -88px }
+
+/* pi-56 scaled offsets (x0.56) */
+.pi-56.icon-crypto-b      { background-position: 0px    -112px }
+.pi-56.icon-globe         { background-position: -56px  -112px }
+.pi-56.icon-market-chart  { background-position: -112px -112px }
+.pi-56.icon-lightning     { background-position: -168px -112px }
+.pi-56.icon-crypto-gold   { background-position: -224px -112px }
+.pi-56.icon-geo-map       { background-position: -280px -112px }
+.pi-56.icon-market-green  { background-position: -336px -112px }
 
 /* ── VARIABLES ── */
 :root {
@@ -375,7 +457,7 @@ img{display:block;max-width:100%}
   margin-right:6px;
 }
 .refresh-btn:hover{border-color:var(--t2)}
-.refresh-btn.spinning .ic-refresh{animation:spin .7s linear infinite}
+.refresh-btn.spinning .icon-refresh{animation:spin .7s linear infinite}
 .refresh-btn svg{width:16px;height:16px;stroke:var(--t2)}
 
 /* ── WATCHLIST / UNDER REVIEW ── */
@@ -493,23 +575,23 @@ img{display:block;max-width:100%}
 <!-- HEADER -->
 <header class="header">
   <div class="logo">
-    <span class="ic ic-sm ic-target" style="margin-right:4px"></span>
+    <span class="poly-icon pi-24 icon-target" style="margin-right:4px"></span>
     <span>PolyDash</span>
     <span class="live-dot"></span>
     <span style="font-size:10px;color:var(--t2);font-weight:500">LIVE</span>
   </div>
   <nav class="desktop-nav">
-    <button data-tab="dashboard" class="active"><span class="ic ic-sm ic-home" style="margin-right:4px"></span>Dashboard</button>
-    <button data-tab="bets"><span class="ic ic-sm ic-bets" style="margin-right:4px"></span>Bets</button>
-    <button data-tab="signals"><span class="ic ic-sm ic-signals" style="margin-right:4px"></span>Signals</button>
-    <button data-tab="scanner"><span class="ic ic-sm ic-scanner" style="margin-right:4px"></span>Scanner</button>
+    <button data-tab="dashboard" class="active"><span class="poly-icon pi-24 icon-home" style="margin-right:4px"></span>Dashboard</button>
+    <button data-tab="bets"><span class="poly-icon pi-24 icon-bets" style="margin-right:4px"></span>Bets</button>
+    <button data-tab="signals"><span class="poly-icon pi-24 icon-signals" style="margin-right:4px"></span>Signals</button>
+    <button data-tab="scanner"><span class="poly-icon pi-24 icon-scanner" style="margin-right:4px"></span>Scanner</button>
   </nav>
   <div class="header-stats">
     <span class="header-value" id="headerValue">--</span>
     <span class="header-pnl" id="headerPnl">--</span>
   </div>
   <button class="refresh-btn" id="refreshBtn" aria-label="Refresh data" title="Refresh">
-    <span class="ic ic-sm ic-refresh" id="refreshIcon"></span>
+    <span class="poly-icon pi-24 icon-refresh" id="refreshIcon"></span>
   </button>
   <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">🌙</button>
 </header>
@@ -517,35 +599,35 @@ img{display:block;max-width:100%}
 <!-- HERO STATS -->
 <div class="hero-stats" id="heroStats">
   <div class="stat-card">
-    <div class="stat-label"><span class="ic ic-sm ic-portfolio"></span> Portfolio Value</div>
+    <div class="stat-label"><span class="poly-icon pi-24 icon-portfolio"></span> Portfolio Value</div>
     <div class="stat-value" id="statPortfolio">--</div>
   </div>
   <div class="stat-card">
-    <div class="stat-label"><span class="ic ic-sm ic-pnl"></span> All-Time P&amp;L</div>
+    <div class="stat-label"><span class="poly-icon pi-24 icon-pl-cash"></span> All-Time P&amp;L</div>
     <div class="stat-value sm" id="statPnl">--</div>
   </div>
   <div class="stat-card">
-    <div class="stat-label"><span class="ic ic-sm ic-winrate"></span> Win Rate</div>
+    <div class="stat-label"><span class="poly-icon pi-24 icon-win-rate"></span> Win Rate</div>
     <div class="stat-value" id="statWinRate">--</div>
   </div>
   <div class="stat-card">
-    <div class="stat-label"><span class="ic ic-sm ic-active-bets"></span> Active Bets</div>
+    <div class="stat-label"><span class="poly-icon pi-24 icon-active-bets"></span> Active Bets</div>
     <div class="stat-value" id="statActive">--</div>
   </div>
 </div>
 
 <!-- TAB: DASHBOARD -->
 <div class="tab-content active" id="tab-dashboard">
-  <div class="section-title"><span class="ic ic-sm ic-positions"></span> Active Positions</div>
+  <div class="section-title"><span class="poly-icon pi-24 icon-positions-map"></span> Active Positions</div>
   <div id="dashBets" class="loading"><div class="spinner"></div>Loading...</div>
 
-  <div class="section-title"><span class="ic ic-sm ic-review"></span> Under Review</div>
+  <div class="section-title"><span class="poly-icon pi-24 icon-under-review"></span> Under Review</div>
   <div id="reviewList">
 
     <!-- CARD 0: Oil $100 residual — still open -->
     <div class="review-card">
       <div class="review-header">
-        <div class="review-icon" style="background:rgba(220,38,38,0.12);display:flex;align-items:center;justify-content:center"><span class="ic ic-lg ic-geopolitics"></span></div>
+        <div class="review-icon" style="background:rgba(220,38,38,0.12);display:flex;align-items:center;justify-content:center"><span class="poly-icon pi-44 icon-geo-map"></span></div>
         <div class="review-main">
           <div class="review-title">Crude Oil $100 — Residual No Position</div>
           <div class="review-meta">
@@ -560,7 +642,7 @@ img{display:block;max-width:100%}
         </div>
       </div>
       <button class="review-toggle" onclick="toggleReview(this)">
-        <span class="ic ic-sm ic-review" style="margin-right:4px"></span> Why we're watching <span class="arrow">▾</span>
+        <span class="poly-icon pi-24 icon-under-review" style="margin-right:4px"></span> Why we're watching <span class="arrow">▾</span>
       </button>
       <div class="review-reason">
         <strong>⚠️ Situation</strong><br>
@@ -576,7 +658,7 @@ img{display:block;max-width:100%}
     <!-- CARD 1: BTC $65K dip -->
     <div class="review-card">
       <div class="review-header">
-        <div class="review-icon" style="background:rgba(247,147,26,0.12);display:flex;align-items:center;justify-content:center"><span class="ic ic-lg ic-bitcoin2"></span></div>
+        <div class="review-icon" style="background:rgba(247,147,26,0.12);display:flex;align-items:center;justify-content:center"><span class="poly-icon pi-44 icon-crypto-gold"></span></div>
         <div class="review-main">
           <div class="review-title">Will Bitcoin dip to $65,000 in March?</div>
           <div class="review-meta">
@@ -591,7 +673,7 @@ img{display:block;max-width:100%}
         </div>
       </div>
       <button class="review-toggle" onclick="toggleReview(this)">
-        <span class="ic ic-sm ic-review" style="margin-right:4px"></span> Why we're watching <span class="arrow">▾</span>
+        <span class="poly-icon pi-24 icon-under-review" style="margin-right:4px"></span> Why we're watching <span class="arrow">▾</span>
       </button>
       <div class="review-reason">
         <strong>⚖️ The Dilemma</strong><br>
@@ -622,7 +704,7 @@ img{display:block;max-width:100%}
         </div>
       </div>
       <button class="review-toggle" onclick="toggleReview(this)">
-        <span class="ic ic-sm ic-review" style="margin-right:4px"></span> Why we're watching <span class="arrow">▾</span>
+        <span class="poly-icon pi-24 icon-under-review" style="margin-right:4px"></span> Why we're watching <span class="arrow">▾</span>
       </button>
       <div class="review-reason">
         <strong>⚖️ The Dilemma</strong><br>
@@ -640,36 +722,36 @@ img{display:block;max-width:100%}
 
 <!-- TAB: BETS -->
 <div class="tab-content" id="tab-bets">
-  <div class="section-title"><span class="ic ic-sm ic-positions"></span> All Active Bets</div>
+  <div class="section-title"><span class="poly-icon pi-24 icon-positions-map"></span> All Active Bets</div>
   <div id="allBets" class="loading"><div class="spinner"></div>Loading...</div>
 </div>
 
 <!-- TAB: SIGNALS -->
 <div class="tab-content" id="tab-signals">
-  <div class="section-title"><span class="ic ic-sm ic-signals"></span> AI Signal Feed</div>
+  <div class="section-title"><span class="poly-icon pi-24 icon-signals"></span> AI Signal Feed</div>
   <div id="signalFeed"></div>
 </div>
 
 <!-- TAB: SCANNER -->
 <div class="tab-content" id="tab-scanner">
-  <div class="section-title"><span class="ic ic-sm ic-scanner"></span> EV+ Scanner</div>
+  <div class="section-title"><span class="poly-icon pi-24 icon-scanner"></span> EV+ Scanner</div>
   <div id="scannerGrid" class="scanner-grid"></div>
 </div>
 
 <!-- BOTTOM STATS BAR -->
 <div class="stats-bar" id="statsBar">
-  <div class="stats-bar-item"><div class="label"><span class="ic ic-sm ic-winrate"></span> Streak</div><div class="val" id="barStreak">--</div></div>
-  <div class="stats-bar-item"><div class="label"><span class="ic ic-sm ic-target"></span> Brier</div><div class="val" id="barBrier">--</div></div>
-  <div class="stats-bar-item"><div class="label"><span class="ic ic-sm ic-active-bets"></span> Exposure</div><div class="val" id="barExposure">--</div></div>
-  <div class="stats-bar-item"><div class="label"><span class="ic ic-sm ic-chart-up"></span> Last Trade</div><div class="val" id="barLastTrade">--</div></div>
+  <div class="stats-bar-item"><div class="label"><span class="poly-icon pi-24 icon-win-rate"></span> Streak</div><div class="val" id="barStreak">--</div></div>
+  <div class="stats-bar-item"><div class="label"><span class="poly-icon pi-24 icon-target"></span> Brier</div><div class="val" id="barBrier">--</div></div>
+  <div class="stats-bar-item"><div class="label"><span class="poly-icon pi-24 icon-active-bets"></span> Exposure</div><div class="val" id="barExposure">--</div></div>
+  <div class="stats-bar-item"><div class="label"><span class="poly-icon pi-24 icon-market-chart"></span> Last Trade</div><div class="val" id="barLastTrade">--</div></div>
 </div>
 
 <!-- BOTTOM NAV -->
 <nav class="bottom-nav">
-  <button class="nav-tab active" data-tab="dashboard"><span class="ic ic-home" style="margin-bottom:2px"></span>Dashboard</button>
-  <button class="nav-tab" data-tab="bets"><span class="ic ic-bets" style="margin-bottom:2px"></span>Bets</button>
-  <button class="nav-tab" data-tab="signals"><span class="ic ic-signals" style="margin-bottom:2px"></span>Signals</button>
-  <button class="nav-tab" data-tab="scanner"><span class="ic ic-scanner" style="margin-bottom:2px"></span>Scanner</button>
+  <button class="nav-tab active" data-tab="dashboard"><span class="poly-icon pi-32 icon-home" style="margin-bottom:2px"></span>Dashboard</button>
+  <button class="nav-tab" data-tab="bets"><span class="poly-icon pi-32 icon-bets" style="margin-bottom:2px"></span>Bets</button>
+  <button class="nav-tab" data-tab="signals"><span class="poly-icon pi-32 icon-signals" style="margin-bottom:2px"></span>Signals</button>
+  <button class="nav-tab" data-tab="scanner"><span class="poly-icon pi-32 icon-scanner" style="margin-bottom:2px"></span>Scanner</button>
 </nav>
 
 <script>
@@ -720,13 +802,13 @@ function fmtBigNum(v) {
 
 function getCategory(text) {
   text = (text || '').toLowerCase();
-  if (/bitcoin|btc|crypto|eth|coin/.test(text))      return {ic:'ic-bitcoin',     label:'Crypto',      color:'#F7931A'};
-  if (/fed|rate|interest|inflation|economy|gdp/.test(text)) return {ic:'ic-pnl',        label:'Economics',   color:'#2563EB'};
-  if (/election|president|congress|senate|vote|political|party|republican|democrat/.test(text)) return {ic:'ic-winrate',    label:'Politics',    color:'#7C3AED'};
-  if (/nba|nfl|soccer|sport|game|team|basketball|football|la liga|finals|pacers|madrid/.test(text)) return {ic:'ic-target',     label:'Sports',      color:'#059669'};
-  if (/gpt|ai|openai|tech|model|release|nvidia/.test(text)) return {ic:'ic-chart-up',  label:'Tech',        color:'#0891B2'};
-  if (/iran|war|military|israel|strike|attack|khamenei|oil|crude/.test(text)) return {ic:'ic-geopolitics',label:'Geopolitics', color:'#DC2626'};
-  return {ic:'ic-markets', label:'Market', color:'#6B7280'};
+  if (/bitcoin|btc|crypto|eth|coin/.test(text))      return {ic:'icon-crypto-b',    label:'Crypto',      color:'#F7931A'};
+  if (/fed|rate|interest|inflation|economy|gdp/.test(text)) return {ic:'icon-pl-cash',    label:'Economics',   color:'#2563EB'};
+  if (/election|president|congress|senate|vote|political|party|republican|democrat/.test(text)) return {ic:'icon-win-rate',   label:'Politics',    color:'#7C3AED'};
+  if (/nba|nfl|soccer|sport|game|team|basketball|football|la liga|finals|pacers|madrid/.test(text)) return {ic:'icon-target',     label:'Sports',      color:'#059669'};
+  if (/gpt|ai|openai|tech|model|release|nvidia/.test(text)) return {ic:'icon-market-chart', label:'Tech',    color:'#0891B2'};
+  if (/iran|war|military|israel|strike|attack|khamenei|oil|crude/.test(text)) return {ic:'icon-geo-map',   label:'Geopolitics', color:'#DC2626'};
+  return {ic:'icon-lightning', label:'Market', color:'#6B7280'};
 }
 
 function daysLeftFromDate(dateStr) {
@@ -779,7 +861,7 @@ function renderBetCard(pos) {
 
   const imgHtml = pos.icon
     ? `<img class="bet-img" src="${pos.icon}" alt="" loading="lazy" onerror="this.outerHTML='<div class=\\'bet-emoji-icon\\' style=\\'background:${cat.color}22;display:flex;align-items:center;justify-content:center\\'><span class=\\'ic ic-lg ${cat.ic}\\'></span></div>'">`
-    : `<div class="bet-emoji-icon" style="background:${cat.color}22;display:flex;align-items:center;justify-content:center"><span class="ic ic-lg ${cat.ic}"></span></div>`;
+    : `<div class="bet-emoji-icon" style="background:${cat.color}22;display:flex;align-items:center;justify-content:center"><span class="poly-icon pi-44 ${cat.ic}"></span></div>`;
 
   return `
     <a href="${pos.link || '#'}" target="_blank" rel="noopener" class="bet-card ${status}">
