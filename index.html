@@ -8,6 +8,46 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <style>
+/* ── SPRITE SHEET ── */
+/* sprites.jpg: 1024×559px, 18 cols × 10 rows, cell ≈ 56.9×55.9px */
+.sp {
+  display: inline-block;
+  background-image: url('sprites.jpg');
+  background-repeat: no-repeat;
+  width: 32px; height: 32px;
+  background-size: calc(18 * 32px) calc(10 * 32px); /* scale to 32px cells */
+  image-rendering: pixelated;
+  flex-shrink: 0;
+}
+/* Macro to compute offset: col*-32, row*-32 */
+.sp-coin     { background-position: calc(15 * -32px) calc(1 * -32px) }  /* gold coin (15,1) */
+.sp-lightning{ background-position: calc(1  * -32px) calc(4 * -32px) }  /* lightning (1,4) */
+.sp-fire     { background-position: calc(5  * -32px) calc(1 * -32px) }  /* fire (5,1) */
+.sp-robot    { background-position: calc(14 * -32px) calc(1 * -32px) }  /* robot (14,1) */
+.sp-ghost    { background-position: calc(13 * -32px) calc(1 * -32px) }  /* ghost (13,1) */
+.sp-star     { background-position: calc(6  * -32px) calc(4 * -32px) }  /* star (6,4) */
+.sp-shield   { background-position: calc(4  * -32px) calc(4 * -32px) }  /* shield (4,4) */
+.sp-check    { background-position: calc(10 * -32px) calc(8 * -32px) }  /* checkmark (10,8) */
+.sp-cross    { background-position: calc(12 * -32px) calc(8 * -32px) }  /* X (12,8) */
+.sp-warn     { background-position: calc(9  * -32px) calc(8 * -32px) }  /* warning (9,8) */
+.sp-trophy   { background-position: calc(3  * -32px) calc(9 * -32px) }  /* trophy (3,9) */
+.sp-user     { background-position: calc(4  * -32px) calc(9 * -32px) }  /* user (4,9) */
+.sp-question { background-position: calc(6  * -32px) calc(9 * -32px) }  /* ? (6,9) */
+.sp-cloud    { background-position: calc(0  * -32px) calc(9 * -32px) }  /* cloud (0,9) */
+.sp-arrow-up { background-position: calc(7  * -32px) calc(7 * -32px) }  /* arrow up (7,7) */
+.sp-arrow-rt { background-position: calc(8  * -32px) calc(7 * -32px) }  /* arrow right (8,7) */
+.sp-refresh  { background-position: calc(5  * -32px) calc(3 * -32px) }  /* refresh (5,3) */
+.sp-gear     { background-position: calc(8  * -32px) calc(2 * -32px) }  /* gear (8,2) */
+.sp-floppy   { background-position: calc(1  * -32px) calc(8 * -32px) }  /* save (1,8) - actually row 9 */
+.sp-chart    { background-position: calc(1  * -32px) calc(9 * -32px) }  /* chart (1,9) */
+.sp-bomb     { background-position: calc(4  * -32px) calc(4 * -32px) }  /* bomb (4,4) */
+.sp-play     { background-position: calc(0  * -32px) calc(2 * -32px) }  /* play (0,2) */
+.sp-pause    { background-position: calc(1  * -32px) calc(2 * -32px) }  /* pause (1,2) */
+
+/* Sized variants */
+.sp.sp-lg { width: 44px; height: 44px; background-size: calc(18 * 44px) calc(10 * 44px) }
+.sp.sp-sm { width: 24px; height: 24px; background-size: calc(18 * 24px) calc(10 * 24px) }
+
 /* ── VARIABLES ── */
 :root {
   --bg: #F5F7FA;
@@ -451,15 +491,16 @@ img{display:block;max-width:100%}
 <!-- HEADER -->
 <header class="header">
   <div class="logo">
+    <span class="sp sp-sm sp-star" style="margin-right:2px"></span>
     <span>PolyDash</span>
     <span class="live-dot"></span>
     <span style="font-size:10px;color:var(--t2);font-weight:500">LIVE</span>
   </div>
   <nav class="desktop-nav">
-    <button data-tab="dashboard" class="active">Dashboard</button>
-    <button data-tab="bets">Bets</button>
-    <button data-tab="signals">Signals</button>
-    <button data-tab="scanner">Scanner</button>
+    <button data-tab="dashboard" class="active"><span class="sp sp-sm sp-chart" style="vertical-align:middle;margin-right:4px"></span>Dashboard</button>
+    <button data-tab="bets"><span class="sp sp-sm sp-shield" style="vertical-align:middle;margin-right:4px"></span>Bets</button>
+    <button data-tab="signals"><span class="sp sp-sm sp-lightning" style="vertical-align:middle;margin-right:4px"></span>Signals</button>
+    <button data-tab="scanner"><span class="sp sp-sm sp-ghost" style="vertical-align:middle;margin-right:4px"></span>Scanner</button>
   </nav>
   <div class="header-stats">
     <span class="header-value" id="headerValue">--</span>
@@ -477,29 +518,29 @@ img{display:block;max-width:100%}
 <!-- HERO STATS -->
 <div class="hero-stats" id="heroStats">
   <div class="stat-card">
-    <div class="stat-label">💼 Portfolio Value</div>
+    <div class="stat-label"><span class="sp sp-sm sp-coin"></span> Portfolio Value</div>
     <div class="stat-value" id="statPortfolio">--</div>
   </div>
   <div class="stat-card">
-    <div class="stat-label">📈 All-Time P&amp;L</div>
+    <div class="stat-label"><span class="sp sp-sm sp-arrow-up"></span> All-Time P&amp;L</div>
     <div class="stat-value sm" id="statPnl">--</div>
   </div>
   <div class="stat-card">
-    <div class="stat-label">🎯 Win Rate</div>
+    <div class="stat-label"><span class="sp sp-sm sp-star"></span> Win Rate</div>
     <div class="stat-value" id="statWinRate">--</div>
   </div>
   <div class="stat-card">
-    <div class="stat-label">⚡ Active Bets</div>
+    <div class="stat-label"><span class="sp sp-sm sp-lightning"></span> Active Bets</div>
     <div class="stat-value" id="statActive">--</div>
   </div>
 </div>
 
 <!-- TAB: DASHBOARD -->
 <div class="tab-content active" id="tab-dashboard">
-  <div class="section-title">📋 Active Positions</div>
+  <div class="section-title"><span class="sp sp-sm sp-shield" style="vertical-align:middle"></span> Active Positions</div>
   <div id="dashBets" class="loading"><div class="spinner"></div>Loading...</div>
 
-  <div class="section-title">🤔 Under Review</div>
+  <div class="section-title"><span class="sp sp-sm sp-question" style="vertical-align:middle"></span> Under Review</div>
   <div id="reviewList">
 
     <!-- CARD 1: Crude Oil $100 -->
@@ -520,7 +561,7 @@ img{display:block;max-width:100%}
         </div>
       </div>
       <button class="review-toggle" onclick="toggleReview(this)">
-        🔍 Why we're watching <span class="arrow">▾</span>
+        <span class="sp sp-sm sp-robot" style="vertical-align:middle;margin-right:4px"></span> Why we're watching <span class="arrow">▾</span>
       </button>
       <div class="review-reason">
         <strong>⚖️ The Dilemma</strong><br>
@@ -551,7 +592,7 @@ img{display:block;max-width:100%}
         </div>
       </div>
       <button class="review-toggle" onclick="toggleReview(this)">
-        🔍 Why we're watching <span class="arrow">▾</span>
+        <span class="sp sp-sm sp-robot" style="vertical-align:middle;margin-right:4px"></span> Why we're watching <span class="arrow">▾</span>
       </button>
       <div class="review-reason">
         <strong>⚖️ The Dilemma</strong><br>
@@ -582,7 +623,7 @@ img{display:block;max-width:100%}
         </div>
       </div>
       <button class="review-toggle" onclick="toggleReview(this)">
-        🔍 Why we're watching <span class="arrow">▾</span>
+        <span class="sp sp-sm sp-robot" style="vertical-align:middle;margin-right:4px"></span> Why we're watching <span class="arrow">▾</span>
       </button>
       <div class="review-reason">
         <strong>⚖️ The Dilemma</strong><br>
@@ -600,36 +641,36 @@ img{display:block;max-width:100%}
 
 <!-- TAB: BETS -->
 <div class="tab-content" id="tab-bets">
-  <div class="section-title">📋 All Active Bets</div>
+  <div class="section-title"><span class="sp sp-sm sp-shield" style="vertical-align:middle"></span> All Active Bets</div>
   <div id="allBets" class="loading"><div class="spinner"></div>Loading...</div>
 </div>
 
 <!-- TAB: SIGNALS -->
 <div class="tab-content" id="tab-signals">
-  <div class="section-title">📡 AI Signal Feed</div>
+  <div class="section-title"><span class="sp sp-sm sp-lightning" style="vertical-align:middle"></span> AI Signal Feed</div>
   <div id="signalFeed"></div>
 </div>
 
 <!-- TAB: SCANNER -->
 <div class="tab-content" id="tab-scanner">
-  <div class="section-title">🔍 EV+ Scanner</div>
+  <div class="section-title"><span class="sp sp-sm sp-robot" style="vertical-align:middle"></span> EV+ Scanner</div>
   <div id="scannerGrid" class="scanner-grid"></div>
 </div>
 
 <!-- BOTTOM STATS BAR -->
 <div class="stats-bar" id="statsBar">
-  <div class="stats-bar-item"><div class="label">Win Streak</div><div class="val" id="barStreak">--</div></div>
-  <div class="stats-bar-item"><div class="label">Brier Score</div><div class="val" id="barBrier">--</div></div>
-  <div class="stats-bar-item"><div class="label">Exposure</div><div class="val" id="barExposure">--</div></div>
-  <div class="stats-bar-item"><div class="label">Last Trade</div><div class="val" id="barLastTrade">--</div></div>
+  <div class="stats-bar-item"><div class="label"><span class="sp sp-sm sp-star" style="vertical-align:middle"></span> Streak</div><div class="val" id="barStreak">--</div></div>
+  <div class="stats-bar-item"><div class="label"><span class="sp sp-sm sp-check" style="vertical-align:middle"></span> Brier</div><div class="val" id="barBrier">--</div></div>
+  <div class="stats-bar-item"><div class="label"><span class="sp sp-sm sp-shield" style="vertical-align:middle"></span> Exposure</div><div class="val" id="barExposure">--</div></div>
+  <div class="stats-bar-item"><div class="label"><span class="sp sp-sm sp-arrow-rt" style="vertical-align:middle"></span> Last Trade</div><div class="val" id="barLastTrade">--</div></div>
 </div>
 
 <!-- BOTTOM NAV -->
 <nav class="bottom-nav">
-  <button class="nav-tab active" data-tab="dashboard"><span class="icon">🏠</span>Dashboard</button>
-  <button class="nav-tab" data-tab="bets"><span class="icon">📋</span>Bets</button>
-  <button class="nav-tab" data-tab="signals"><span class="icon">📡</span>Signals</button>
-  <button class="nav-tab" data-tab="scanner"><span class="icon">🔍</span>Scanner</button>
+  <button class="nav-tab active" data-tab="dashboard"><span class="sp sp-chart" style="margin-bottom:1px"></span>Dashboard</button>
+  <button class="nav-tab" data-tab="bets"><span class="sp sp-shield" style="margin-bottom:1px"></span>Bets</button>
+  <button class="nav-tab" data-tab="signals"><span class="sp sp-lightning" style="margin-bottom:1px"></span>Signals</button>
+  <button class="nav-tab" data-tab="scanner"><span class="sp sp-robot" style="margin-bottom:1px"></span>Scanner</button>
 </nav>
 
 <script>
@@ -680,13 +721,13 @@ function fmtBigNum(v) {
 
 function getCategory(text) {
   text = (text || '').toLowerCase();
-  if (/bitcoin|btc|crypto|eth|coin/.test(text)) return {emoji:'₿', label:'Crypto', color:'#F7931A'};
-  if (/fed|rate|interest|inflation|economy|gdp/.test(text)) return {emoji:'🏦', label:'Economics', color:'#2563EB'};
-  if (/election|president|congress|senate|vote|political|party|republican|democrat/.test(text)) return {emoji:'🗳️', label:'Politics', color:'#7C3AED'};
-  if (/nba|nfl|soccer|sport|game|team|basketball|football|la liga|finals|pacers|madrid/.test(text)) return {emoji:'⚽', label:'Sports', color:'#059669'};
-  if (/gpt|ai|openai|tech|model|release|nvidia/.test(text)) return {emoji:'🔬', label:'Tech', color:'#0891B2'};
-  if (/iran|war|military|israel|strike|attack|khamenei/.test(text)) return {emoji:'🌍', label:'Geopolitics', color:'#DC2626'};
-  return {emoji:'📊', label:'Market', color:'#6B7280'};
+  if (/bitcoin|btc|crypto|eth|coin/.test(text))      return {sprite:'sp-coin',    emoji:'₿',   label:'Crypto',      color:'#F7931A'};
+  if (/fed|rate|interest|inflation|economy|gdp/.test(text)) return {sprite:'sp-chart',   emoji:'🏦',  label:'Economics',   color:'#2563EB'};
+  if (/election|president|congress|senate|vote|political|party|republican|democrat/.test(text)) return {sprite:'sp-trophy',  emoji:'🗳️', label:'Politics',    color:'#7C3AED'};
+  if (/nba|nfl|soccer|sport|game|team|basketball|football|la liga|finals|pacers|madrid/.test(text)) return {sprite:'sp-star',    emoji:'⚽',  label:'Sports',      color:'#059669'};
+  if (/gpt|ai|openai|tech|model|release|nvidia/.test(text)) return {sprite:'sp-robot',   emoji:'🔬',  label:'Tech',        color:'#0891B2'};
+  if (/iran|war|military|israel|strike|attack|khamenei|oil|crude/.test(text)) return {sprite:'sp-fire',    emoji:'🌍',  label:'Geopolitics', color:'#DC2626'};
+  return {sprite:'sp-ghost', emoji:'📊', label:'Market', color:'#6B7280'};
 }
 
 function daysLeftFromDate(dateStr) {
@@ -738,8 +779,8 @@ function renderBetCard(pos) {
   const pnlClass = pos.cashPnl >= 0 ? 'pnl-pos' : 'pnl-neg';
 
   const imgHtml = pos.icon
-    ? `<img class="bet-img" src="${pos.icon}" alt="" loading="lazy" onerror="this.outerHTML='<div class=\\'bet-emoji-icon\\' style=\\'background:${cat.color}\\'>${cat.emoji}</div>'">`
-    : `<div class="bet-emoji-icon" style="background:${cat.color}">${cat.emoji}</div>`;
+    ? `<img class="bet-img" src="${pos.icon}" alt="" loading="lazy" onerror="this.outerHTML='<div class=\\'bet-emoji-icon\\' style=\\'background:${cat.color};display:flex;align-items:center;justify-content:center\\'><span class=\\'sp sp-lg ${cat.sprite}\\'></span></div>'">`
+    : `<div class="bet-emoji-icon" style="background:${cat.color};display:flex;align-items:center;justify-content:center"><span class="sp sp-lg ${cat.sprite}"></span></div>`;
 
   return `
     <a href="${pos.link || '#'}" target="_blank" rel="noopener" class="bet-card ${status}">
@@ -770,8 +811,8 @@ function renderScannerCard(m) {
   const liqPct = Math.min(100, ((m.liquidity || 0) / maxLiq) * 100);
 
   const imgHtml = m.image
-    ? `<div class="scanner-img-wrap"><img src="${m.image}" alt="" loading="lazy"></div>`
-    : `<div class="scanner-img-wrap" style="background:${cat.color};display:flex;align-items:center;justify-content:center;font-size:40px">${cat.emoji}</div>`;
+    ? `<div class="scanner-img-wrap"><img src="${m.image}" alt="" loading="lazy" onerror="this.parentElement.innerHTML='<div style=\\'width:100%;height:100%;background:${cat.color};display:flex;align-items:center;justify-content:center\\'><span class=\\'sp\\'style=\\'width:56px;height:56px;background-size:calc(18*56px) calc(10*56px)\\' class=\\'${cat.sprite}\\'></span></div>'"></div>`
+    : `<div class="scanner-img-wrap" style="background:${cat.color}22;display:flex;align-items:center;justify-content:center"><span class="sp" style="width:56px;height:56px;background-size:calc(18*56px) calc(10*56px);background-image:url('sprites.jpg');background-repeat:no-repeat;background-position:${({'sp-coin':'calc(15*-56px) calc(1*-56px)','sp-chart':'calc(1*-56px) calc(9*-56px)','sp-trophy':'calc(3*-56px) calc(9*-56px)','sp-star':'calc(6*-56px) calc(4*-56px)','sp-robot':'calc(14*-56px) calc(1*-56px)','sp-fire':'calc(5*-56px) calc(1*-56px)','sp-ghost':'calc(13*-56px) calc(1*-56px)'}[cat.sprite]||'calc(6*-56px) calc(4*-56px)')}"></span></div>`;
 
   return `
     <a href="${m.link || '#'}" target="_blank" rel="noopener" class="scanner-card">
