@@ -321,6 +321,75 @@ img{display:block;max-width:100%}
   transition:background .2s,border-color .2s;
   padding-bottom:env(safe-area-inset-bottom,0);
 }
+
+/* ── REFRESH BUTTON ── */
+.refresh-btn{
+  width:36px;height:36px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;
+  background:var(--bg);
+  border:1px solid var(--border);
+  transition:background .2s,border-color .2s,transform .3s;
+  margin-right:6px;
+}
+.refresh-btn:hover{border-color:var(--t2)}
+.refresh-btn.spinning svg{animation:spin .7s linear infinite}
+.refresh-btn svg{width:16px;height:16px;stroke:var(--t2)}
+
+/* ── WATCHLIST / UNDER REVIEW ── */
+.review-card{
+  background:var(--card);border-radius:12px;
+  box-shadow:var(--card-shadow);
+  margin-bottom:10px;padding:14px;
+  border-left:3px solid var(--amber);
+  transition:background .2s,box-shadow .2s;
+}
+.review-header{
+  display:flex;align-items:flex-start;gap:10px;
+}
+.review-icon{
+  width:44px;height:44px;border-radius:10px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;
+}
+.review-main{flex:1;min-width:0}
+.review-title{
+  font-size:13px;font-weight:600;line-height:1.35;margin-bottom:4px;
+}
+.review-meta{
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  font-size:11px;color:var(--t2);font-family:var(--mono);font-weight:600;
+}
+.review-toggle{
+  display:inline-flex;align-items:center;gap:4px;
+  margin-top:10px;padding:6px 12px;border-radius:8px;
+  font-size:12px;font-weight:600;color:var(--amber);
+  background:var(--amber-bg);border:1px solid var(--amber);
+  transition:opacity .15s;
+  cursor:pointer;
+}
+.review-toggle:hover{opacity:.8}
+.review-toggle .arrow{transition:transform .2s;display:inline-block}
+.review-toggle.open .arrow{transform:rotate(180deg)}
+.review-reason{
+  display:none;margin-top:10px;padding:10px 12px;
+  background:var(--amber-bg);border-radius:8px;
+  font-size:12px;line-height:1.6;color:var(--t1);
+}
+.review-reason.visible{display:block}
+.review-divider{
+  display:flex;align-items:center;gap:8px;
+  margin:6px 0;color:var(--t3);font-size:11px;font-weight:600;
+}
+.review-divider::before,.review-divider::after{
+  content:'';flex:1;height:1px;background:var(--border);
+}
+.verdict-row{
+  display:flex;align-items:center;gap:6px;
+  margin-top:6px;font-size:12px;font-weight:700;
+}
+.verdict-hold{color:var(--amber)}
+.verdict-watch{color:var(--blue)}
 .nav-tab{
   flex:1;display:flex;flex-direction:column;align-items:center;
   justify-content:center;gap:2px;
@@ -396,6 +465,12 @@ img{display:block;max-width:100%}
     <span class="header-value" id="headerValue">--</span>
     <span class="header-pnl" id="headerPnl">--</span>
   </div>
+  <button class="refresh-btn" id="refreshBtn" aria-label="Refresh data" title="Refresh">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
+      <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+    </svg>
+  </button>
   <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">🌙</button>
 </header>
 
@@ -423,6 +498,104 @@ img{display:block;max-width:100%}
 <div class="tab-content active" id="tab-dashboard">
   <div class="section-title">📋 Active Positions</div>
   <div id="dashBets" class="loading"><div class="spinner"></div>Loading...</div>
+
+  <div class="section-title">🤔 Under Review</div>
+  <div id="reviewList">
+
+    <!-- CARD 1: Crude Oil $100 -->
+    <div class="review-card">
+      <div class="review-header">
+        <div class="review-icon" style="background:rgba(217,119,6,0.12)">🛢️</div>
+        <div class="review-main">
+          <div class="review-title">Will Crude Oil hit $100 by end of March?</div>
+          <div class="review-meta">
+            <span>📍 We hold: No</span>
+            <span>·</span>
+            <span>Yes = 82%</span>
+            <span>·</span>
+            <span style="color:var(--red)">−$2.50</span>
+            <span>·</span>
+            <span>23d left</span>
+          </div>
+        </div>
+      </div>
+      <button class="review-toggle" onclick="toggleReview(this)">
+        🔍 Why we're watching <span class="arrow">▾</span>
+      </button>
+      <div class="review-reason">
+        <strong>⚖️ The Dilemma</strong><br>
+        WTI closed at $90.90 on Friday after a historic 35% weekly surge driven by the Iran–US conflict and Strait of Hormuz slowdown. The market now prices 82% probability of reaching $100 — but that requires another 10% move in 23 days.<br><br>
+        <div class="review-divider">FOR holding No</div>
+        Goldman Sachs Q2 forecast: $71/barrel. IEA demand weakness. The geopolitical spike is likely already priced in — markets tend to front-run conflict, not sustain the move.<br><br>
+        <div class="review-divider">AGAINST (risks)</div>
+        Hormuz closure or Iran escalation could spike oil to $110+ overnight. Morgan Stanley raised forecasts. "March to $100" narrative is strong in financial media.<br><br>
+        <div class="verdict-row verdict-hold">⏸️ HOLD — EV+ at 18¢ if true probability is 50%. Re-evaluate if WTI breaks $95.</div>
+      </div>
+    </div>
+
+    <!-- CARD 2: Bitcoin $65K dip -->
+    <div class="review-card">
+      <div class="review-header">
+        <div class="review-icon" style="background:rgba(247,147,26,0.12)">₿</div>
+        <div class="review-main">
+          <div class="review-title">Will Bitcoin dip to $65,000 in March?</div>
+          <div class="review-meta">
+            <span>📍 No position</span>
+            <span>·</span>
+            <span>Yes = 77%</span>
+            <span>·</span>
+            <span>BTC now ~$68K</span>
+            <span>·</span>
+            <span>24d left</span>
+          </div>
+        </div>
+      </div>
+      <button class="review-toggle" onclick="toggleReview(this)">
+        🔍 Why we're watching <span class="arrow">▾</span>
+      </button>
+      <div class="review-reason">
+        <strong>⚖️ The Dilemma</strong><br>
+        Bitcoin is at ~$68K — just $3K above the $65K threshold. The market prices 77% chance of a dip. With macro headwinds (Nasdaq selloff, Iran risk-off, dollar strength), BTC is technically fragile.<br><br>
+        <div class="review-divider">FOR betting Yes</div>
+        BTC already dropped from $88K → $68K (−23%). Support levels at $65-66K are visible. Risk-off environment continues. We already hold "No $75K" which is directionally aligned.<br><br>
+        <div class="review-divider">AGAINST</div>
+        We already have BTC No ($75K). Adding Yes on $65K dip creates conflicting directional exposure. 77% Yes price leaves only 23% edge for No — low margin. Correlation risk with existing position.<br><br>
+        <div class="verdict-row verdict-watch">👀 WATCH — Waiting for BTC to approach $66K before deciding. Would increase conviction significantly.</div>
+      </div>
+    </div>
+
+    <!-- CARD 3: ETH $2,200 -->
+    <div class="review-card">
+      <div class="review-header">
+        <div class="review-icon" style="background:rgba(99,102,241,0.12)">Ξ</div>
+        <div class="review-main">
+          <div class="review-title">Will Ethereum reach $2,200 in March?</div>
+          <div class="review-meta">
+            <span>📍 No position</span>
+            <span>·</span>
+            <span>Yes = 48%</span>
+            <span>·</span>
+            <span>ETH now ~$1,971</span>
+            <span>·</span>
+            <span>24d left</span>
+          </div>
+        </div>
+      </div>
+      <button class="review-toggle" onclick="toggleReview(this)">
+        🔍 Why we're watching <span class="arrow">▾</span>
+      </button>
+      <div class="review-reason">
+        <strong>⚖️ The Dilemma</strong><br>
+        ETH needs a 11.6% rally from $1,971 to $2,200 within 24 days. Market prices this at 48% — essentially a coin flip. But the macro environment is risk-off and ETH has been underperforming BTC.<br><br>
+        <div class="review-divider">FOR betting No</div>
+        ETH at $1,971 is in a downtrend. Risk-off macro (Iran war, Nasdaq down) hurts alt-coins more than BTC. 11.6% in 24 days with current momentum is ambitious. We'd price this at ~30% → edge of 18%.<br><br>
+        <div class="review-divider">AGAINST</div>
+        The market we found ($79K liquidity) turned out to be a range bet — not the clean "reach $2,200" we analyzed. Actual available markets have only $10K liquidity (too thin). Execution risk is high.<br><br>
+        <div class="verdict-row verdict-watch">👀 BLOCKED — Target market has insufficient liquidity ($10K). Looking for better entry. Will revisit when a deeper market opens.</div>
+      </div>
+    </div>
+
+  </div>
 </div>
 
 <!-- TAB: BETS -->
@@ -645,8 +818,7 @@ let DATA = null;
 
 async function loadData() {
   try {
-    const d = new Date().toISOString().slice(0, 10);
-    const res = await fetch('data.json?t=' + d);
+    const res = await fetch('data.json?t=' + Date.now());
     DATA = await res.json();
     render();
   } catch (e) {
@@ -746,6 +918,24 @@ function render() {
     const diff = Math.floor((Date.now() - ts) / 3600000);
     document.getElementById('barLastTrade').textContent = diff < 24 ? diff + 'h ago' : Math.floor(diff / 24) + 'd ago';
   }
+}
+
+// ── Refresh button ──
+const refreshBtn = document.getElementById('refreshBtn');
+refreshBtn.addEventListener('click', () => {
+  refreshBtn.classList.add('spinning');
+  loadData().finally(() => {
+    setTimeout(() => refreshBtn.classList.remove('spinning'), 500);
+  });
+});
+
+// ── Toggle review reason ──
+function toggleReview(btn) {
+  const card = btn.closest('.review-card');
+  const reason = card.querySelector('.review-reason');
+  const isOpen = reason.classList.contains('visible');
+  reason.classList.toggle('visible', !isOpen);
+  btn.classList.toggle('open', !isOpen);
 }
 
 // ── Init ──
