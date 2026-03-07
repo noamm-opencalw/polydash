@@ -8,45 +8,47 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <style>
-/* ── SPRITE SHEET ── */
-/* sprites.jpg: 1024×559px, 18 cols × 10 rows, cell ≈ 56.9×55.9px */
-.sp {
+/* ── NEW ICON PACK (icons.png) ── */
+/* 512x279 | 8 cols x 3 rows | 64x93 per cell | rendered at 32px */
+.ic {
   display: inline-block;
-  background-image: url('sprites.jpg');
+  background-image: url('icons.png');
   background-repeat: no-repeat;
   width: 32px; height: 32px;
-  background-size: calc(18 * 32px) calc(10 * 32px); /* scale to 32px cells */
-  image-rendering: pixelated;
+  background-size: 256px 96px;
+  vertical-align: middle;
   flex-shrink: 0;
 }
-/* Macro to compute offset: col*-32, row*-32 */
-.sp-coin     { background-position: calc(15 * -32px) calc(1 * -32px) }  /* gold coin (15,1) */
-.sp-lightning{ background-position: calc(1  * -32px) calc(4 * -32px) }  /* lightning (1,4) */
-.sp-fire     { background-position: calc(5  * -32px) calc(1 * -32px) }  /* fire (5,1) */
-.sp-robot    { background-position: calc(14 * -32px) calc(1 * -32px) }  /* robot (14,1) */
-.sp-ghost    { background-position: calc(13 * -32px) calc(1 * -32px) }  /* ghost (13,1) */
-.sp-star     { background-position: calc(6  * -32px) calc(4 * -32px) }  /* star (6,4) */
-.sp-shield   { background-position: calc(4  * -32px) calc(4 * -32px) }  /* shield (4,4) */
-.sp-check    { background-position: calc(10 * -32px) calc(8 * -32px) }  /* checkmark (10,8) */
-.sp-cross    { background-position: calc(12 * -32px) calc(8 * -32px) }  /* X (12,8) */
-.sp-warn     { background-position: calc(9  * -32px) calc(8 * -32px) }  /* warning (9,8) */
-.sp-trophy   { background-position: calc(3  * -32px) calc(9 * -32px) }  /* trophy (3,9) */
-.sp-user     { background-position: calc(4  * -32px) calc(9 * -32px) }  /* user (4,9) */
-.sp-question { background-position: calc(6  * -32px) calc(9 * -32px) }  /* ? (6,9) */
-.sp-cloud    { background-position: calc(0  * -32px) calc(9 * -32px) }  /* cloud (0,9) */
-.sp-arrow-up { background-position: calc(7  * -32px) calc(7 * -32px) }  /* arrow up (7,7) */
-.sp-arrow-rt { background-position: calc(8  * -32px) calc(7 * -32px) }  /* arrow right (8,7) */
-.sp-refresh  { background-position: calc(5  * -32px) calc(3 * -32px) }  /* refresh (5,3) */
-.sp-gear     { background-position: calc(8  * -32px) calc(2 * -32px) }  /* gear (8,2) */
-.sp-floppy   { background-position: calc(1  * -32px) calc(8 * -32px) }  /* save (1,8) - actually row 9 */
-.sp-chart    { background-position: calc(1  * -32px) calc(9 * -32px) }  /* chart (1,9) */
-.sp-bomb     { background-position: calc(4  * -32px) calc(4 * -32px) }  /* bomb (4,4) */
-.sp-play     { background-position: calc(0  * -32px) calc(2 * -32px) }  /* play (0,2) */
-.sp-pause    { background-position: calc(1  * -32px) calc(2 * -32px) }  /* pause (1,2) */
+.ic.ic-lg { width: 44px; height: 44px; background-size: 352px 132px }
+.ic.ic-sm { width: 24px; height: 24px; background-size: 192px 72px }
 
-/* Sized variants */
-.sp.sp-lg { width: 44px; height: 44px; background-size: calc(18 * 44px) calc(10 * 44px) }
-.sp.sp-sm { width: 24px; height: 24px; background-size: calc(18 * 24px) calc(10 * 24px) }
+/* Row 0 */
+.ic-home        { background-position: -0px   -0px  }
+.ic-bets        { background-position: -32px  -0px  }
+.ic-signals     { background-position: -64px  -0px  }
+.ic-scanner     { background-position: -96px  -0px  }
+.ic-scanner2    { background-position: -128px -0px  }
+.ic-target      { background-position: -160px -0px  }
+.ic-half-circle { background-position: -192px -0px  }
+.ic-moon        { background-position: -224px -0px  }
+/* Row 1 */
+.ic-portfolio   { background-position: -0px   -32px }
+.ic-pnl         { background-position: -32px  -32px }
+.ic-winrate     { background-position: -64px  -32px }
+.ic-active-bets { background-position: -96px  -32px }
+.ic-refresh     { background-position: -128px -32px }
+.ic-moon2       { background-position: -160px -32px }
+.ic-positions   { background-position: -192px -32px }
+.ic-review      { background-position: -224px -32px }
+/* Row 2 */
+.ic-bitcoin     { background-position: -0px   -64px }
+.ic-globe       { background-position: -32px  -64px }
+.ic-chart-up    { background-position: -64px  -64px }
+.ic-lightning   { background-position: -96px  -64px }
+.ic-bitcoin2    { background-position: -128px -64px }
+.ic-geopolitics { background-position: -160px -64px }
+.ic-markets     { background-position: -192px -64px }
+.ic-chain       { background-position: -224px -64px }
 
 /* ── VARIABLES ── */
 :root {
@@ -373,7 +375,7 @@ img{display:block;max-width:100%}
   margin-right:6px;
 }
 .refresh-btn:hover{border-color:var(--t2)}
-.refresh-btn.spinning svg{animation:spin .7s linear infinite}
+.refresh-btn.spinning .ic-refresh{animation:spin .7s linear infinite}
 .refresh-btn svg{width:16px;height:16px;stroke:var(--t2)}
 
 /* ── WATCHLIST / UNDER REVIEW ── */
@@ -491,26 +493,23 @@ img{display:block;max-width:100%}
 <!-- HEADER -->
 <header class="header">
   <div class="logo">
-    <span class="sp sp-sm sp-star" style="margin-right:2px"></span>
+    <span class="ic ic-sm ic-target" style="margin-right:4px"></span>
     <span>PolyDash</span>
     <span class="live-dot"></span>
     <span style="font-size:10px;color:var(--t2);font-weight:500">LIVE</span>
   </div>
   <nav class="desktop-nav">
-    <button data-tab="dashboard" class="active"><span class="sp sp-sm sp-chart" style="vertical-align:middle;margin-right:4px"></span>Dashboard</button>
-    <button data-tab="bets"><span class="sp sp-sm sp-shield" style="vertical-align:middle;margin-right:4px"></span>Bets</button>
-    <button data-tab="signals"><span class="sp sp-sm sp-lightning" style="vertical-align:middle;margin-right:4px"></span>Signals</button>
-    <button data-tab="scanner"><span class="sp sp-sm sp-ghost" style="vertical-align:middle;margin-right:4px"></span>Scanner</button>
+    <button data-tab="dashboard" class="active"><span class="ic ic-sm ic-home" style="margin-right:4px"></span>Dashboard</button>
+    <button data-tab="bets"><span class="ic ic-sm ic-bets" style="margin-right:4px"></span>Bets</button>
+    <button data-tab="signals"><span class="ic ic-sm ic-signals" style="margin-right:4px"></span>Signals</button>
+    <button data-tab="scanner"><span class="ic ic-sm ic-scanner" style="margin-right:4px"></span>Scanner</button>
   </nav>
   <div class="header-stats">
     <span class="header-value" id="headerValue">--</span>
     <span class="header-pnl" id="headerPnl">--</span>
   </div>
   <button class="refresh-btn" id="refreshBtn" aria-label="Refresh data" title="Refresh">
-    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
-      <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
-    </svg>
+    <span class="ic ic-sm ic-refresh" id="refreshIcon"></span>
   </button>
   <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">🌙</button>
 </header>
@@ -518,35 +517,35 @@ img{display:block;max-width:100%}
 <!-- HERO STATS -->
 <div class="hero-stats" id="heroStats">
   <div class="stat-card">
-    <div class="stat-label"><span class="sp sp-sm sp-coin"></span> Portfolio Value</div>
+    <div class="stat-label"><span class="ic ic-sm ic-portfolio"></span> Portfolio Value</div>
     <div class="stat-value" id="statPortfolio">--</div>
   </div>
   <div class="stat-card">
-    <div class="stat-label"><span class="sp sp-sm sp-arrow-up"></span> All-Time P&amp;L</div>
+    <div class="stat-label"><span class="ic ic-sm ic-pnl"></span> All-Time P&amp;L</div>
     <div class="stat-value sm" id="statPnl">--</div>
   </div>
   <div class="stat-card">
-    <div class="stat-label"><span class="sp sp-sm sp-star"></span> Win Rate</div>
+    <div class="stat-label"><span class="ic ic-sm ic-winrate"></span> Win Rate</div>
     <div class="stat-value" id="statWinRate">--</div>
   </div>
   <div class="stat-card">
-    <div class="stat-label"><span class="sp sp-sm sp-lightning"></span> Active Bets</div>
+    <div class="stat-label"><span class="ic ic-sm ic-active-bets"></span> Active Bets</div>
     <div class="stat-value" id="statActive">--</div>
   </div>
 </div>
 
 <!-- TAB: DASHBOARD -->
 <div class="tab-content active" id="tab-dashboard">
-  <div class="section-title"><span class="sp sp-sm sp-shield" style="vertical-align:middle"></span> Active Positions</div>
+  <div class="section-title"><span class="ic ic-sm ic-positions"></span> Active Positions</div>
   <div id="dashBets" class="loading"><div class="spinner"></div>Loading...</div>
 
-  <div class="section-title"><span class="sp sp-sm sp-question" style="vertical-align:middle"></span> Under Review</div>
+  <div class="section-title"><span class="ic ic-sm ic-review"></span> Under Review</div>
   <div id="reviewList">
 
     <!-- CARD 0: Oil $100 residual — still open -->
     <div class="review-card">
       <div class="review-header">
-        <div class="review-icon" style="background:rgba(220,38,38,0.12);display:flex;align-items:center;justify-content:center"><span class="sp sp-lg sp-fire"></span></div>
+        <div class="review-icon" style="background:rgba(220,38,38,0.12);display:flex;align-items:center;justify-content:center"><span class="ic ic-lg ic-geopolitics"></span></div>
         <div class="review-main">
           <div class="review-title">Crude Oil $100 — Residual No Position</div>
           <div class="review-meta">
@@ -561,7 +560,7 @@ img{display:block;max-width:100%}
         </div>
       </div>
       <button class="review-toggle" onclick="toggleReview(this)">
-        <span class="sp sp-sm sp-robot" style="vertical-align:middle;margin-right:4px"></span> Why we're watching <span class="arrow">▾</span>
+        <span class="ic ic-sm ic-review" style="margin-right:4px"></span> Why we're watching <span class="arrow">▾</span>
       </button>
       <div class="review-reason">
         <strong>⚠️ Situation</strong><br>
@@ -577,7 +576,7 @@ img{display:block;max-width:100%}
     <!-- CARD 1: BTC $65K dip -->
     <div class="review-card">
       <div class="review-header">
-        <div class="review-icon" style="background:rgba(247,147,26,0.12);display:flex;align-items:center;justify-content:center"><span class="sp sp-lg sp-coin"></span></div>
+        <div class="review-icon" style="background:rgba(247,147,26,0.12);display:flex;align-items:center;justify-content:center"><span class="ic ic-lg ic-bitcoin2"></span></div>
         <div class="review-main">
           <div class="review-title">Will Bitcoin dip to $65,000 in March?</div>
           <div class="review-meta">
@@ -592,7 +591,7 @@ img{display:block;max-width:100%}
         </div>
       </div>
       <button class="review-toggle" onclick="toggleReview(this)">
-        <span class="sp sp-sm sp-robot" style="vertical-align:middle;margin-right:4px"></span> Why we're watching <span class="arrow">▾</span>
+        <span class="ic ic-sm ic-review" style="margin-right:4px"></span> Why we're watching <span class="arrow">▾</span>
       </button>
       <div class="review-reason">
         <strong>⚖️ The Dilemma</strong><br>
@@ -623,7 +622,7 @@ img{display:block;max-width:100%}
         </div>
       </div>
       <button class="review-toggle" onclick="toggleReview(this)">
-        <span class="sp sp-sm sp-robot" style="vertical-align:middle;margin-right:4px"></span> Why we're watching <span class="arrow">▾</span>
+        <span class="ic ic-sm ic-review" style="margin-right:4px"></span> Why we're watching <span class="arrow">▾</span>
       </button>
       <div class="review-reason">
         <strong>⚖️ The Dilemma</strong><br>
@@ -641,36 +640,36 @@ img{display:block;max-width:100%}
 
 <!-- TAB: BETS -->
 <div class="tab-content" id="tab-bets">
-  <div class="section-title"><span class="sp sp-sm sp-shield" style="vertical-align:middle"></span> All Active Bets</div>
+  <div class="section-title"><span class="ic ic-sm ic-positions"></span> All Active Bets</div>
   <div id="allBets" class="loading"><div class="spinner"></div>Loading...</div>
 </div>
 
 <!-- TAB: SIGNALS -->
 <div class="tab-content" id="tab-signals">
-  <div class="section-title"><span class="sp sp-sm sp-lightning" style="vertical-align:middle"></span> AI Signal Feed</div>
+  <div class="section-title"><span class="ic ic-sm ic-signals"></span> AI Signal Feed</div>
   <div id="signalFeed"></div>
 </div>
 
 <!-- TAB: SCANNER -->
 <div class="tab-content" id="tab-scanner">
-  <div class="section-title"><span class="sp sp-sm sp-robot" style="vertical-align:middle"></span> EV+ Scanner</div>
+  <div class="section-title"><span class="ic ic-sm ic-scanner"></span> EV+ Scanner</div>
   <div id="scannerGrid" class="scanner-grid"></div>
 </div>
 
 <!-- BOTTOM STATS BAR -->
 <div class="stats-bar" id="statsBar">
-  <div class="stats-bar-item"><div class="label"><span class="sp sp-sm sp-star" style="vertical-align:middle"></span> Streak</div><div class="val" id="barStreak">--</div></div>
-  <div class="stats-bar-item"><div class="label"><span class="sp sp-sm sp-check" style="vertical-align:middle"></span> Brier</div><div class="val" id="barBrier">--</div></div>
-  <div class="stats-bar-item"><div class="label"><span class="sp sp-sm sp-shield" style="vertical-align:middle"></span> Exposure</div><div class="val" id="barExposure">--</div></div>
-  <div class="stats-bar-item"><div class="label"><span class="sp sp-sm sp-arrow-rt" style="vertical-align:middle"></span> Last Trade</div><div class="val" id="barLastTrade">--</div></div>
+  <div class="stats-bar-item"><div class="label"><span class="ic ic-sm ic-winrate"></span> Streak</div><div class="val" id="barStreak">--</div></div>
+  <div class="stats-bar-item"><div class="label"><span class="ic ic-sm ic-target"></span> Brier</div><div class="val" id="barBrier">--</div></div>
+  <div class="stats-bar-item"><div class="label"><span class="ic ic-sm ic-active-bets"></span> Exposure</div><div class="val" id="barExposure">--</div></div>
+  <div class="stats-bar-item"><div class="label"><span class="ic ic-sm ic-chart-up"></span> Last Trade</div><div class="val" id="barLastTrade">--</div></div>
 </div>
 
 <!-- BOTTOM NAV -->
 <nav class="bottom-nav">
-  <button class="nav-tab active" data-tab="dashboard"><span class="sp sp-chart" style="margin-bottom:1px"></span>Dashboard</button>
-  <button class="nav-tab" data-tab="bets"><span class="sp sp-shield" style="margin-bottom:1px"></span>Bets</button>
-  <button class="nav-tab" data-tab="signals"><span class="sp sp-lightning" style="margin-bottom:1px"></span>Signals</button>
-  <button class="nav-tab" data-tab="scanner"><span class="sp sp-robot" style="margin-bottom:1px"></span>Scanner</button>
+  <button class="nav-tab active" data-tab="dashboard"><span class="ic ic-home" style="margin-bottom:2px"></span>Dashboard</button>
+  <button class="nav-tab" data-tab="bets"><span class="ic ic-bets" style="margin-bottom:2px"></span>Bets</button>
+  <button class="nav-tab" data-tab="signals"><span class="ic ic-signals" style="margin-bottom:2px"></span>Signals</button>
+  <button class="nav-tab" data-tab="scanner"><span class="ic ic-scanner" style="margin-bottom:2px"></span>Scanner</button>
 </nav>
 
 <script>
@@ -721,13 +720,13 @@ function fmtBigNum(v) {
 
 function getCategory(text) {
   text = (text || '').toLowerCase();
-  if (/bitcoin|btc|crypto|eth|coin/.test(text))      return {sprite:'sp-coin',    emoji:'₿',   label:'Crypto',      color:'#F7931A'};
-  if (/fed|rate|interest|inflation|economy|gdp/.test(text)) return {sprite:'sp-chart',   emoji:'🏦',  label:'Economics',   color:'#2563EB'};
-  if (/election|president|congress|senate|vote|political|party|republican|democrat/.test(text)) return {sprite:'sp-trophy',  emoji:'🗳️', label:'Politics',    color:'#7C3AED'};
-  if (/nba|nfl|soccer|sport|game|team|basketball|football|la liga|finals|pacers|madrid/.test(text)) return {sprite:'sp-star',    emoji:'⚽',  label:'Sports',      color:'#059669'};
-  if (/gpt|ai|openai|tech|model|release|nvidia/.test(text)) return {sprite:'sp-robot',   emoji:'🔬',  label:'Tech',        color:'#0891B2'};
-  if (/iran|war|military|israel|strike|attack|khamenei|oil|crude/.test(text)) return {sprite:'sp-fire',    emoji:'🌍',  label:'Geopolitics', color:'#DC2626'};
-  return {sprite:'sp-ghost', emoji:'📊', label:'Market', color:'#6B7280'};
+  if (/bitcoin|btc|crypto|eth|coin/.test(text))      return {ic:'ic-bitcoin',     label:'Crypto',      color:'#F7931A'};
+  if (/fed|rate|interest|inflation|economy|gdp/.test(text)) return {ic:'ic-pnl',        label:'Economics',   color:'#2563EB'};
+  if (/election|president|congress|senate|vote|political|party|republican|democrat/.test(text)) return {ic:'ic-winrate',    label:'Politics',    color:'#7C3AED'};
+  if (/nba|nfl|soccer|sport|game|team|basketball|football|la liga|finals|pacers|madrid/.test(text)) return {ic:'ic-target',     label:'Sports',      color:'#059669'};
+  if (/gpt|ai|openai|tech|model|release|nvidia/.test(text)) return {ic:'ic-chart-up',  label:'Tech',        color:'#0891B2'};
+  if (/iran|war|military|israel|strike|attack|khamenei|oil|crude/.test(text)) return {ic:'ic-geopolitics',label:'Geopolitics', color:'#DC2626'};
+  return {ic:'ic-markets', label:'Market', color:'#6B7280'};
 }
 
 function daysLeftFromDate(dateStr) {
@@ -779,15 +778,15 @@ function renderBetCard(pos) {
   const pnlClass = pos.cashPnl >= 0 ? 'pnl-pos' : 'pnl-neg';
 
   const imgHtml = pos.icon
-    ? `<img class="bet-img" src="${pos.icon}" alt="" loading="lazy" onerror="this.outerHTML='<div class=\\'bet-emoji-icon\\' style=\\'background:${cat.color};display:flex;align-items:center;justify-content:center\\'><span class=\\'sp sp-lg ${cat.sprite}\\'></span></div>'">`
-    : `<div class="bet-emoji-icon" style="background:${cat.color};display:flex;align-items:center;justify-content:center"><span class="sp sp-lg ${cat.sprite}"></span></div>`;
+    ? `<img class="bet-img" src="${pos.icon}" alt="" loading="lazy" onerror="this.outerHTML='<div class=\\'bet-emoji-icon\\' style=\\'background:${cat.color}22;display:flex;align-items:center;justify-content:center\\'><span class=\\'ic ic-lg ${cat.ic}\\'></span></div>'">`
+    : `<div class="bet-emoji-icon" style="background:${cat.color}22;display:flex;align-items:center;justify-content:center"><span class="ic ic-lg ${cat.ic}"></span></div>`;
 
   return `
     <a href="${pos.link || '#'}" target="_blank" rel="noopener" class="bet-card ${status}">
       ${imgHtml}
       <div class="bet-body">
         <div class="bet-title">${pos.title}</div>
-        <span class="cat-pill" style="background:${cat.color}15;color:${cat.color}">${cat.emoji} ${cat.label}</span>
+        <span class="cat-pill" style="background:${cat.color}15;color:${cat.color}"><span class="ic ic-sm ${cat.ic}" style="width:14px;height:14px;background-size:112px 54px;margin-right:3px;vertical-align:text-bottom"></span>${cat.label}</span>
         <div class="bet-prices">
           ${pos.avgPrice.toFixed(2)} <span class="arrow">→</span> ${pos.curPrice.toFixed(2)}
         </div>
@@ -811,14 +810,14 @@ function renderScannerCard(m) {
   const liqPct = Math.min(100, ((m.liquidity || 0) / maxLiq) * 100);
 
   const imgHtml = m.image
-    ? `<div class="scanner-img-wrap"><img src="${m.image}" alt="" loading="lazy" onerror="this.parentElement.innerHTML='<div style=\\'width:100%;height:100%;background:${cat.color};display:flex;align-items:center;justify-content:center\\'><span class=\\'sp\\'style=\\'width:56px;height:56px;background-size:calc(18*56px) calc(10*56px)\\' class=\\'${cat.sprite}\\'></span></div>'"></div>`
-    : `<div class="scanner-img-wrap" style="background:${cat.color}22;display:flex;align-items:center;justify-content:center"><span class="sp" style="width:56px;height:56px;background-size:calc(18*56px) calc(10*56px);background-image:url('sprites.jpg');background-repeat:no-repeat;background-position:${({'sp-coin':'calc(15*-56px) calc(1*-56px)','sp-chart':'calc(1*-56px) calc(9*-56px)','sp-trophy':'calc(3*-56px) calc(9*-56px)','sp-star':'calc(6*-56px) calc(4*-56px)','sp-robot':'calc(14*-56px) calc(1*-56px)','sp-fire':'calc(5*-56px) calc(1*-56px)','sp-ghost':'calc(13*-56px) calc(1*-56px)'}[cat.sprite]||'calc(6*-56px) calc(4*-56px)')}"></span></div>`;
+  const iconStyleScan = 'width:56px;height:56px;background-size:448px 192px';
+  const imgHtml2 = m.image
 
   return `
     <a href="${m.link || '#'}" target="_blank" rel="noopener" class="scanner-card">
       ${imgHtml}
       <div class="scanner-body">
-        <span class="cat-pill" style="background:${cat.color}15;color:${cat.color}">${cat.emoji} ${cat.label}</span>
+        <span class="cat-pill" style="background:${cat.color}15;color:${cat.color}"><span class="ic ic-sm ${cat.ic}" style="width:14px;height:14px;background-size:112px 54px;margin-right:3px;vertical-align:text-bottom"></span>${cat.label}</span>
         <div class="scanner-question">${m.question}</div>
         <div class="scanner-meta">
           <span class="yes-badge ${yesClass}">YES ${yesPct}%</span>
