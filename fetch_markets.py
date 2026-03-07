@@ -273,19 +273,26 @@ def fetch_real_positions() -> dict:
     wins   = sum(1 for p in resolved if p["cashPnl"] > 0)
     losses = sum(1 for p in resolved if p["cashPnl"] <= 0)
 
-    # יתרת USDC
+    # יתרת USDC — קריאה ישירה מ-Polygon blockchain
+    # Polymarket משתמש ב-USDC.e (bridged): 0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174
     usdc_balance = 0.0
     try:
-        r = requests.get(
-            f"https://data-api.polymarket.com/value",
-            params={"user": PROXY_WALLET},
-            timeout=8,
-        )
-        data_val = r.json()
-        if isinstance(data_val, list) and data_val:
-            usdc_balance = float(data_val[0].get("value", 0)) - total_current
-    except Exception:
-        pass
+        usdc_contract = "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174"
+        padded_addr   = PROXY_WALLET[2:].lower().zfill(64)
+        call_data     = "0x70a08231" + padded_addr
+        polygon_rpc   = "https://rpc-mainnet.matic.quiknode.pro"
+        r = requests.post(polygon_rpc, json={
+            "jsonrpc": "2.0",
+            "method": "eth_call",
+            "params": [{"to": usdc_contract, "data": call_data}, "latest"],
+            "id": 1,
+        }, timeout=8)
+        res = r.json()
+        if "result" in res and res["result"] not in ("0x", None, "0x0"):
+            usdc_balance = int(res["result"], 16) / 1e6
+    except Exception as e:
+        print(f"Warning: USDC balance fetch failed: {e}")
+        usdc_balance = 0.0
 
     # שולף activity (עסקאות היסטוריות)
     activity = []
@@ -716,6 +723,30 @@ def main():
     # P&L on resolved: win = get back size_usd/entry_pct per share; rough calc
     total_pnl      = sum(b.get("pnl_usd") or 0 for b in all_bets)
 
+    # Portfolio: use real_positions data when available, fallback to local signals
+    real_port = real_positions.get("portfolio", {})
+    real_total_current  = real_port.get("total_current", 0)
+    real_usdc_balance   = real_port.get("usdc_balance", 0)
+    real_total_pnl      = real_port.get("total_pnl", total_pnl)
+    real_total_invested = real_port.get("total_invested", total_invested)
+    real_wins           = real_port.get("wins", wins)
+    real_losses         = real_port.get("losses", losses)
+    real_active         = real_port.get("active", len(active_bets))
+
+    portfolio = {
+        # נתוני אמת מהחשבון
+        "total_invested":  round(real_total_invested, 2),
+        "total_current":   round(real_total_current, 2),
+        "total_pnl":       round(real_total_pnl, 2),
+        "usdc_balance":    round(real_usdc_balance, 2),
+        "portfolio_value": round(real_total_current + real_usdc_balance, 2),
+        "wins":   real_wins,
+        "losses": real_losses,
+        "active": real_active,
+        # נתוני signals מקומיים לגיבוי
+        "signals_pnl": round(total_pnl, 2),
+    }
+
     data = {
         "updated_at": now.isoformat(),
         "real_positions": real_positions,
@@ -733,13 +764,7 @@ def main():
         "resolved_bets": resolved_bets,
         "active_bets_count": len(active_bets),
         "resolved_bets_count": len(resolved_bets),
-        "portfolio": {
-            "total_invested": round(total_invested, 2),
-            "total_pnl": round(total_pnl, 2),
-            "wins": wins,
-            "losses": losses,
-            "active": len(active_bets),
-        },
+        "portfolio": portfolio,
     }
 
     with open("data.json", "w", encoding="utf-8") as f:

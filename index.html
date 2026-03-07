@@ -662,8 +662,9 @@ function render() {
   const topPf = DATA.portfolio || {};
 
   // ── Header stats ──
-  const currentVal = pf.total_current || topPf.total_invested || 0;
-  const totalPnl = pf.total_pnl || topPf.total_pnl || 0;
+  // portfolio_value = positions current value + USDC cash balance (real account data)
+  const currentVal = topPf.portfolio_value || pf.total_current || topPf.total_invested || 0;
+  const totalPnl = topPf.total_pnl || pf.total_pnl || 0;
   document.getElementById('headerValue').textContent = fmt$(currentVal);
   const pnlEl = document.getElementById('headerPnl');
   pnlEl.textContent = fmt$(totalPnl);
