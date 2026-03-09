@@ -225,6 +225,18 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 @media(max-width:1100px){.insights-sidebar{width:240px}}
 @media(max-width:768px){.insights-sidebar{width:100%}}
 
+/* ── TRACK RECORD ── */
+.track-card{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:10px;transition:border-color .2s}
+.track-card:hover{border-color:rgba(0,212,255,0.3)}
+.track-header{display:flex;align-items:flex-start;gap:10px;margin-bottom:12px}
+.track-icon{font-size:20px;flex-shrink:0;margin-top:2px}
+.track-title{font-size:14px;font-weight:600;line-height:1.3}
+.track-bar-wrap{position:relative;height:8px;background:var(--border);border-radius:4px;margin:6px 0}
+.track-bar-entry{position:absolute;top:-2px;width:3px;height:12px;background:var(--muted);border-radius:2px;transform:translateX(-50%)}
+.track-bar-fill{position:absolute;top:0;height:8px;border-radius:4px;opacity:.7}
+.track-bar-live{position:absolute;top:-3px;width:4px;height:14px;border-radius:2px;transform:translateX(-50%)}
+.track-assessment{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.5;padding:8px;background:rgba(0,0,0,0.2);border-radius:6px;border-left:3px solid var(--blue)}
+
 /* ── EMPTY STATE ── */
 .empty{text-align:center;padding:40px 20px;color:var(--muted)}
 .empty-icon{font-size:40px;margin-bottom:12px}
@@ -253,18 +265,18 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
     <span class="updated-at" id="updated-at">Loading…</span>
     <div class="live-badge">
       <div class="live-dot"></div>
-      LIVE
+      חי
     </div>
   </div>
 </header>
 
 <!-- NAV TABS -->
 <nav>
-  <div class="tab active" data-tab="insights">🧠 Insights</div>
-  <div class="tab" data-tab="portfolio">📊 Portfolio</div>
-  <div class="tab" data-tab="strategy">🎯 Strategy Lab</div>
-  <div class="tab" data-tab="log">📜 Decision Log</div>
-  <div class="tab" data-tab="geo">🌍 Geo Intel</div>
+  <div class="tab active" data-tab="insights">🧠 תובנות</div>
+  <div class="tab" data-tab="portfolio">📊 תיק השקעות</div>
+  <div class="tab" data-tab="strategy">🎯 מעבדת אסטרטגיה</div>
+  <div class="tab" data-tab="log">📜 יומן החלטות</div>
+  <div class="tab" data-tab="geo">🌍 מודיעין גיאו</div>
 </nav>
 
 <main>
@@ -273,10 +285,10 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 <div class="tab-panel active" id="tab-insights">
   <div class="section-header">
     <div>
-      <div class="section-title">Mission Control</div>
+      <div class="section-title">מרכז פיקוד</div>
       <div class="section-sub">Real-time portfolio overview & opportunities</div>
     </div>
-    <button class="refresh-btn" onclick="loadData()">↻ Refresh</button>
+    <button class="refresh-btn" onclick="loadData()">↻ רענן</button>
   </div>
 
   <!-- Stats bar -->
@@ -291,26 +303,26 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
   <div class="geo-risk-banner" id="geo-banner" style="display:none">
     <span class="icon">⚠️</span>
     <div>
-      <strong style="color:var(--red)">Geo Risk Active</strong> — Position sizing -25% on oil/Iran markets.
+      <strong style="color:var(--red)">⚠️ סיכון גיאו פעיל</strong> — גודל פוזיציה -25% על שווקי נפט/איראן.
       <span id="geo-banner-text"></span>
     </div>
   </div>
 
   <div class="insights-layout">
     <div class="insights-main">
-      <!-- Opportunities -->
+      <!-- Track Record -->
       <div class="section-header">
-        <div class="section-title" style="font-size:14px">⚡ Top Opportunities</div>
+        <div class="section-title" style="font-size:14px">📈 מעקב פוזיציות — הערכה מול מציאות</div>
+        <div style="font-size:11px;color:var(--muted)">▏ כניסה &nbsp;━ תנועה &nbsp;● חי</div>
       </div>
-      <div class="grid grid-3" id="opportunities-grid" style="margin-bottom:24px">
-        <div class="opp-card skeleton" style="height:140px"></div>
-        <div class="opp-card skeleton" style="height:140px"></div>
-        <div class="opp-card skeleton" style="height:140px"></div>
+      <div id="track-record" style="margin-bottom:24px">
+        <div class="track-card skeleton" style="height:120px"></div>
+        <div class="track-card skeleton" style="height:120px"></div>
       </div>
 
       <!-- Recent Decisions -->
       <div class="card">
-        <div class="card-title">⏱ Recent Decisions</div>
+        <div class="card-title">⏱ החלטות אחרונות</div>
         <div id="decisions-feed"></div>
       </div>
     </div>
@@ -318,13 +330,13 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
     <div class="insights-sidebar">
       <!-- Geo Intelligence -->
       <div class="card" style="margin-bottom:16px">
-        <div class="card-title">🌍 Geo Intelligence</div>
+        <div class="card-title">🌍 מודיעין גיאופוליטי</div>
         <div class="geo-pills" id="geo-pills"></div>
       </div>
 
       <!-- Monthly Goal -->
       <div class="card">
-        <div class="card-title">🎯 Monthly Goal</div>
+        <div class="card-title">🎯 יעד חודשי</div>
         <div id="monthly-goal"></div>
       </div>
     </div>
@@ -335,8 +347,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 <div class="tab-panel" id="tab-portfolio">
   <div class="section-header">
     <div>
-      <div class="section-title">Portfolio</div>
-      <div class="section-sub" id="portfolio-sub">Loading positions…</div>
+      <div class="section-title">תיק השקעות</div>
+      <div class="section-sub" id="portfolio-sub">טוען פוזיציות…</div>
     </div>
     <div class="stats-row" id="portfolio-stats"></div>
   </div>
@@ -345,13 +357,13 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 
 <!-- TAB: STRATEGY LAB -->
 <div class="tab-panel" id="tab-strategy">
-  <div class="section-title" style="margin-bottom:20px">Strategy Lab</div>
+  <div class="section-title" style="margin-bottom:20px">מעבדת אסטרטגיה</div>
   <div class="grid grid-2">
     <div>
       <div class="card" style="margin-bottom:16px">
         <div class="card-title">⚙️ Model Parameters</div>
         <div class="toggle-row">
-          <span>Score Threshold</span>
+          <span>סף ציון</span>
           <div style="display:flex;align-items:center;gap:10px">
             <span class="badge badge-open" id="threshold-val" style="font-size:14px">40</span>
           </div>
@@ -362,13 +374,13 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
         </div>
         <div class="toggle-row">
           <div>
-            <div style="font-size:13px;font-weight:600">Geo Risk Filter</div>
+            <div style="font-size:13px;font-weight:600">סינון סיכון גיאו</div>
             <div style="font-size:11px;color:var(--muted)" id="geo-risk-status">Loading…</div>
           </div>
           <div class="toggle" id="geo-toggle"></div>
         </div>
         <div class="toggle-row" style="border-bottom:none">
-          <span style="font-size:13px">Position Sizing Penalty</span>
+          <span style="font-size:13px">עונש גודל פוזיציה</span>
           <span style="color:var(--red);font-family:var(--mono);font-size:13px">−25%</span>
         </div>
       </div>
@@ -387,12 +399,12 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 
       <div class="card">
         <div class="card-title">🔮 Simulation</div>
-        <div style="color:var(--muted);font-size:13px;margin-bottom:16px">Adjust the score threshold slider to preview how many signals would qualify.</div>
+        <div style="color:var(--muted);font-size:13px;margin-bottom:16px">שנה את סף הציון לצפות בכמה סיגנלים יעברו.</div>
         <div style="text-align:center;padding:20px 0">
           <div style="font-size:36px;font-family:var(--mono);color:var(--blue)" id="sim-count">—</div>
-          <div style="font-size:12px;color:var(--muted);margin-top:4px">signals in last 50 decisions</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px">סיגנלים מתוך 50 ההחלטות האחרונות</div>
         </div>
-        <button class="btn-sell" style="background:rgba(0,212,255,0.1);border-color:rgba(0,212,255,0.3);color:var(--blue)" onclick="alert('Coming soon: full backtest simulation')">▶ Run Simulation</button>
+        <button class="btn-sell" style="background:rgba(0,212,255,0.1);border-color:rgba(0,212,255,0.3);color:var(--blue)" onclick="alert('בקרוב: סימולציה מלאה')">▶ הרץ סימולציה</button>
       </div>
     </div>
   </div>
@@ -401,20 +413,20 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 <!-- TAB: DECISION LOG -->
 <div class="tab-panel" id="tab-log">
   <div class="section-header">
-    <div class="section-title">Decision Log</div>
-    <button class="export-btn" onclick="exportCSV()">↓ Export CSV</button>
+    <div class="section-title">יומן החלטות</div>
+    <button class="export-btn" onclick="exportCSV()">↓ ייצוא CSV</button>
   </div>
   <div class="filter-bar">
-    <button class="filter-btn active" data-action="ALL" onclick="filterDecisions('action',this)">All Actions</button>
+    <button class="filter-btn active" data-action="ALL" onclick="filterDecisions('action',this)">כל הפעולות</button>
     <button class="filter-btn" data-action="BUY" onclick="filterDecisions('action',this)">BUY</button>
     <button class="filter-btn" data-action="SELL" onclick="filterDecisions('action',this)">SELL</button>
     <button class="filter-btn" data-action="HOLD" onclick="filterDecisions('action',this)">HOLD</button>
     <span style="color:var(--border)">|</span>
-    <button class="filter-btn active" data-outcome="ALL" onclick="filterDecisions('outcome',this)">All Outcomes</button>
+    <button class="filter-btn active" data-outcome="ALL" onclick="filterDecisions('outcome',this)">כל התוצאות</button>
     <button class="filter-btn" data-outcome="WIN" onclick="filterDecisions('outcome',this)">WIN</button>
     <button class="filter-btn" data-outcome="LOSS" onclick="filterDecisions('outcome',this)">LOSS</button>
     <button class="filter-btn" data-outcome="OPEN" onclick="filterDecisions('outcome',this)">OPEN</button>
-    <input type="text" class="filter-search" placeholder="Search market…" oninput="searchDecisions(this.value)" id="log-search"/>
+    <input type="text" class="filter-search" placeholder="חיפוש שוק…" oninput="searchDecisions(this.value)" id="log-search"/>
   </div>
   <div style="display:flex;gap:20px;margin-bottom:16px" id="log-stats"></div>
   <div style="overflow-x:auto">
@@ -430,7 +442,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 
 <!-- TAB: GEO INTEL -->
 <div class="tab-panel" id="tab-geo">
-  <div class="section-title" style="margin-bottom:20px">Geo Intelligence Center</div>
+  <div class="section-title" style="margin-bottom:20px">מרכז מודיעין גיאופוליטי</div>
   <div class="grid grid-2" id="geo-panels" style="margin-bottom:24px"></div>
 
   <div class="grid grid-2">
@@ -451,11 +463,11 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 <!-- SELL MODAL -->
 <div class="modal-overlay" id="sell-modal">
   <div class="modal">
-    <div class="modal-title">⚠️ Confirm SELL</div>
-    <div class="modal-body" id="modal-body">Are you sure you want to sell this position?</div>
+    <div class="modal-title">⚠️ אישור מכירה</div>
+    <div class="modal-body" id="modal-body">האם אתה בטוח שברצונך למכור פוזיציה זו?</div>
     <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
-      <button class="btn-confirm" onclick="confirmSell()">Sell Position</button>
+      <button class="btn-cancel" onclick="closeModal()">ביטול</button>
+      <button class="btn-confirm" onclick="confirmSell()">מכור פוזיציה</button>
     </div>
   </div>
 </div>
@@ -510,10 +522,10 @@ async function loadData(){
 // ── RENDER ──
 function render(){
   if(!D)return;
-  document.getElementById('updated-at').textContent='Updated: '+relTime(D.updated_at);
+  document.getElementById('updated-at').textContent='עודכן: '+relTime(D.updated_at);
   renderStats();
   renderGeo();
-  renderOpportunities();
+  renderTrackRecord();
   renderDecisionsFeed();
   renderMonthlyGoal();
   renderPortfolio();
@@ -530,24 +542,24 @@ function renderStats(){
   const pnlPct=p.pnl_pct||0;
   const html=`
     <div class="stat-card blue">
-      <div class="stat-label">Total Portfolio</div>
+      <div class="stat-label">שווי תיק</div>
       <div class="stat-value" id="sv-total">${fmt$(p.total_value)}</div>
-      <div class="stat-sub">Cash: ${fmt$(p.cash_available)} available</div>
+      <div class="stat-sub">מזומן: ${fmt$(p.cash_available)} פנוי</div>
     </div>
     <div class="stat-card ${pnl>=0?'green':'red'}">
-      <div class="stat-label">P&L</div>
+      <div class="stat-label">רווח/הפסד</div>
       <div class="stat-value" style="color:${pnl>=0?'var(--green)':'var(--red)'}">${pnl>=0?'+':''}${fmt$(pnl)}</div>
-      <div class="stat-sub" style="color:${pnl>=0?'var(--green)':'var(--red)'}">${fmtPct(pnlPct)}</div>
+      <div class="stat-sub" style="color:${pnl>=0?'var(--green)':'var(--red)'}">${fmtPct(pnlPct)} על עלות</div>
     </div>
     <div class="stat-card gold">
-      <div class="stat-label">Win Rate</div>
+      <div class="stat-label">אחוז הצלחה</div>
       <div class="stat-value" style="color:var(--gold)">${lp.win_rate?Math.round(lp.win_rate*100)+'%':'—'}</div>
-      <div class="stat-sub">${lp.total_trades||0} total trades</div>
+      <div class="stat-sub">${lp.total_trades||0} עסקאות סה"כ</div>
     </div>
     <div class="stat-card blue">
-      <div class="stat-label">Active Positions</div>
+      <div class="stat-label">פוזיציות פעילות</div>
       <div class="stat-value">${pos.length}</div>
-      <div class="stat-sub">Score threshold: ${lp.score_threshold||40}</div>
+      <div class="stat-sub">סף ציון: ${lp.score_threshold||40}</div>
     </div>`;
   document.getElementById('stats-bar').innerHTML=html;
 }
@@ -583,7 +595,7 @@ function renderGeo(){
 function renderOpportunities(){
   const sigs=(D.signals||[]).filter(s=>s.edge>0.05).slice(0,3);
   if(!sigs.length){
-    document.getElementById('opportunities-grid').innerHTML=`<div class="empty" style="grid-column:span 3"><div class="empty-icon">🔍</div>No signals above threshold</div>`;
+    document.getElementById('opportunities-grid').innerHTML=`<div class="empty" style="grid-column:span 3"><div class="empty-icon">🔍</div>אין סיגנלים מעל הסף</div>`;
     return;
   }
   document.getElementById('opportunities-grid').innerHTML=sigs.map(s=>`
@@ -595,9 +607,9 @@ function renderOpportunities(){
       <div class="opp-edge">${s.edge?(s.edge*100).toFixed(1)+'%':'—'}</div>
       <div class="opp-question">${s.question||s.slug}</div>
       <div class="opp-meta">
-        <span>Score: <strong style="color:var(--blue)">${s.score||0}</strong></span>
+        <span>ציון: <strong style="color:var(--blue)">${s.score||0}</strong></span>
         <span>${s.days_left||0}d left</span>
-        ${s.confidence?`<span>Conf: ${s.confidence}/100</span>`:''}
+        ${s.confidence?`<span>ביטחון: ${s.confidence}/100</span>`:''}
       </div>
     </div>`).join('');
 }
@@ -605,7 +617,7 @@ function renderOpportunities(){
 function renderDecisionsFeed(){
   const dec=(D.decisions||[]).slice(0,5);
   if(!dec.length){
-    document.getElementById('decisions-feed').innerHTML='<div class="empty"><div class="empty-icon">📝</div>No decisions yet</div>';
+    document.getElementById('decisions-feed').innerHTML='<div class="empty"><div class="empty-icon">📝</div>אין החלטות עדיין</div>';
     return;
   }
   document.getElementById('decisions-feed').innerHTML=dec.map(d=>`
@@ -619,9 +631,65 @@ function renderDecisionsFeed(){
     </div>`).join('');
 }
 
+function renderTrackRecord(){
+  const positions = D.positions || [];
+  if(!positions.length) return;
+
+  const icons = {great:'🚀', good:'✅', bad:'❌'};
+  const tagHe = {great:'ניצחון', good:'בכיוון', bad:'הפסד'};
+
+  const html = positions.map(p => {
+    const pnlColor = p.pnl_usd >= 0 ? 'var(--green)' : 'var(--red)';
+    const pnlSign = p.pnl_usd >= 0 ? '+' : '';
+    const icon = icons[p.outcome_tag] || '•';
+    const tag = tagHe[p.outcome_tag] || '';
+    const entryPct = Math.round(p.entry_price * 100);
+    const livePct = Math.round(p.live_side_price * 100);
+    const moveDir = p.live_side_price >= p.entry_price ? '↑' : '↓';
+    const movePct = Math.abs(p.pnl_pct).toFixed(1);
+
+    return `
+    <div class="track-card">
+      <div class="track-header">
+        <span class="track-icon">${icon}</span>
+        <div style="flex:1">
+          <div class="track-title">${p.slug_display}</div>
+          <div style="display:flex;gap:8px;align-items:center;margin-top:4px">
+            ${badge(p.side)}
+            <span style="font-size:11px;color:var(--muted)">כניסה ${entryPct}¢</span>
+            <span style="font-size:11px;color:var(--muted)">→</span>
+            <span style="font-size:13px;font-family:var(--mono);font-weight:700;color:${pnlColor}">${livePct}¢ ${moveDir}${movePct}%</span>
+          </div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-family:var(--mono);font-size:18px;font-weight:700;color:${pnlColor}">${pnlSign}$${Math.abs(p.pnl_usd).toFixed(2)}</div>
+          <div class="badge badge-${p.outcome_tag==='bad'?'loss':p.outcome_tag==='great'?'win':'open'}" style="font-size:10px">${tag}</div>
+        </div>
+      </div>
+      <div class="track-bar-wrap">
+        <div class="track-bar-entry" style="left:${entryPct}%"></div>
+        <div class="track-bar-fill" style="
+          left:${Math.min(entryPct,livePct)}%;
+          width:${Math.abs(livePct-entryPct)}%;
+          background:${pnlColor};
+        "></div>
+        <div class="track-bar-live" style="left:${livePct}%;background:${pnlColor}"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:4px">
+        <span>0¢</span>
+        <span style="color:${pnlColor};font-weight:600">חי: ${livePct}¢</span>
+        <span>100¢</span>
+      </div>
+      <div class="track-assessment">${p.assessment}</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('track-record').innerHTML = html;
+}
+
 function renderMonthlyGoal(){
   const g=D.monthly_goal||{};
-  if(!g.target)return document.getElementById('monthly-goal').innerHTML='<div style="color:var(--muted);font-size:12px">No goal set</div>';
+  if(!g.target)return document.getElementById('monthly-goal').innerHTML='<div style="color:var(--muted);font-size:12px">לא הוגדר יעד</div>';
   const pct=Math.min(100,(g.start&&g.target)?(((D.portfolio?.total_value||g.start)-g.start)/(g.target-g.start)*100):0);
   document.getElementById('monthly-goal').innerHTML=`
     <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:8px">
@@ -644,7 +712,7 @@ function renderPortfolio(){
     <div class="stat-item"><div class="dot" style="background:var(--blue)"></div>${D.learned_params?.win_rate?Math.round(D.learned_params.win_rate*100)+'%':'-'} win rate</div>`;
   
   if(!pos.length){
-    document.getElementById('positions-grid').innerHTML=`<div class="empty" style="grid-column:span 2"><div class="empty-icon">📭</div>No open positions</div>`;
+    document.getElementById('positions-grid').innerHTML=`<div class="empty" style="grid-column:span 2"><div class="empty-icon">📭</div>אין פוזיציות פתוחות</div>`;
     return;
   }
   document.getElementById('positions-grid').innerHTML=pos.map(p=>{
@@ -665,7 +733,7 @@ function renderPortfolio(){
           <div class="pos-stat-value">${fmt$(p.current_value)}</div>
         </div>
         <div class="pos-stat">
-          <div class="pos-stat-label">P&L</div>
+          <div class="pos-stat-label">רווח/הפסד</div>
           <div class="pos-stat-value pos-pnl ${p.pnl>=0?'pos':'neg'}">${p.pnl>=0?'+':''}${fmt$(p.pnl)}</div>
         </div>
       </div>
@@ -673,10 +741,10 @@ function renderPortfolio(){
         <div class="progress-fill" style="width:${pct}%"></div>
       </div>
       <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:12px">
-        <span>${p.days_left||0} days left</span>
+        <span>${p.days_left||0} ימים נותרים</span>
         <span>${fmtPct(p.pnl_pct)}</span>
       </div>
-      <button class="btn-sell" onclick="openSellModal('${p.slug}','${(p.question||p.slug).replace(/'/g,"\\'")}')">Sell Position</button>
+      <button class="btn-sell" onclick="openSellModal('${p.slug}','${(p.question||p.slug).replace(/'/g,"\\'")}')">מכור פוזיציה</button>
     </div>`;
   }).join('');
 }
@@ -693,21 +761,21 @@ function renderStrategy(){
   
   const geoActive=Object.values((D.geo_context?.topics)||{}).some(t=>t.escalation);
   document.getElementById('geo-toggle').className='toggle'+(geoActive?' on':'');
-  document.getElementById('geo-risk-status').textContent=geoActive?'Active — sizing penalty applied':'Monitoring — no active escalation';
+  document.getElementById('geo-risk-status').textContent=geoActive?'פעיל — עונש sizing מופעל':'ניטור — אין הסלמה פעילה';
   
   // Performance
   const wr=lp.win_rate||0;
   document.getElementById('perf-summary').innerHTML=`
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-      <span style="color:var(--muted);font-size:13px">Win Rate</span>
+      <span style="color:var(--muted);font-size:13px">אחוז הצלחה</span>
       <span style="font-family:var(--mono);font-size:24px;color:var(--green);font-weight:700">${Math.round(wr*100)}%</span>
     </div>
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-      <span style="color:var(--muted);font-size:13px">Total Trades</span>
+      <span style="color:var(--muted);font-size:13px">סה"כ עסקאות</span>
       <span style="font-family:var(--mono);font-size:18px;color:var(--blue);font-weight:700">${lp.total_trades||0}</span>
     </div>
     <div style="display:flex;align-items:center;justify-content:space-between">
-      <span style="color:var(--muted);font-size:13px">Score Threshold</span>
+      <span style="color:var(--muted);font-size:13px">סף ציון</span>
       <span style="font-family:var(--mono);font-size:18px;color:var(--gold);font-weight:700">${thr}</span>
     </div>`;
   
@@ -827,10 +895,10 @@ function renderGeoIntel(){
           <span class="geo-tone tone-${tone}">${tone.toUpperCase()}</span>
         </div>
       </div>
-      ${t.escalation?`<div style="margin-bottom:8px">${badge('HIGH')} escalation active</div>`:''}
+      ${t.escalation?`<div style="margin-bottom:8px">${badge('HIGH')} הסלמה פעילה</div>`:''}
       <div class="geo-headline">${headline}</div>
       <div class="geo-meta">
-        <span>✓ ${credible} credible source${credible!==1?'s':''}</span>
+        <span>✓ ${credible} מקור אמין${credible!==1?'s':''}</span>
         <span>${relTime(geo.updated_at)}</span>
       </div>
     </div>`;
@@ -843,7 +911,7 @@ function renderGeoIntel(){
       <div class="corr-arrow">→</div>
       <div class="corr-markets">${(t.slugs||[]).map(s=>`<span class="corr-slug">${s.substring(0,30)}…</span>`).join('')}</div>
     </div>`).join('');
-  document.getElementById('corr-map').innerHTML=corrItems||'<div class="empty"><div class="empty-icon">🔗</div>No correlations yet</div>';
+  document.getElementById('corr-map').innerHTML=corrItems||'<div class="empty"><div class="empty-icon">🔗</div>אין מתאמים עדיין</div>';
   
   // Timeline
   const hist=(D.geo_history||[]).slice(-10).reverse();
@@ -852,7 +920,7 @@ function renderGeoIntel(){
     const sumKeys=h.summary?Object.keys(h.summary):[];
     const escalated=sumKeys.filter(k=>h.summary[k]?.escalation);
     const label=escalated.length?escalated.map(k=>k.replace(/_/g,' ')).join(', '):'geo scan';
-    const geoRisk=h.geo_risk_active?'🔴 Geo Risk Active':'✓ Scanned';
+    const geoRisk=h.geo_risk_active?'🔴 ⚠️ סיכון גיאו פעיל':'✓ Scanned';
     return `<div class="timeline-item">
       <div class="timeline-dot"></div>
       <div style="flex:1;min-width:0">
@@ -861,7 +929,7 @@ function renderGeoIntel(){
       </div>
       <div class="timeline-time">${relTime(h.timestamp)}</div>
     </div>`;
-  }).join(''):'<div class="empty"><div class="empty-icon">📡</div>No geo history yet</div>';
+  }).join(''):'<div class="empty"><div class="empty-icon">📡</div>אין היסטוריית גיאו</div>';
 }
 
 // ── MODAL ──
@@ -875,7 +943,7 @@ function closeModal(){
   sellSlug=null;
 }
 function confirmSell(){
-  alert(`SELL signal logged for: ${sellSlug}\n\nThe system will process this on next scan cycle.`);
+  alert(`סיגנל מכירה נרשם עבור: ${sellSlug}\n\nהמערכת תעבד זאת בסבב הסריקה הבא.`);
   closeModal();
 }
 document.getElementById('sell-modal').addEventListener('click',function(e){if(e.target===this)closeModal();});
